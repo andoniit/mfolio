@@ -1,0 +1,57 @@
+/* Combined styles from page.module.css and Project.module.css */
+
+.main {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .gallery {
+    width: 70%;
+    font-family: var(--font-shadows), cursive;
+    font-size: 4em;
+
+  }
+  
+  .project {
+    border-top: 2px solid black;
+    padding-top: 0.8vw;
+    padding-bottom: 0.8vw;
+    cursor: pointer;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .imgContainer {
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    width: 0; /* initial width is 0; expands on hover */
+    
+    /* Now targeting the image inside the local .imgContainer */
+    img {
+      width: 10vw;
+    }
+  }
+  
+  .title {
+    font-size: 5vw;
+    margin: 0;
+    font-family: 'Tajawal';
+    
+  }
+  
+  .title:first-of-type {
+    margin-right: 0.75vw;
+  }
+  
+  .title:last-of-type {
+    margin-left: 0.75vw;
+  }
+  
+  .project:last-of-type {
+    border-bottom: 2px solid black;
+  }

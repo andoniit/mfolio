@@ -1,0 +1,167 @@
+.container {
+    height: 300vh;
+    position: relative;
+  }
+  
+  .sticky {
+    position: sticky;
+    overflow: hidden;
+    top: 0;
+    height: 100vh;
+  
+    .el {
+      width: 100%;
+      height: 100%;
+      top: 0;
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+  
+      .imageContainer {
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+      }
+    }
+  }
+  
+  /* Section 1: Center Image (no additional background as it shows the image) */
+  .section1 .imageContainer {
+    width: 25vw;
+    height: 25vh;
+    position: relative;
+    img {
+        object-fit: cover;
+        border-radius: 20px;
+      }
+  }
+  
+  /* Section 2: Text */
+  .section2 .imageContainer {
+    top: -30vh;
+    left: 5vw;
+    width: 35vw;
+    height: 30vh;
+    background-color: #ffffff00;
+    img {
+        object-fit: cover;
+        border-radius: 20px;
+      } /* Example background color */
+  }
+  .section2 .textContent {
+    font-size: 2rem;
+    color: #330000;
+    font-family: 'Boldonse', cursive;
+    z-index: 3;
+  }
+  
+  /* Section 3: Text */
+  .section3 .imageContainer {
+    top: -10vh;
+    left: -25vw;
+    width: 20vw;
+    height: 45vh;
+    background-color: #99ff99;
+    img {
+        object-fit: cover;
+        border-radius: 20px;
+      }
+  }
+  .section3 .textContent {
+    font-size: 1.8rem;
+    color: #003300;
+  }
+  
+  /* Section 4: Text */
+  .section4 .imageContainer {
+    left: 27.5vw;
+    width: 30vw;
+    height: 30vh;
+    background-color: #ffffff;
+    img {
+        object-fit: cover;
+        border-radius: 20px;
+      }
+  }
+  .section4 .textContent {
+    font-size: 1.5rem;
+    color: #333;
+    font-family: 'Tajawal';
+
+}
+.section4 .highlight {
+    color: #ff3636;
+    font-family: var(--font-shadows), cursive;
+
+    /* Example: Yellow color */
+    font-size: 3em;
+  }
+  
+  /* Section 5: Text */
+  .section5 .imageContainer {
+    top: 27.5vh;
+    left: 5vw;
+    width: 20vw;
+    height: 25vh;
+    background-color: #ffcc99;
+    img {
+        object-fit: cover;
+        border-radius: 20px;
+      }
+  }
+  .section5 .textContent {
+    font-size: 2.2rem;
+    color: #663300;
+  }
+  
+  /* Section 6: Text */
+  .section6 .imageContainer {
+    top: 27.5vh;
+    left: -22.5vw;
+    width: 30vw;
+    height: 25vh;
+    background-color: #ccffcc;
+    img {
+        object-fit: cover;
+        border-radius: 20px;
+      }
+  }
+  .section6 .textContent {
+    font-size: 1.8rem;
+    color: #003300;
+  }
+  
+  /* Section 7: Text */
+  .section7 .imageContainer {
+    top: 22.5vh;
+    left: 25vw;
+    width: 15vw;
+    height: 35vh;
+    background-color: #ffff99;
+    img {
+        object-fit: cover;
+        border-radius: 20px;
+        
+      }
+  }
+  .section7 .textContent {
+    font-size: 1.6rem;
+    color: #666600;
+  }
+  
+  /* Common styling for text content inside any imageContainer */
+  .textContent {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-weight: 400;
+    text-align: center;
+     /* semi-transparent overlay */
+    border-radius: 20px;
+    font-family: 'Tajawal';
+
+  }
+  

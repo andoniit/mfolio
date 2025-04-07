@@ -1,0 +1,37 @@
+{
+  "name": "andon-potefol",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@studio-freight/lenis": "^1.0.42",
+    "@tabler/icons-react": "^3.31.0",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.6.3",
+    "gsap": "^3.12.7",
+    "motion": "^12.6.3",
+    "motion-plus": "^0.1.6",
+    "next": "15.2.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "sass": "^1.86.1",
+    "tailwind-merge": "^3.1.0",
+    "tweakpane": "^4.0.5"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.2.4",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
