@@ -1,7 +1,5 @@
-import type { Metadata } from "next";
 import { Tajawal,Shadows_Into_Light } from "next/font/google";
 import "./globals.css";
-import Header from '@/components/header/header';
 // Optimized Google fonts
 const tajawal = Tajawal({
   subsets: ['arabic'],

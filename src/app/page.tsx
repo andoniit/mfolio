@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+
 import { useEffect, useState } from 'react'
 import Hero from './hero';
 import InteractiveSection from './InteractiveSection';

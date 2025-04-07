@@ -9,9 +9,8 @@ import Picture1 from '../../public/images/1.jpg';
 import Picture2 from '../../public/images/2.jpg';
 import Picture3 from '../../public/images/3.jpg';
 import Picture5 from '../../public/images/5.jpg';
-import Picture6 from '../../public/images/6.png';
 import Picture7 from '../../public/images/7.jpg';
-import Framer from '@/components/Framer';
+
 
 export default function Hero() {
   const container = useRef(null);
