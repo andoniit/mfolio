@@ -59,17 +59,12 @@ export default function Home() {
         {isLoading && <Preloader />}
       </AnimatePresence>
       <Header/>
-<Hero />
-
-<InteractiveSection />
-
-
-<Timeline/>
-<Scattertext/>
-
-<Projects/>
-
-<Contact/>
+      <Hero />
+      <InteractiveSection />
+      <Timeline/>
+      <Scattertext/>
+      <Projects/>
+      <Contact/>
     </div>
     
   );

@@ -89,24 +89,29 @@ function Stylesheet() {
         display: flex;
         justify-content: center;
         align-items: center;
-        width: 88vw;
-        height: 100vh;
+        width: 100%;
+        max-width: 1600px;
+        height: 120vh;
         overflow: hidden;
         text-align: left;
         font-family: 'Tajawal', sans-serif;
         color: #0f1115;
-        margin-left:11em;
+        margin: 0 auto; /* center container horizontally */
+        padding: 0 2rem;
       }
+      
       .h1 {
-        font-size: 8rem;
+        /* Use clamp() to ensure the font scales well between a minimum and maximum size */
+        font-size: clamp(3rem, 8vw, 8rem);
         font-weight: 200;
-        line-height: 1; /* Reduced line spacing */
+        line-height: 1;
       }
       
       .split-char {
         will-change: transform, opacity;
         overflow: hidden;
       }
+      
       .extraordinary {
         color: #ff0000;
         overflow: hidden;
@@ -134,12 +139,13 @@ function Stylesheet() {
         position: absolute;
         bottom: 0;
         left: 0;
-        background: rgb(255, 255, 255);
+        background: #fff;
         color: #333;
         padding: 10px;
         font-size: 1rem;
         max-width: 90%;
         border-radius: 20px;
+    
       }
 
       @media screen and (max-width: 768px) {
@@ -174,6 +180,29 @@ function Stylesheet() {
           margin: -20em 0em ;
         }
       }
+
+    @media screen and (min-width: 1772px) {
+  .scatter {
+    max-width: 1772px; /* Increase container width to match larger screens */
+    padding: 0 7rem;   /* Increase horizontal padding for better spacing */
+    margin-bottom:10em;
+  }
+  
+  /* Adjust overlay text positioning on larger screens */
+  .overlay-text {
+    margin-top:-2em        /* Move it a bit higher from the bottom */
+    left: 5%;          /* Add some left spacing */
+    max-width: 85%;    /* Constrain the width to avoid overlapping */
+    font-size: 1rem;   /* Ensure the font scales appropriately */
+    transform: none;   /* Remove any transforms used for mobile */
+    margin: 0;
+  }
+  
+  /* Optionally, adjust the main heading if needed */
+  .h1 {
+    font-size: clamp(3rem, 6vw, 8rem);
+  }
+}
     `}</style>
   );
 }
