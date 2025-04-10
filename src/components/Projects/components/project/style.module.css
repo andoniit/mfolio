@@ -1,0 +1,61 @@
+.project{
+    display: flex;
+    width: 150%;
+    justify-content: space-between;
+    align-items: center;
+    padding: 50px 100px 50px 100px;
+    border-top: 1px solid rgb(201, 201, 201);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Tajawal';
+}
+.project:last-of-type{
+    border-bottom: 1px solid rgb(201, 201, 201);
+}
+
+.project:hover{
+    opacity: 0.5;
+}
+
+.project:hover h2{
+    transform: translateX(-10px);
+    color:#ff0000;
+
+}
+
+.project:hover p{
+    transform: translateX(10px);
+
+}
+
+.project h2{
+    font-size: 2rem;
+    margin: 0px;
+    font-weight: 700;
+    transition: all 0.4s;
+}
+
+.project p{
+    transition: all 0.4s;
+    font-weight: 300;
+    color:#ff0000;
+
+}
+
+@media screen and (max-width: 768px) {
+  .project {
+    flex-direction: column;
+    width: 100%;
+    padding: 20px 10px;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  
+  .project h2 {
+    font-size: 1.5rem;
+  }
+  
+  .project p {
+    font-size: 1rem;
+  }
+}

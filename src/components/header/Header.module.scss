@@ -14,6 +14,7 @@
   justify-content: space-between;
   padding: 20px 40px;
   mix-blend-mode: difference;
+  position: relative;
 }
 
 /* Title container now a horizontal flex row */
@@ -24,13 +25,16 @@
   white-space: nowrap;
   font-size: 2rem;
   transition: font-size 0.3s ease;
+  z-index: 1000;
   
   h1 {
     font-family: 'Boldonse', cursive;
     font-size: 4em;
-    padding-left: 1em;
+    padding-left: 0.7em;
     color: #ededed;
     margin: 0;
+    z-index: 1000;
+
   }
   
   p {
@@ -39,11 +43,13 @@
     color: #ff3636;
     margin: 0 0 0 -7.6em; /* margin-left for spacing */
     align-items: center;
+    z-index: 1000;
+
   }
 }
 
 .titleSmall {
-  font-size: 1rem;
+  font-size: 0.7rem;
 }
 
 .nav {
@@ -59,7 +65,7 @@
     display: flex;
     align-items: center;
     transition: color 0.3s ease;
-    
+   
     &:hover {
       color: #ff3636;
     }
@@ -74,3 +80,42 @@
   margin-bottom: 5px;
 }
 
+/* Mobile Responsive Styles */
+@media screen and (max-width: 768px) {
+  .container {
+    padding: 10px 20px;
+  }
+  
+  .title {
+    flex-direction: column;
+    
+    
+    h1 {
+      font-size: 3.1em;
+      padding-left: 0;
+      
+    }
+    
+    p {
+      font-size: 1.2em;
+      margin: -30px 0 0 0;
+    }
+  }
+  
+  .nav {
+    a {
+      margin-left: 10px;
+      font-size: 0.9em;
+      margin-top: 2em;
+    }
+  }
+  
+  .icon {
+    width: 15px;
+    height: 15px;
+    margin-bottom: 2px;
+  }
+  .titleSmall {
+    font-size: 0.6rem;
+  }
+}

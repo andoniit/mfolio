@@ -1,5 +1,5 @@
 .container {
-    height: 100vh;
+    height: 60vh;
     width: 100vw;
     display: flex;
     align-items: center;
@@ -7,7 +7,7 @@
     background-color: rgb(255, 255, 255);
     color: rgb(0, 0, 0);
     font-family: 'Tajawal';
-
+    margin-top: 10em;
   }
   
   .body {
@@ -30,11 +30,12 @@
     font-size: 4em;
     margin: 0;
     font-family: var(--font-shadows), cursive !important;
+    text-align: left;
 
     
   }
   .description p {
-    font-size: 1em;
+    font-size: 1rem;
     margin: 0;
     font-family: 'Tajawal';
    
@@ -121,3 +122,50 @@
     height: 500px;
     top: -250px;
   }
+
+@media screen and (max-width: 768px) {
+  .container {
+    height: auto; /* allow container height to adjust */
+    margin-top: 5em; /* reduce top margin */
+    padding: 1em;
+  }
+  
+  .body {
+    width: 90vw; /* adjust width for smaller screens */
+  }
+  
+  .description h1 {
+    font-size: 2.5em; /* smaller heading */
+  }
+  
+  .description p {
+    font-size: 0.9rem; /* slightly smaller paragraph text */
+  }
+  
+  .description p:nth-of-type(2) {
+    font-size: 16px;
+    width: 100%;
+    margin-left: 0;
+  }
+  
+  .tags {
+    width: 100%;
+    margin-left: 0;
+    gap: 8px;
+  }
+  
+  .tags p {
+    font-size: 14px;
+    padding: 8px 10px;
+  }
+  
+  .line svg {
+    height: 250px;
+    top: -125px;
+  }
+  
+  .line .box {
+    height: 20px;
+    top: -10px;
+  }
+}

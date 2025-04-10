@@ -164,4 +164,18 @@
     font-family: 'Tajawal';
 
   }
-  
+
+@media screen and (max-width: 768px) {
+  .section4 .highlight {
+    font-size: 1em;
+    
+  }
+  .section4 .textContent{
+    font-size: 0.8em;
+  }
+  .imageContainer {
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+      }
+}

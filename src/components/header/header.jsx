@@ -4,8 +4,8 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import styles from "./Header.module.scss";
 import Framer from "@/components/Framer";
-import Image from 'next/image';
-import Icon1 from '../../../public/1.png';
+
+
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -56,8 +56,8 @@ export default function Header() {
     <motion.header
       className={styles.header}
       variants={containerVariants}
-      initial="hidden"
-      animate={preloaderFinished ? "visible" : "hidden"}
+      //initial="hidden"
+      //animate={preloaderFinished ? "visible" : "hidden"}
     >
       <div className={styles.container}>
         <Framer>
@@ -79,6 +79,7 @@ export default function Header() {
           <motion.a
             href="https://www.linkedin.com/in/anirudha-kapileshwari-293826202/"
             variants={linkVariants}
+            target="_blank"
           >
             <img
               className={styles.icon}
@@ -90,7 +91,7 @@ export default function Header() {
         </Framer>
         <Framer>
 
-          <motion.a href="https://github.com/andoniit" variants={linkVariants}>
+          <motion.a href="https://github.com/andoniit" target="_blank" variants={linkVariants}>
             <img
               className={styles.icon}
               src="/3.png"
@@ -104,6 +105,7 @@ export default function Header() {
           <motion.a
             href="https://www.behance.net/aniruddkapiles1"
             variants={linkVariants}
+            target="_blank"
           >
             <img
               className={styles.icon}

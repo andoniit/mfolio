@@ -5,13 +5,6 @@
   --foreground: #171717;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #ffffff;
@@ -23,6 +16,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
 }
 
 .handwriting {
@@ -32,12 +26,24 @@ body {
   margin-top: -2em;
   align-items: center;
   padding-left: 1.5em;
-
 }
 
 .boldonse {
   font-family: 'Boldonse', cursive;
   font-size:10em;
   padding-left: 1em;
+}
 
+/* Mobile Responsive Styles */
+@media screen and (max-width: 768px) {
+  .handwriting {
+    font-size: 3em;
+    margin-top: -1em;
+    padding-left: 1em;
+  }
+
+  .boldonse {
+    font-size: 6em;
+    padding-left: 0.5em;
+  }
 }

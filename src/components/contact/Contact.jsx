@@ -5,12 +5,15 @@ import { motion } from "framer-motion";
 import { disperse } from "./anim"; // Ensure you have defined your Framer Motion variants in anim.js
 import gsap from "gsap";
 import styles from "./contact.module.css";
+import Framer from "@/components/Framer"
+
+
 
 export default function Contact() {
   const background = useRef(null);
 
   const setBackground = (isActive) => {
-    gsap.to(background.current, { opacity: isActive ? 0.8 : 0 });
+    gsap.to(background.current, { opacity: isActive ? 0.5 : 0 });
   };
 
   return (
@@ -40,18 +43,58 @@ export default function Contact() {
           <p>→Email</p>
         </TextDisperse>
 
-        <TextDisperse setBackground={setBackground}>
-          <p>→Likedin</p>
-        </TextDisperse>
-        <TextDisperse setBackground={setBackground}>
-          <p>→behance</p>
-          
-          
-          
-        </TextDisperse>
+        <div className={styles.contactEmailLine}>
+          <p>
+          Let’s have a conversation about how I can contribute to your success <a href="mailto:akapileshwari@hawk.iit.edu" className={styles.emailLink}>akapileshwari@hawk.iit.edu</a>
+          </p>
+        </div>
         
       </div>
       <div ref={background} className={styles.background}></div>
+      <div className={styles.socialIcons}>
+  <Framer>
+    <motion.a
+      href="https://www.linkedin.com/in/anirudha-kapileshwari-293826202/"
+      
+      target="_blank"
+    >
+      <img
+        className={styles.icon}
+        src="/2.png"
+        alt="LinkedIn Icon"
+      />
+      
+    </motion.a>
+  </Framer>
+  <Framer>
+    <motion.a
+      href="https://github.com/andoniit"
+      target="_blank"
+      
+    >
+      <img
+        className={styles.icon}
+        src="/3.png"
+        alt="GitHub Icon"
+      />
+      
+    </motion.a>
+  </Framer>
+  <Framer>
+    <motion.a
+      href="https://www.behance.net/aniruddkapiles1"
+      
+      target="_blank"
+    >
+      <img
+        className={styles.icon}
+        src="/1.png"
+        alt="Behance Icon"
+      />
+      
+    </motion.a>
+  </Framer>
+</div>
     </main>
   );
 }
@@ -107,5 +150,6 @@ function TextDisperse({ children, setBackground }) {
     >
       {getChars()}
     </div>
+    
   );
 }

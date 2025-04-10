@@ -1,46 +1,126 @@
 .main {
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    background-color: white; /* Contact section background */
-  }
+  height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background-color: white; /* Fallback background color */
+  background-image: url('../../../public/images/14.JPG');
+  background-size: cover;
+  background-position:top;
+  border-radius: 30px;
+  margin: 5em;
+  max-width: 1800px;
+  width: 90%;
+}
   
-  .body {
-    width: 51vw;
-  }
+.body {
+    position: absolute;
+    top: 80;
+    left: 90;
+    width: 20vw;
+    margin: 0;
+}
   
-  .introLine {
+.introLine {
     display: flex;
-    font-size: 4vw;
+    font-size: 5vw;
     justify-content: space-between;
     text-transform: uppercase;
-    color: #333; /* Inverted text color */
+    color: #ffffff; /* Inverted text color */
     margin-bottom: 1rem;
-    font-family: 'Boldonse', cursive !important;
+    font-family: 'Tajawal';
+    font-weight: 500;
+    line-height: 0.9;
+}
 
-  }
-  
-  /* Adjust specific introLine items if needed */
-  .introLine:nth-of-type(5),
-  .introLine:nth-of-type(6) {
+/* Adjust specific introLine items if needed */
+.introLine:nth-of-type(5),
+.introLine:nth-of-type(6) {
     display: inline-flex;
-  }
-  .introLine:nth-of-type(6) {
+}
+.introLine:nth-of-type(6) {
     right: -40px;
     position: relative;
-  }
+}
   
-  .introLine p {
+.introLine p {
     margin: 0;
-  }
+}
   
-  .background {
+.background {
     background-color: rgb(248, 248, 248);
     position: absolute;
     width: 100%;
     height: 100%;
     pointer-events: none;
     opacity: 0;
+}
+.contactEmailLine {
+    margin-top: -1rem;
   }
+  
+  .emailLink {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  .emailLink:hover {
+    text-decoration: underline;
+  }
+
+  .socialIcons {
+    position: absolute;
+    bottom: -1rem;
+    right: -0.5rem;
+    display: flex;
+    gap: 1rem;
+    z-index: 10;
+    background-color: white;  /* Added background white */
+    padding: 0.5rem;          /* Add some padding */
+    border-radius: 5px; 
+    /* Removed incorrect 'size: 10px;' property */
+  }
+  
+  /* Reduce the size of icons within the socialIcons container */
+  .socialIcons img {
+    width: 40px;
+    height: auto;
+  }
+@media screen and (max-width: 768px) {
+  .main {
+      padding: 2rem 1rem;
+      position: relative;
+      height: 70vh;
+      width: 80vw;
+  margin: 3em;
+
+  }
+  .socialIcons img {
+    width: 30px;
+    height: auto;
+  }
+  
+  .body {
+      position: absolute;
+      top: 40;
+      left: 40;
+      width: 50vw;
+      margin: 0;
+      height: 60vh;
+  }
+  
+  /* Updated introLine styles for mobile */
+  .introLine {
+      position: relative;
+      margin: 1rem auto;
+      text-align: center;
+      font-size: 6vw; /* reduced font size for mobile */
+      line-height: 0.6;
+  }
+  
+  .background {
+      opacity: 0.1;
+  }
+}

@@ -9,16 +9,18 @@ import Contact from "@/components/contact/Contact"
 import Scattertext from "@/components/Scattertext"
 import Preloader from "@/components/Preloader"
 import { AnimatePresence } from 'framer-motion';
-import Projects from "@/components/Project"
+import Projects from "@/components/Projects/Project"
 
 import Header from "@/components/header/header"
-
+import { motion, useScroll } from "motion/react"
   
 
 
 
 
 export default function Home() {
+  
+  const { scrollYProgress } = useScroll()
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect( () => {
@@ -38,6 +40,21 @@ export default function Home() {
     
 
 <div>
+<motion.div
+                id="scroll-indicator"
+                style={{
+                    scaleX: scrollYProgress,
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: 4,
+                    originX: 0,
+                    backgroundColor: "#ff3636",
+                    zIndex:50,
+                    
+                }}
+            />
 <AnimatePresence mode='wait'>
         {isLoading && <Preloader />}
       </AnimatePresence>
@@ -45,9 +62,10 @@ export default function Home() {
 <Hero />
 
 <InteractiveSection />
-<Scattertext/>
+
 
 <Timeline/>
+<Scattertext/>
 
 <Projects/>
 

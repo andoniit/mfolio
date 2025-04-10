@@ -27,10 +27,9 @@
       align-items: center;
       position: absolute;
       z-index: 6;
-    font-family: var(--font-shadows), cursive;
-    padding-left: 1em;
+      font-family: var(--font-shadows), cursive;
+      padding-left: 1em;
 
-      
       span {
         display: block;
         width: 10px;
@@ -38,8 +37,31 @@
         background-color: white;
         border-radius: 50%;
         margin-right: 10px;
-    font-family: var(--font-shadows), cursive;
-
+        font-family: var(--font-shadows), cursive;
       }
     }
+}
+
+@media screen and (max-width: 768px) {
+  .introduction {
+    height: 100vh;
+    width: 100vw;
+    padding: 1rem;
   }
+  
+  .introduction svg {
+    height: calc(100% + 100px);
+  }
+  
+  .introduction p {
+    font-size: 5em;
+    padding-left: 0.5em;
+    top: 10%; /* Positions the text a bit above */
+  }
+  
+  .introduction p span {
+    width: 5px;
+    height: 5px;
+    margin-right: 5px;
+  }
+}
