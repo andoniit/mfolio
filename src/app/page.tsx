@@ -10,7 +10,7 @@ import Scattertext from "@/components/Scattertext"
 import Preloader from "@/components/Preloader"
 import { AnimatePresence } from 'framer-motion';
 import Projects from "@/components/Projects/Project"
-
+import Slideshow from "@/components/SliderSection"
 import Header from "@/components/header/header"
 import { motion, useScroll } from "motion/react"
   
@@ -64,6 +64,7 @@ export default function Home() {
       <Timeline/>
       <Scattertext/>
       <Projects/>
+      <Slideshow/>
       <Contact/>
     </div>
     

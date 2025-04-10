@@ -16,8 +16,8 @@
   
 .body {
     position: absolute;
-    top: 80;
-    left: 90;
+    top: 10%;
+    left: 7%;
     width: 20vw;
     margin: 0;
 }
