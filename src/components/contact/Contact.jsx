@@ -45,9 +45,17 @@ export default function Contact() {
 
         <div className={styles.contactEmailLine}>
           <p>
-          Let’s have a conversation about how I can contribute to your success <a href="mailto:akapileshwari@hawk.iit.edu" className={styles.emailLink}>akapileshwari@hawk.iit.edu</a>
+          Let's have a conversation about how I can contribute to your success <a href="mailto:akapileshwari@hawk.iit.edu" className={styles.emailLink}>akapileshwari@hawk.iit.edu</a>
           </p>
         </div>
+        
+          <motion.a
+            href="https://drive.google.com/file/d/1MGd6Ju9cMte9KP1prnWCZjEfG1oHuMh_/view?usp=sharing"
+            target="_blank"
+            className={styles.resumeButton}
+          >
+            View My Resume
+          </motion.a>
         
       </div>
       <div ref={background} className={styles.background}></div>

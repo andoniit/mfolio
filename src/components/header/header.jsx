@@ -115,6 +115,16 @@ export default function Header() {
             Behance
           </motion.a>
         </Framer>
+        <Framer>
+          <motion.a
+            href="https://drive.google.com/file/d/1MGd6Ju9cMte9KP1prnWCZjEfG1oHuMh_/view?usp=sharing"
+            variants={linkVariants}
+            target="_blank"
+            className={styles.resumeButton}
+          >
+            View My Resume
+          </motion.a>
+        </Framer>
 
         </motion.nav>
       </div>

@@ -70,6 +70,22 @@
     text-decoration: underline;
   }
 
+  .resumeButton {
+    display: inline-block;
+    background-color: #ff363640;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-family: 'Tajawal';
+    margin-top: 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .resumeButton:hover {
+    background-color: #ff1a1a;
+  }
+
   .socialIcons {
     position: absolute;
     bottom: -1rem;
