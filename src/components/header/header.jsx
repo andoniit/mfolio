@@ -117,7 +117,7 @@ export default function Header() {
         </Framer>
         <Framer>
           <motion.a
-            href="https://drive.google.com/file/d/1MGd6Ju9cMte9KP1prnWCZjEfG1oHuMh_/view?usp=sharing"
+            href="https://drive.google.com/file/d/158gjEa5tBzswX6IFXiDtfuhRsvACCl4n/view?usp=share_link"
             variants={linkVariants}
             target="_blank"
             className={styles.resumeButton}
