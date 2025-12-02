@@ -123,7 +123,7 @@ export default function Hero() {
         <motion.div variants={itemVariants} style={{ scale: scaleSection4 }} className={`${styles.el} ${styles.section4}`}>
           <div className={styles.imageContainer}>
             <div className={styles.textContent}>
-              I am from <span className={styles.highlight}>Chicago</span>
+              I am from <span className={styles.highlight}>Chicago/Seattle</span>
               <br />
               {chicagoTime}
             </div>

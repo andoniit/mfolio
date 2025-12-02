@@ -90,6 +90,33 @@ const Timeline = () => {
               <div className="timeline__right">
                 <div>
                   <div className="timeline__content">
+                    <h3>Web Developer</h3>
+                    <h4>Artversion (Full-Time) | Jun 2025 – Present</h4>
+                    <ul>
+                      At ArtVersion, I created a LinkedIn integration plugin that pulls posts, likes, and comments and displays them in a dynamic WordPress slider, surfacing real-time social proof on the site. I developed custom WordPress and WordPress VIP plugins with complex functionality for dynamic content, custom fields, and reusable components, and built a Chrome extension to securely transfer structured data between two WordPress instances, automating manual data entry and reducing errors. I also delivered highly interactive GSAP-powered websites, implemented ADA/WCAG-compliant front-end builds, and designed custom templates and custom post types to support modular, content-rich architectures, while closely collaborating with designers and stakeholders to turn Figma/UX mockups into pixel-perfect, responsive WordPress themes and components.
+                    </ul>
+                    <h4>Tech Stack</h4>
+                    <p>WordPress VIP, PHP, JavaScript (ES6+), jQuery, Chrome Extensions API, LinkedIn REST API, GSAP, HTML5, CSS3/SCSS, Git, Figma, ADA/WCAG.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="timeline__section">
+              <div className="timeline__left">
+                <div className="timeline__date">
+                  {/* ... date info if any ... */}
+                </div>
+              </div>
+              <div className="timeline__tracker">
+                <div className="tracker"></div>
+              </div>
+              <div className="timeline__middle">
+                <div className="timeline__bullet"></div>
+              </div>
+
+              <div className="timeline__right">
+                <div>
+                  <div className="timeline__content">
                     <h3>Software Developer</h3>
                     <h4>Artarray (Full-Time) | Jul 2022 – Jun 2023</h4>
                     <ul>
@@ -103,6 +130,7 @@ const Timeline = () => {
                 </div>
               </div>
             </div>
+            
 
             {/* ... TIMELINE SECTION 2 ... */}
             <div className="timeline__section">

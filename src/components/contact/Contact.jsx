@@ -45,7 +45,7 @@ export default function Contact() {
 
         <div className={styles.contactEmailLine}>
           <p>
-          Let's have a conversation about how I can contribute to your success <a href="mailto:akapileshwari@hawk.iit.edu" className={styles.emailLink}>akapileshwari@hawk.iit.edu</a>
+          Let's have a conversation about how I can contribute to your success <a href="mailto:akapileshwari@hawk.illinoistech.edu" className={styles.emailLink}>akapileshwari@hawk.illinoistech.edu</a>
           </p>
         </div>
         
