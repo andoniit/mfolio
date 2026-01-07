@@ -16,9 +16,9 @@
     "gsap": "^3.12.7",
     "motion": "^12.6.3",
     "motion-plus": "^0.1.6",
-    "next": "15.2.4",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "next": "^16.1.1",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "sass": "^1.86.1",
     "tailwind-merge": "^3.1.0",
     "tweakpane": "^4.0.5"
@@ -30,7 +30,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "15.2.4",
+    "eslint-config-next": "^16.1.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
