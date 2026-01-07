@@ -93,7 +93,7 @@ const Timeline = () => {
                     <h3>Web Developer</h3>
                     <h4>Artversion (Full-Time) | Jun 2025 – Present</h4>
                     <ul>
-                      At ArtVersion, I created a LinkedIn integration plugin that pulls posts, likes, and comments and displays them in a dynamic WordPress slider, surfacing real-time social proof on the site. I developed custom WordPress and WordPress VIP plugins with complex functionality for dynamic content, custom fields, and reusable components, and built a Chrome extension to securely transfer structured data between two WordPress instances, automating manual data entry and reducing errors. I also delivered highly interactive GSAP-powered websites, implemented ADA/WCAG-compliant front-end builds, and designed custom templates and custom post types to support modular, content-rich architectures, while closely collaborating with designers and stakeholders to turn Figma/UX mockups into pixel-perfect, responsive WordPress themes and components.
+                      At ArtVersion, I engineered a LinkedIn integration plugin that ingests posts, reactions, and comments via API, applies normalization and caching, and renders them through a responsive, dynamic WordPress slider to surface real-time social proof with minimal performance overhead. I developed enterprise-grade WordPress and WordPress VIP plugins using maintainable, modular patterns—delivering dynamic content pipelines, custom-field–driven workflows, and reusable component systems built with security best practices (sanitization/escaping, capability checks). I also built a secure Chrome extension to transfer structured content between WordPress environments with validation and automated mapping, eliminating repetitive manual entry and reducing data inconsistencies. Beyond integrations, I shipped highly interactive GSAP experiences (ScrollTrigger, micro-interactions) optimized for smooth runtime performance, implemented ADA/WCAG-aligned accessibility through semantic HTML, keyboard-first flows, and ARIA patterns, and designed scalable template + CPT architectures that enable modular, content-rich sites. I collaborated closely with designers and stakeholders to translate Figma into pixel-perfect, responsive themes and components, proactively handling edge cases across breakpoints and browsers.
                     </ul>
                     <h4>Tech Stack</h4>
                     <p>WordPress VIP, PHP, JavaScript (ES6+), jQuery, Chrome Extensions API, LinkedIn REST API, GSAP, HTML5, CSS3/SCSS, Git, Figma, ADA/WCAG.</p>
@@ -118,11 +118,9 @@ const Timeline = () => {
                 <div>
                   <div className="timeline__content">
                     <h3>Software Developer</h3>
-                    <h4>Artarray (Full-Time) | Jul 2022 – Jun 2023</h4>
+                    <h4>Artarray (Full-Time) | Feb 2020 – Jun 2023</h4>
                     <ul>
-                      <li>Collaborated with 3 cross-functional teams to develop and design web applications, achieving a 15% improvement in user satisfaction scores and a 25% reduction in post-launch issues.</li>
-                      <li>Identified and mitigated challenges in the development process, boosting efficiency and effectiveness. Implemented solutions led to a 20% reduction in development time and improved overall project success rates.</li>
-                      <li>Utilized investigative reasoning skills for troubleshooting, ensuring swift issue resolution and optimal performance of web applications, and led software solutions implementations, ensuring a seamless transition from development to production environments.</li>
+                      I collaborated closely with three cross-functional teams (Design, Engineering, and QA) to build and deliver production web applications end to end, improving user satisfaction by 15% and reducing post-launch issues by 25% through clearer requirements, stronger QA alignment, and disciplined release validation. I consistently identified bottlenecks and mitigated development risks by applying solid software engineering practices—modular architecture, reusable components, and workflow automation—resulting in a 20% reduction in development time and more predictable delivery. Using a root-cause, hypothesis-driven debugging approach, I troubleshot complex performance and reliability issues quickly and helped stabilize deployments with production-ready practices across environments (development → staging → production). In parallel, I contributed as a Software Engineer Intern at Artarray, strengthening both front-end and back-end skills on internal projects and improving UI engagement through responsive, accessible, ADA/WCAG-aligned builds (semantic HTML, keyboard navigation, ARIA). My work spans modern web stacks and integration patterns, including React/Next.js, Node.js/Express, REST APIs, WordPress VIP/PHP, CI/CD, and event-driven systems such as Kafka, with cloud tooling like AWS/GCP/Firebase to support scalable, resilient applications.
                     </ul>
                     <h4>Tech Stack</h4>
                     <p>React, Angular, Three.js, React Three Fiber, Leaflet, MongoDB, AWS</p>
@@ -132,35 +130,7 @@ const Timeline = () => {
             </div>
             
 
-            {/* ... TIMELINE SECTION 2 ... */}
-            <div className="timeline__section">
-              <div className="timeline__left">
-                <div className="timeline__date">
-                  {/* ... date info if any ... */}
-                </div>
-              </div>
-              <div className="timeline__tracker">
-                <div className="tracker"></div>
-              </div>
-              <div className="timeline__middle">
-                <div className="timeline__bullet"></div>
-              </div>
-
-              <div className="timeline__right">
-                <div>
-                  <div className="timeline__content">
-                    <h3>Software Engineer Intern</h3>
-                    <h4>Artarray (Intern) | Feb 2020 – Jul 2022</h4>
-                    <ul>
-                      <li>Served as a Software Engineer Intern at Artarray, honing my skills in front-end and back-end development while collaborating on various internal projects.</li>
-                      <li>Played a pivotal role in enhancing user interfaces for optimal engagement, showcasing a holistic approach to software development.</li>
-                    </ul>
-                    <h4>Tech Stack</h4>
-                    <p>Adobe XD, WordPress, Squarespace, Angular</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+           
 
             {/* ... TIMELINE SECTION 3 ... */}
             <div className="timeline__section">
@@ -277,10 +247,16 @@ const Timeline = () => {
           font-family: Tajawal;
         }
         @media (max-width: 768px) {
-          .experienceTitle {
-            font-size: 3em;
-            margin-left: 1rem;
-            margin-bottom: -10rem;
+        .experienceTitle  {
+        font-size: 4rem;
+        margin:0px;
+        }
+          .experienceTitle h1 {
+            font-size: 4rem;
+            margin-left: 1rem !important;
+            margin-bottom:0px !important;
+            
+            
           }
           .voluntaryRoles {
             font-size: 2em;
@@ -341,7 +317,7 @@ const Timeline = () => {
         }
         .timeline__left,
         .timeline__middle {
-          margin-bottom: var(--buffer);
+         
         }
         .timeline__right {
           background: linear-gradient(
@@ -420,12 +396,11 @@ const Timeline = () => {
           }
           .timeline__section {
             grid-template-columns: 1fr;
-            grid-gap: 0.5rem;
-            margin-bottom: 1rem;
+            
           }
           .timeline__right > div {
             padding-left: 10px;
-            margin-bottom: -10em;
+            
           }
           .timeline__content h3 {
             font-size: 1.5rem;

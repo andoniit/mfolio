@@ -28,19 +28,21 @@ export default function Hero() {
   const scaleSection6 = useTransform(scrollYProgress, [0, 1], [1, 8]);
   const scaleSection7 = useTransform(scrollYProgress, [0, 1], [1, 9]);
 
-  // Chicago local time (without seconds)
-  const [chicagoTime, setChicagoTime] = useState("");
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const time = new Date().toLocaleTimeString("en-US", { 
-        timeZone: "America/Chicago", 
-        hour: "numeric", 
-        minute: "numeric"
-      });
-      setChicagoTime(time);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
+ // Seattle local time (without seconds)
+const [seattleTime, setSeattleTime] = useState("");
+
+useEffect(() => {
+  const interval = setInterval(() => {
+    const time = new Date().toLocaleTimeString("en-US", {
+      timeZone: "America/Los_Angeles", // ✅ Seattle = Pacific Time
+      hour: "numeric",
+      minute: "numeric",
+    });
+    setSeattleTime(time);
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, []);
 
   // Intro animation variants for each section.
   const itemVariants = {
@@ -123,9 +125,9 @@ export default function Hero() {
         <motion.div variants={itemVariants} style={{ scale: scaleSection4 }} className={`${styles.el} ${styles.section4}`}>
           <div className={styles.imageContainer}>
             <div className={styles.textContent}>
-              I am from <span className={styles.highlight}>Chicago/Seattle</span>
+              I am from <span className={styles.highlight}>Seattle</span>
               <br />
-              {chicagoTime}
+              {seattleTime}
             </div>
           </div>
         </motion.div>

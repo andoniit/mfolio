@@ -64,7 +64,9 @@
     color: #ffffff;
     text-decoration: none;
     font-weight: bold;
+    font-size: 14px;
   }
+  
   
   .emailLink:hover {
     text-decoration: underline;

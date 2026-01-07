@@ -86,28 +86,22 @@ export default function InteractiveSection() {
 
         <div className={styles.description}>
           <p>
-          I’m a designer at heart, a developer by trade, and a creative thinker by default. With 3 years of professional experience in web and cloud development, I thrive at the intersection of code, design, and interaction. My journey blends scalable product building with a curiosity for solving real-world problems, and lately, I’ve been diving into the immersive world of 3D web experiences.
-          <br/>
-          <br/>
-          Currently pursuing my Master’s in Computer Science at IIT Chicago, I’m based in the vibrant city of Chicago—where I fuel my days with lines of code and my weekends with camera gear. I’m passionate about AI/ML, have tinkered with ChatGPT APIs, and am particularly drawn to integration engineering and seamless system design. Oh—and when I’m not deep in tech, you’ll probably find me editing videos, shooting cinematic clips, or planning the next visual story.
+         With 4 years of professional experience and 6 years of academic training in Computer Science, I build and ship production-grade software across front-end, platform, and data-heavy systems. I have hands-on experience delivering cloud-ready, scalable applications and AI-enabled workflows, with a strong focus on integration engineering, reliability, and performance. I also specialize in modern web UI development and enterprise WordPress VIP—developing custom plugins and reusable component systems, building a Chrome extension to automate structured data transfer between WordPress environments, and creating GSAP-powered, highly interactive interfaces optimized for smooth runtime performance. I design and implement accessible, standards-aligned experiences (ADA/WCAG) using semantic HTML, keyboard-first patterns, and ARIA best practices. I’m seeking a full-time role where I can apply strong engineering fundamentals to build resilient, high-performance, user-centered products end to end.
           </p>
-          <br/>
+
           
         </div>
         <div className={styles.tagsContainer}>
-        <h1>More About Me (a.k.a. The Side Quests)</h1>
         <p>Beyond the code and cloud, there’s a timeline of passion projects, creative chaos, and side quests that shaped who I am.
-<br/>
-<br/>
+
 
 In 2020, I went full gamer mode—livestreaming video games on YouTube during the COVID pandemic (peak lockdown vibes). I’ve worked with an ad agency, a news channel, and even a political party in India, getting hands-on experience with storytelling, media, and impact.
-<br/>
-<br/>
+
 
 
 I’ve also worked as a software engineer, collaborated with friends to build robots and drones, and yes—I absolutely snack on chips and soda while doing all this. I was an active member of the IEEE Student Branch at KLS GIT, started a Photography Club during my undergrad, and served as the Design Head for three semesters at IIT Chicago.
-<br/>
-<br/>
+
+
 
 
 Oh—and one more thing: I can Procreate (yes, the iPad app—designing, illustrating, and occasionally doodling nonsense that turns out kinda cool).
