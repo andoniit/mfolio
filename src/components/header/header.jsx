@@ -83,7 +83,7 @@ export default function Header() {
           >
             <img
               className={styles.icon}
-              src="/2.png"
+              src="/3.png"
               alt="LinkedIn Icon"
             />
             Linkedin
@@ -94,7 +94,7 @@ export default function Header() {
           <motion.a href="https://github.com/andoniit" target="_blank" variants={linkVariants}>
             <img
               className={styles.icon}
-              src="/3.png"
+              src="/2.png"
               alt="GitHub Icon"
             />
             GitHub
