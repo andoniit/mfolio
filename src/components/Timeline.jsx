@@ -90,13 +90,13 @@ const Timeline = () => {
               <div className="timeline__right">
                 <div>
                   <div className="timeline__content">
-                    <h3>Web Developer</h3>
-                    <h4>Artversion (Full-Time) | Jun 2025 – Present</h4>
+                    <h3>Frontend Engineer</h3>
+                    <h4>Artversion (Full-Time) | Jun 2025 – Jan 2026</h4>
                     <ul>
-                      At ArtVersion, I engineered a LinkedIn integration plugin that ingests posts, reactions, and comments via API, applies normalization and caching, and renders them through a responsive, dynamic WordPress slider to surface real-time social proof with minimal performance overhead. I developed enterprise-grade WordPress and WordPress VIP plugins using maintainable, modular patterns—delivering dynamic content pipelines, custom-field–driven workflows, and reusable component systems built with security best practices (sanitization/escaping, capability checks). I also built a secure Chrome extension to transfer structured content between WordPress environments with validation and automated mapping, eliminating repetitive manual entry and reducing data inconsistencies. Beyond integrations, I shipped highly interactive GSAP experiences (ScrollTrigger, micro-interactions) optimized for smooth runtime performance, implemented ADA/WCAG-aligned accessibility through semantic HTML, keyboard-first flows, and ARIA patterns, and designed scalable template + CPT architectures that enable modular, content-rich sites. I collaborated closely with designers and stakeholders to translate Figma into pixel-perfect, responsive themes and components, proactively handling edge cases across breakpoints and browsers.
+                      At ArtVersion, I shipped React features using TypeScript/JavaScript, building reusable UI components and integrating APIs to deliver responsive, accessible (ADA/WCAG) experiences from Figma to production. I also built a LinkedIn integration plugin that ingests posts/reactions/comments via API, normalizes and caches the data, and renders it in a dynamic WordPress slider to surface real-time social proof with minimal performance overhead. Additionally, I developed enterprise WordPress/WordPress VIP plugins with modular architecture and security best practices (sanitization/escaping, capability checks), and created a secure Chrome extension to transfer structured content between WordPress environments with validation and automated field mapping to eliminate manual entry and reduce inconsistencies.
                     </ul>
                     <h4>Tech Stack</h4>
-                    <p>WordPress VIP, PHP, JavaScript (ES6+), jQuery, Chrome Extensions API, LinkedIn REST API, GSAP, HTML5, CSS3/SCSS, Git, Figma, ADA/WCAG.</p>
+                    <p>React, WordPress VIP, PHP, JavaScript (ES6+), jQuery, Chrome Extensions API, LinkedIn REST API, GSAP, HTML5, CSS3/SCSS, Git, Figma, ADA/WCAG.</p>
                   </div>
                 </div>
               </div>
