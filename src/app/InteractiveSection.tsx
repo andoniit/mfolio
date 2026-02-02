@@ -86,7 +86,13 @@ export default function InteractiveSection() {
 
         <div className={styles.description}>
           <p>
-         With 4 years of professional experience and 6 years of academic training in Computer Science, I build and ship production-grade software across front-end, platform, and data-heavy systems. I have hands-on experience delivering cloud-ready, scalable applications and AI-enabled workflows, with a strong focus on integration engineering, reliability, and performance. I also specialize in modern web UI development and enterprise WordPress VIP—developing custom plugins and reusable component systems, building a Chrome extension to automate structured data transfer between WordPress environments, and creating GSAP-powered, highly interactive interfaces optimized for smooth runtime performance. I design and implement accessible, standards-aligned experiences (ADA/WCAG) using semantic HTML, keyboard-first patterns, and ARIA best practices. I’m seeking a full-time role where I can apply strong engineering fundamentals to build resilient, high-performance, user-centered products end to end.
+         I’m a Software Development Engineer with experience building and owning production-grade, full-stack web applications from design through deployment. I enjoy working on problems that sit at the intersection of clean architecture, scalable systems, and user-focused engineering.
+
+My background spans frontend and backend development, where I’ve built modular UI systems with React, designed RESTful APIs and backend workflows using Node.js, and deployed reliable, containerized services on AWS. I care deeply about performance, security, accessibility, and maintainability, and I’ve led features that improved user satisfaction, reduced defects, and supported stable production releases.
+
+I’ve worked across the full software lifecycle—requirements analysis, system design, implementation, testing, deployment, and observability—collaborating closely with designers, engineers, and QA to ship reliable systems at scale. I’m comfortable owning features end-to-end and diving deep into debugging, optimization, and edge-case handling.
+
+Currently, I’m seeking Software Development Engineer roles where I can contribute to scalable, high-impact systems, learn from strong engineering teams, and continue growing as an engineer who builds things that last.
           </p>
 
           

@@ -90,7 +90,7 @@ const Timeline = () => {
               <div className="timeline__right">
                 <div>
                   <div className="timeline__content">
-                    <h3>Frontend Engineer</h3>
+                    <h3>Software Developer</h3>
                     <h4>Artversion (Full-Time) | Jun 2025 – Jan 2026</h4>
                     <ul>
                       At ArtVersion, I shipped React features using TypeScript/JavaScript, building reusable UI components and integrating APIs to deliver responsive, accessible (ADA/WCAG) experiences from Figma to production. I also built a LinkedIn integration plugin that ingests posts/reactions/comments via API, normalizes and caches the data, and renders it in a dynamic WordPress slider to surface real-time social proof with minimal performance overhead. Additionally, I developed enterprise WordPress/WordPress VIP plugins with modular architecture and security best practices (sanitization/escaping, capability checks), and created a secure Chrome extension to transfer structured content between WordPress environments with validation and automated field mapping to eliminate manual entry and reduce inconsistencies.
