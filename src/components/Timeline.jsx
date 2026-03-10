@@ -2,87 +2,195 @@
 
 import { useEffect } from "react";
 import Framer from "@/components/Framer";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+// Register ScrollTrigger plugin
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 const Timeline = () => {
   useEffect(() => {
+    // --- 1. Original Custom Scroll Logic (Gradient Timeline Tracker) ---
     const timelines = document.querySelectorAll(".timeline__right");
     const trackers = document.querySelectorAll(".timeline__tracker");
 
     const onScroll = () => {
       timelines.forEach((timeline, i) => {
         const content = timeline.querySelector(".timeline__content");
-        if (trackers[i].offsetTop > 0) {
+        if (trackers[i] && trackers[i].offsetTop > 0) {
           content.classList.add("animate-on-scroll");
-        } else {
+        } else if (content) {
           content.classList.remove("animate-on-scroll");
         }
-        timeline.style.background = `linear-gradient(
-          180deg, 
-          #ff3636 0%, 
-          #ff3636 0%, 
-          #ff3636 ${trackers[i].offsetTop + 5}px, 
-          black ${trackers[i].offsetTop + 5}px, 
-          black 100%
-        )`;
+        
+        if (trackers[i]) {
+          timeline.style.background = `linear-gradient(
+            180deg, 
+            #ff3636 0%, 
+            #ff3636 0%, 
+            #ff3636 ${trackers[i].offsetTop + 5}px, 
+            black ${trackers[i].offsetTop + 5}px, 
+            black 100%
+          )`;
+        }
       });
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+
+    // --- 2. GSAP Scroll Entry Animations ---
+    
+    // Animate the main Experience Title
+    gsap.fromTo(
+      ".experienceTitle h1",
+      { opacity: 0, y: -50 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: ".experienceTitle",
+          start: "top 85%",
+        },
+      }
+    );
+
+    // Animate the Voluntary Roles Heading
+    gsap.fromTo(
+      ".voluntaryRoles",
+      { opacity: 0, x: -30 },
+      {
+        opacity: 1,
+        x: 0,
+        duration: 1,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: ".voluntaryRoles",
+          start: "top 85%",
+        },
+      }
+    );
+
+    // Animate each Voluntary Item individually
+    const voluntaryItems = document.querySelectorAll(".voluntary-item");
+    voluntaryItems.forEach((item) => {
+      gsap.fromTo(
+        item,
+        { opacity: 0, y: 40 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: item,
+            start: "top 85%",
+            toggleActions: "play none none none", // Plays once when scrolled into view
+          },
+        }
+      );
+    });
+
+    // Animate each Timeline Content box
+    const timelineContents = document.querySelectorAll(".timeline__content");
+    timelineContents.forEach((content) => {
+      gsap.fromTo(
+        content,
+        { opacity: 0, x: 50 }, // Slides in slightly from the right
+        {
+          opacity: 1,
+          x: 0,
+          duration: 0.8,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: content,
+            start: "top 85%",
+            toggleActions: "play none none none",
+          },
+        }
+      );
+    });
+
+    // Cleanup listeners and ScrollTriggers on unmount
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+    };
   }, []);
 
   return (
     <div>
       <div style={{ height: "30vh" }}></div>
-      
-     
+
       <div className="experienceTitle">
-            <h1>Experience</h1>
-          </div>
+        <h1>Experience</h1>
+      </div>
       <div className="experience-container">
-      
         {/* LEFT COLUMN: Voluntary Section */}
         <div className="voluntary-section">
+          <div className="voluntaryRoles">Voluntary Roles</div>
           
-          <div className="voluntaryRoles">
-            Voluntary Roles
-          </div>
           <div className="voluntary-item">
             <h3>Javascript Developer</h3>
             <h4>Carboncopies Foundation</h4>
-            <p>The Carboncopies Foundation is a nonprofit dedicated to advancing the science and development of Whole Brain Emulation. As a JavaScript Developer, I engineer their interactive web application (<a href="https://roadmap.carboncopies.org/" target="_blank" rel="noopener noreferrer">roadmap.carboncopies.org</a>) to visually track the complex research milestones required for this mission. This platform successfully translates highly technical data into an accessible, engaging roadmap for both the scientific community and the public.</p>
-          </div>
-          {/* Updated volunteer items */}
-          <div className="voluntary-item">
-            <h3>Design Head</h3>
-            <h4>Indian Student Association – Illinois Tech | Aug 2023 – Jan 2025 · 1 yr 6 mos</h4>
-            <p>I served as Design Head for 3 semesters at ISA@IIT Chicago. I was also offered a 4th tenure as Design Head, but as I was in the final semester of my master's, I had to decline the offer. In this role, I contributed significantly to art and culture by making and filming videos, managing the design team, and collaborating closely with the photography team.</p>
+            <p>
+              The Carboncopies Foundation is a nonprofit dedicated to advancing the science and
+              development of Whole Brain Emulation. As a JavaScript Developer, I engineer their
+              interactive web application (
+              <a href="https://roadmap.carboncopies.org/" target="_blank" rel="noopener noreferrer">
+                roadmap.carboncopies.org
+              </a>
+              ) to visually track the complex research milestones required for this mission. This
+              platform successfully translates highly technical data into an accessible, engaging
+              roadmap for both the scientific community and the public.
+            </p>
           </div>
           
           <div className="voluntary-item">
+            <h3>Design Head</h3>
+            <h4>Indian Student Association – Illinois Tech | Aug 2023 – Jan 2025 · 1 yr 6 mos</h4>
+            <p>
+              I served as Design Head for 3 semesters at ISA@IIT Chicago. I was also offered a 4th
+              tenure as Design Head, but as I was in the final semester of my master's, I had to
+              decline the offer. In this role, I contributed significantly to art and culture by
+              making and filming videos, managing the design team, and collaborating closely with
+              the photography team.
+            </p>
+          </div>
+
+          <div className="voluntary-item">
             <h3>Joint Secretary</h3>
             <h4>IEEE KLS GIT | Dec 2021 – Oct 2022 · 11 mos</h4>
-            <p>As Joint Secretary at IEEE KLS GIT, I coordinated internal communications, managed event logistics, and maintained documentation to ensure smooth operation of the team. I played a key role in organizing events and streamlining processes, as detailed in the second image.</p>
+            <p>
+              As Joint Secretary at IEEE KLS GIT, I coordinated internal communications, managed
+              event logistics, and maintained documentation to ensure smooth operation of the team.
+              I played a key role in organizing events and streamlining processes, as detailed in
+              the second image.
+            </p>
           </div>
 
           <div className="voluntary-item">
             <h3>Webmaster</h3>
             <h4>IEEE KLS GIT | Jan 2020 – Nov 2021 · 1 yr 10 mos</h4>
-            <p>As Webmaster at IEEE KLS GIT, I led website maintenance and development initiatives, ensuring the site was both visually appealing and functionally robust. I collaborated with multiple teams to manage content updates and optimize the user experience, following the details provided in the first image.</p>
+            <p>
+              As Webmaster at IEEE KLS GIT, I led website maintenance and development initiatives,
+              ensuring the site was both visually appealing and functionally robust. I collaborated
+              with multiple teams to manage content updates and optimize the user experience,
+              following the details provided in the first image.
+            </p>
           </div>
-
-          
         </div>
 
-        {/* RIGHT COLUMN: Timeline (unchanged code) */}
+        {/* RIGHT COLUMN: Timeline */}
         <div className="timeline-wrapper">
           <div className="timeline">
-            {/* ----------------- TIMELINE SECTION 1 (Latest Experience) ----------------- */}
+            {/* TIMELINE SECTION 1 */}
             <div className="timeline__section">
               <div className="timeline__left">
-                <div className="timeline__date">
-                  {/* ... date info if any ... */}
-                </div>
+                <div className="timeline__date"></div>
               </div>
               <div className="timeline__tracker">
                 <div className="tracker"></div>
@@ -103,16 +211,16 @@ const Timeline = () => {
                       <li>Developed and launched a high-performance web platform on WordPress VIP, engineering fluid, interactive UI components with GSAP web animations, which increased user time-on-page by 35% and significantly enhanced visual engagement.</li>
                     </ul>
                     <h4>Tech Stack</h4>
-                    <p> JavaScript, PHP, React, REST APIs, Dayforce API, Chrome/Safari Extensions, WordPress VIP, GSAP, ADA/WCAG/ARIA, Cron Jobs</p>
+                    <p>JavaScript, PHP, React, REST APIs, Dayforce API, Chrome/Safari Extensions, WordPress VIP, GSAP, ADA/WCAG/ARIA, Cron Jobs</p>
                   </div>
                 </div>
               </div>
             </div>
+
+            {/* TIMELINE SECTION 2 */}
             <div className="timeline__section">
               <div className="timeline__left">
-                <div className="timeline__date">
-                  {/* ... date info if any ... */}
-                </div>
+                <div className="timeline__date"></div>
               </div>
               <div className="timeline__tracker">
                 <div className="tracker"></div>
@@ -132,21 +240,16 @@ const Timeline = () => {
                       <li>Improved platform reliability and scalability by integrating Firebase Authentication, deploying Dockerized services on AWS, and building centralized monitoring with AWS OpenSearch, reducing incident resolution time by 50% and supporting 99.9% availability during peak registration cycles.</li>
                     </ul>
                     <h4>Tech Stack</h4>
-                    <p> React, Node.js, JavaScript (ES6+), RESTful APIs, Firebase, Docker, AWS, AWS OpenSearch</p>
+                    <p>React, Node.js, JavaScript (ES6+), RESTful APIs, Firebase, Docker, AWS, AWS OpenSearch</p>
                   </div>
                 </div>
               </div>
             </div>
-            
 
-           
-
-            {/* ... TIMELINE SECTION 3 ... */}
+            {/* TIMELINE SECTION 3 */}
             <div className="timeline__section">
               <div className="timeline__left">
-                <div className="timeline__date">
-                  {/* ... date info if any ... */}
-                </div>
+                <div className="timeline__date"></div>
               </div>
               <div className="timeline__tracker">
                 <div className="tracker"></div>
@@ -166,18 +269,16 @@ const Timeline = () => {
                       <li>Leveraged analytics integration and event tracking to analyze user behavior and conversion funnels, guiding feature enhancements that boosted engagement by 25%.</li>
                     </ul>
                     <h4>Tech Stack</h4>
-                    <p> React, Angular, JavaScript (ES6+), HTML5, CSS3, REST APIs, State Management, Web Analytics</p>
+                    <p>React, Angular, JavaScript (ES6+), HTML5, CSS3, REST APIs, State Management, Web Analytics</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* ... TIMELINE SECTION 4 ... */}
+            {/* TIMELINE SECTION 4 */}
             <div className="timeline__section">
               <div className="timeline__left">
-                <div className="timeline__date">
-                  {/* ... date info if any ... */}
-                </div>
+                <div className="timeline__date"></div>
               </div>
               <div className="timeline__tracker">
                 <div className="tracker"></div>
@@ -202,7 +303,7 @@ const Timeline = () => {
                 </div>
               </div>
             </div>
-            {/* ... Add more timeline sections as needed ... */}
+
           </div>
         </div>
       </div>
@@ -227,16 +328,12 @@ const Timeline = () => {
 
       {/* Component-Specific Styles */}
       <style jsx>{`
-        /* NEW GRID WRAPPER for left (volunteer) and right (timeline) */
         .experience-container {
           display: grid;
           grid-template-columns: 1fr 2fr;
           gap: 2rem;
           max-width: 1200px;
           margin: 0 auto;
-        }
-        .voluntary-section {
-          
         }
         .experienceTitle {
           font-size: 6em;
@@ -249,21 +346,18 @@ const Timeline = () => {
           font-size: 3em;
           margin-bottom: 1rem;
           margin-top: 7rem;
-
           color: var(--color-white);
           font-family: Tajawal;
         }
         @media (max-width: 768px) {
-        .experienceTitle  {
-        font-size: 4rem;
-        margin:0px;
-        }
+          .experienceTitle {
+            font-size: 4rem;
+            margin: 0px;
+          }
           .experienceTitle h1 {
             font-size: 4rem;
             margin-left: 1rem !important;
-            margin-bottom:0px !important;
-            
-            
+            margin-bottom: 0px !important;
           }
           .voluntaryRoles {
             font-size: 2em;
@@ -273,6 +367,7 @@ const Timeline = () => {
           margin-bottom: 1rem;
           border-bottom: 1px solid var(--color-grey);
           padding-bottom: 1rem;
+          will-change: transform, opacity;
         }
         .voluntary-item h3 {
           font-size: 2rem;
@@ -294,11 +389,6 @@ const Timeline = () => {
           margin-top: 0.25rem;
         }
 
-        .timeline-wrapper {
-          /* Just a wrapper around your existing .timeline to preserve layout */
-        }
-
-        /* Existing timeline and other styles remain unchanged below */
         .timeline {
           max-width: 1000px;
           margin: 0 auto;
@@ -321,10 +411,6 @@ const Timeline = () => {
         .timeline__tracker {
           position: sticky;
           top: var(--sticky-top-pos);
-        }
-        .timeline__left,
-        .timeline__middle {
-         
         }
         .timeline__right {
           background: linear-gradient(
@@ -358,12 +444,12 @@ const Timeline = () => {
           color: var(--color-grey);
           transition: color 1s cubic-bezier(0, 0.39, 0.58, 1);
           font-family: 'Tajawal';
+          will-change: transform, opacity;
         }
         .animate-on-scroll {
           color: var(--color-white);
         }
 
-        /* Styles for Title, Sub Title and Tech Stack details */
         .timeline__content h3 {
           font-size: 2rem;
           font-weight: bold;
@@ -389,25 +475,20 @@ const Timeline = () => {
           margin-top: 0.25rem;
         }
 
-        /* Mobile adjustments */
         @media (max-width: 768px) {
           .experience-container {
             display: flex;
             flex-direction: column;
             padding: 0 10px;
-            
           }
-          
-          .voluntary-item h3{
-          font-size:1.5rem
+          .voluntary-item h3 {
+            font-size: 1.5rem;
           }
           .timeline__section {
             grid-template-columns: 1fr;
-            
           }
           .timeline__right > div {
             padding-left: 10px;
-            
           }
           .timeline__content h3 {
             font-size: 1.5rem;
@@ -429,16 +510,16 @@ const Timeline = () => {
             order: 2;
           }
         }
-          .timeline__content ul {
-  list-style-type: disc; /* Ensures the bullet points appear */
-  padding-left: 20px;    /* Gives the bullets room to breathe */
-  margin: 10px 0;        /* Adds space above and below the list */
-}
-
-.timeline__content li {
-  margin-bottom: 10px;   /* Adds spacing between each individual pointer */
-  line-height: 1.5;      /* Makes the text easier to read */
-}
+        
+        .timeline__content ul {
+          list-style-type: disc;
+          padding-left: 20px;
+          margin: 10px 0;
+        }
+        .timeline__content li {
+          margin-bottom: 10px;
+          line-height: 1.5;
+        }
       `}</style>
     </div>
   );
