@@ -47,7 +47,11 @@ const Timeline = () => {
           <div className="voluntaryRoles">
             Voluntary Roles
           </div>
-
+          <div className="voluntary-item">
+            <h3>Javascript Developer</h3>
+            <h4>Carboncopies Foundation</h4>
+            <p>The Carboncopies Foundation is a nonprofit dedicated to advancing the science and development of Whole Brain Emulation. As a JavaScript Developer, I engineer their interactive web application (<a href="https://roadmap.carboncopies.org/" target="_blank" rel="noopener noreferrer">roadmap.carboncopies.org</a>) to visually track the complex research milestones required for this mission. This platform successfully translates highly technical data into an accessible, engaging roadmap for both the scientific community and the public.</p>
+          </div>
           {/* Updated volunteer items */}
           <div className="voluntary-item">
             <h3>Design Head</h3>
@@ -91,12 +95,15 @@ const Timeline = () => {
                 <div>
                   <div className="timeline__content">
                     <h3>Software Developer</h3>
-                    <h4>Artversion (Full-Time) | Jun 2025 – Jan 2026</h4>
+                    <h4>Artversion (Full-Time) | May 2025 – Jan 2026</h4>
                     <ul>
-                      At ArtVersion, I shipped React features using TypeScript/JavaScript, building reusable UI components and integrating APIs to deliver responsive, accessible (ADA/WCAG) experiences from Figma to production. I also built a LinkedIn integration plugin that ingests posts/reactions/comments via API, normalizes and caches the data, and renders it in a dynamic WordPress slider to surface real-time social proof with minimal performance overhead. Additionally, I developed enterprise WordPress/WordPress VIP plugins with modular architecture and security best practices (sanitization/escaping, capability checks), and created a secure Chrome extension to transfer structured content between WordPress environments with validation and automated field mapping to eliminate manual entry and reduce inconsistencies.
+                      <li>Owned the development of automated Dayforce API integrations for multiple client platforms using JavaScript, PHP, REST APIs, and cron jobs, reducing manual job-posting effort by 70% and increasing cross-platform publishing reliability.</li>
+                      <li>Built secure Chrome and Safari extensions to bridge disconnected systems across multiple client environments, reducing data transfer time by 90% and improving workflow efficiency for business operations.</li>
+                      <li>Drove accessibility improvements across multiple React-based client applications by implementing ADA, WCAG, and ARIA standards, increasing accessible reach by 40% and strengthening overall user engagement.</li>
+                      <li>Developed and launched a high-performance web platform on WordPress VIP, engineering fluid, interactive UI components with GSAP web animations, which increased user time-on-page by 35% and significantly enhanced visual engagement.</li>
                     </ul>
                     <h4>Tech Stack</h4>
-                    <p>React, WordPress VIP, PHP, JavaScript (ES6+), jQuery, Chrome Extensions API, LinkedIn REST API, GSAP, HTML5, CSS3/SCSS, Git, Figma, ADA/WCAG.</p>
+                    <p> JavaScript, PHP, React, REST APIs, Dayforce API, Chrome/Safari Extensions, WordPress VIP, GSAP, ADA/WCAG/ARIA, Cron Jobs</p>
                   </div>
                 </div>
               </div>
@@ -120,10 +127,12 @@ const Timeline = () => {
                     <h3>Software Developer</h3>
                     <h4>Artarray (Full-Time) | Feb 2020 – Jun 2023</h4>
                     <ul>
-                      I collaborated closely with three cross-functional teams (Design, Engineering, and QA) to build and deliver production web applications end to end, improving user satisfaction by 15% and reducing post-launch issues by 25% through clearer requirements, stronger QA alignment, and disciplined release validation. I consistently identified bottlenecks and mitigated development risks by applying solid software engineering practices—modular architecture, reusable components, and workflow automation—resulting in a 20% reduction in development time and more predictable delivery. Using a root-cause, hypothesis-driven debugging approach, I troubleshot complex performance and reliability issues quickly and helped stabilize deployments with production-ready practices across environments (development → staging → production). In parallel, I contributed as a Software Engineer Intern at Artarray, strengthening both front-end and back-end skills on internal projects and improving UI engagement through responsive, accessible, ADA/WCAG-aligned builds (semantic HTML, keyboard navigation, ARIA). My work spans modern web stacks and integration patterns, including React/Next.js, Node.js/Express, REST APIs, WordPress VIP/PHP, CI/CD, and event-driven systems such as Kafka, with cloud tooling like AWS/GCP/Firebase to support scalable, resilient applications.
+                      <li>Owned the development of a high-traffic course registration platform using React, Node.js, JavaScript (ES6+), and RESTful APIs, improving enrollment workflow efficiency by 35% and delivering a secure end-to-end user experience.</li>
+                      <li>Architected and implemented distributed business logic for schedule conflict detection, prerequisite validation, and automated waitlist management, reducing registration errors by 40% and increasing successful enrollment processing by 30%.</li>
+                      <li>Improved platform reliability and scalability by integrating Firebase Authentication, deploying Dockerized services on AWS, and building centralized monitoring with AWS OpenSearch, reducing incident resolution time by 50% and supporting 99.9% availability during peak registration cycles.</li>
                     </ul>
                     <h4>Tech Stack</h4>
-                    <p>React, Angular, Three.js, React Three Fiber, Leaflet, MongoDB, AWS</p>
+                    <p> React, Node.js, JavaScript (ES6+), RESTful APIs, Firebase, Docker, AWS, AWS OpenSearch</p>
                   </div>
                 </div>
               </div>
@@ -151,13 +160,13 @@ const Timeline = () => {
                   <div className="timeline__content">
                     <h3>Freelance Web Developer</h3>
                     <h4>Mar 2020 – Feb 2022</h4>
-                    <p>
-                      Freelanced for multiple companies (MyNexAlloys, Artarray, Studio 89, etc.),
-                      providing web solutions that ranged from front-end design to full-stack
-                      implementations. This experience paved the way to my internship at Artarray.
-                    </p>
+                    <ul>
+                      <li>Owned end-to-end web application development for multiple freelance clients, driving requirements gathering, system design, implementation, deployment, and post-launch support for scalable, business-critical solutions.</li>
+                      <li>Developed dynamic, responsive front-end systems using React, Angular, JavaScript (ES6+), HTML5/CSS3, REST APIs, and state management, improving performance by 35% and delivering consistent cross-device experiences.</li>
+                      <li>Leveraged analytics integration and event tracking to analyze user behavior and conversion funnels, guiding feature enhancements that boosted engagement by 25%.</li>
+                    </ul>
                     <h4>Tech Stack</h4>
-                    <p>React, WordPress, Angular, Social Media Marketing</p>
+                    <p> React, Angular, JavaScript (ES6+), HTML5, CSS3, REST APIs, State Management, Web Analytics</p>
                   </div>
                 </div>
               </div>
@@ -182,15 +191,13 @@ const Timeline = () => {
                   <div className="timeline__content">
                     <h3>Webmaster</h3>
                     <h4>IEEE Bangalore Young Professionals (Intern) | Nov 2020 – Sep 2023</h4>
-                    <p>
-                      Developed and maintained the IEEE Bangalore Young Professionals website,
-                      including the flagship event site for the Young Professionals Global
-                      Summit 2020. Recognized at the summit in the presence of His Highness
-                      Yaduveer Wadiyar, Maharaja of Mysuru. Secured this internship by winning
-                      the YP Online Website Contest.
-                    </p>
+                    <ul>
+                      <li>Secured this competitive internship by winning the IEEE YP Online Website Contest, showcasing strong technical and web design capabilities.</li>
+                      <li>Developed and launched the official IEEE Bangalore Young Professionals website, creating a responsive and modern digital hub for organizational engagement.</li>
+                      <li>Engineered the flagship event platform for the Young Professionals Global Summit 2020, delivering a high-performance web experience for global attendees.</li>
+                    </ul>
                     <h4>Tech Stack</h4>
-                    <p>HTML, CSS, JavaScript</p>
+                    <p>HTML, CSS, JavaScript, Web Design, Responsive UI, Web Performance Optimization</p>
                   </div>
                 </div>
               </div>
@@ -422,6 +429,16 @@ const Timeline = () => {
             order: 2;
           }
         }
+          .timeline__content ul {
+  list-style-type: disc; /* Ensures the bullet points appear */
+  padding-left: 20px;    /* Gives the bullets room to breathe */
+  margin: 10px 0;        /* Adds space above and below the list */
+}
+
+.timeline__content li {
+  margin-bottom: 10px;   /* Adds spacing between each individual pointer */
+  line-height: 1.5;      /* Makes the text easier to read */
+}
       `}</style>
     </div>
   );
