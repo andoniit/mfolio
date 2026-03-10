@@ -50,7 +50,7 @@ export default function Contact() {
         </div>
         
           <motion.a
-            href="https://drive.google.com/file/d/1a8gZyTcUayzOBsS9JNhxbYUyF5Ih21BK/view?usp=sharing"
+            href="https://drive.google.com/file/d/1ZcqjNJy4wuhlX9StV6VnDAXn-8b0lmdF/view?usp=sharing"
             target="_blank"
             className={styles.resumeButton}
           >

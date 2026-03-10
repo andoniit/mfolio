@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --webpack",
+    "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "next lint"
@@ -13,7 +13,7 @@
     "@tabler/icons-react": "^3.31.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.6.3",
-    "gsap": "^3.12.7",
+    "gsap": "^3.14.2",
     "motion": "^12.6.3",
     "motion-plus": "^0.1.6",
     "next": "^16.1.1",
