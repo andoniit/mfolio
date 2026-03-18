@@ -2,7 +2,7 @@
 
 import { useRef, useEffect } from 'react';
 import styles from './InteractiveSection.module.css';
-import Framer from "@/components/Framer";
+import Framer from "@/components/shared/Framer";
 
 
 export default function InteractiveSection() {

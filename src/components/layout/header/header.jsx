@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import styles from "./Header.module.scss";
-import Framer from "@/components/Framer";
+import Framer from "@/components/shared/Framer";
 
 
 

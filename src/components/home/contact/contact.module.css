@@ -5,7 +5,7 @@
   justify-content: center;
   position: relative;
   background-color: white; /* Fallback background color */
-  background-image: url('../../../public/images/14.JPG');
+  background-image: url('/images/14.JPG');
   background-size: cover;
   background-position:top;
   border-radius: 30px;

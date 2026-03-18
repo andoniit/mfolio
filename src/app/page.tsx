@@ -2,16 +2,16 @@
 
 
 import { useEffect, useState } from 'react'
-import Hero from './hero';
-import InteractiveSection from './InteractiveSection';
-import  Timeline  from "@/components/Timeline";
-import Contact from "@/components/contact/Contact"
-import Scattertext from "@/components/Scattertext"
-import Preloader from "@/components/Preloader"
+import Hero from '../components/home/hero';
+import InteractiveSection from '../components/home/InteractiveSection';
+import  Timeline  from "@/components/home/Timeline";
+import Contact from "@/components/home/contact/Contact"
+import Scattertext from "@/components/home/Scattertext"
+import Preloader from "@/components/home/Preloader"
 import { AnimatePresence } from 'framer-motion';
-import Projects from "@/components/Projects/Project"
-import Slideshow from "@/components/SliderSection"
-import Header from "@/components/header/header"
+import Projects from "@/components/home/Projects/Project"
+import Slideshow from "@/components/home/SliderSection"
+import Header from "@/components/layout/header/header"
 import { motion, useScroll } from "motion/react"
   
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import Framer from "@/components/Framer";
+import Framer from "@/components/shared/Framer";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 

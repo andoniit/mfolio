@@ -3,7 +3,7 @@ import styles from './combined.module.scss'
 import { useState } from 'react';
 import Project from '../Projects/components/project';
 import Modal from '../Projects/components/modal';
-import Framer from "@/components/Framer"
+import Framer from "@/components/shared/Framer"
 
 
 
@@ -54,7 +54,7 @@ const projects = [
   }
 ]
 
-export default function Home() {
+export default function Projects() {
 
   const [modal, setModal] = useState({active: false, index: 0})
 

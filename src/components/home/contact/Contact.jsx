@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { disperse } from "./anim"; // Ensure you have defined your Framer Motion variants in anim.js
 import gsap from "gsap";
 import styles from "./contact.module.css";
-import Framer from "@/components/Framer"
+import Framer from "@/components/shared/Framer"
 
 
 
