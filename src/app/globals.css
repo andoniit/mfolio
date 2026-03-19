@@ -47,3 +47,35 @@ body {
     padding-left: 0.5em;
   }
 }
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #9ca3af;
+  pointer-events: none;
+  height: 0;
+}
+
+.ProseMirror:focus {
+  outline: none;
+}
+
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+}
+
+.ProseMirror blockquote {
+  border-left: 3px solid #d4d4d8;
+  padding-left: 1rem;
+  color: #52525b;
+}
+
+.ProseMirror pre {
+  background: #111827;
+  color: white;
+  padding: 1rem;
+  border-radius: 12px;
+  overflow-x: auto;
+}

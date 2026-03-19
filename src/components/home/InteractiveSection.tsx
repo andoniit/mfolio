@@ -112,6 +112,7 @@ I’ve also worked as a software engineer, collaborated with friends to build ro
 
 Oh—and one more thing: I can Procreate (yes, the iPad app—designing, illustrating, and occasionally doodling nonsense that turns out kinda cool).
 </p>
+
         </div>
       </div>
     </div>
