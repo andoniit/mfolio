@@ -14,7 +14,7 @@ const shadows = Shadows_Into_Light({
 });
 
 export const metadata = {
-  title: 'Anirudha Kapileshwari',
+  title: 'Anirudha Kapileshwari - Software Engineer',
   description: 'Potefolio website of me ',
 };
 

@@ -125,7 +125,7 @@ useEffect(() => {
         <motion.div variants={itemVariants} style={{ scale: scaleSection4 }} className={`${styles.el} ${styles.section4}`}>
           <div className={styles.imageContainer}>
             <div className={styles.textContent}>
-              I am from <span className={styles.highlight}>Seattle</span>
+              I am from <span className={styles.highlight}>Seattle, WA</span>
               <br />
               {seattleTime}
             </div>
