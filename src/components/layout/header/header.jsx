@@ -60,7 +60,7 @@ export default function Header() {
       //animate={preloaderFinished ? "visible" : "hidden"}
     >
       <div className={styles.container}>
-        <Framer>
+        
           <motion.div
             className={
               isScrolled
@@ -72,7 +72,7 @@ export default function Header() {
             <h1>Andon</h1>
             <p>Anirudha Kapileshwari</p>
           </motion.div>
-        </Framer>
+        
         <motion.nav className={styles.nav} variants={navVariants}>
         
         <Framer>

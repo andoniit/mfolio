@@ -5,18 +5,37 @@ import slugify from "slugify";
 import BlogEditor from "@/components/blog/BlogEditor";
 import ImageUpload from "@/components/admin/ImageUpload";
 
+type Category = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
+type Tag = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
 type BlogFormProps = {
   initialData?: any;
   postId?: string;
+  categories?: Category[];
+  tags?: Tag[];
+  selectedTagIds?: string[];
 };
 
-export default function BlogForm({ initialData, postId }: BlogFormProps) {
+export default function BlogForm({
+  initialData,
+  postId,
+  categories = [],
+  tags = [],
+  selectedTagIds = [],
+}: BlogFormProps) {
   const [title, setTitle] = useState(initialData?.title || "");
   const [slug, setSlug] = useState(initialData?.slug || "");
   const [excerpt, setExcerpt] = useState(initialData?.excerpt || "");
-  const [coverImageUrl, setCoverImageUrl] = useState(
-    initialData?.cover_image_url || ""
-  );
+  const [coverImageUrl, setCoverImageUrl] = useState(initialData?.cover_image_url || "");
   const [published, setPublished] = useState(initialData?.published || false);
   const [publishedAt, setPublishedAt] = useState(
     initialData?.published_at
@@ -25,14 +44,21 @@ export default function BlogForm({ initialData, postId }: BlogFormProps) {
   );
   const [contentJson, setContentJson] = useState(initialData?.content_json || null);
   const [contentHtml, setContentHtml] = useState(initialData?.content_html || "");
+  const [categoryId, setCategoryId] = useState(initialData?.category_id || "");
+  const [tagIds, setTagIds] = useState<string[]>(selectedTagIds);
   const [saving, setSaving] = useState(false);
 
   const handleTitleChange = (value: string) => {
     setTitle(value);
-
     if (!initialData?.slug && !postId) {
       setSlug(slugify(value, { lower: true, strict: true }));
     }
+  };
+
+  const toggleTag = (tagId: string) => {
+    setTagIds((prev) =>
+      prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,6 +74,8 @@ export default function BlogForm({ initialData, postId }: BlogFormProps) {
       content_html: contentHtml,
       published,
       published_at: published ? new Date(publishedAt).toISOString() : null,
+      category_id: categoryId || null,
+      tag_ids: tagIds,
     };
 
     const isEditing = Boolean(postId);
@@ -99,6 +127,38 @@ export default function BlogForm({ initialData, postId }: BlogFormProps) {
       />
 
       <div>
+        <label className="block mb-2 font-medium">Category</label>
+        <select
+          value={categoryId}
+          onChange={(e) => setCategoryId(e.target.value)}
+          className="w-full border rounded-lg p-3"
+        >
+          <option value="">Select a category</option>
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <p className="mb-2 font-medium">Tags</p>
+        <div className="flex flex-wrap gap-3">
+          {tags.map((tag) => (
+            <label key={tag.id} className="flex items-center gap-2 border rounded-full px-3 py-2">
+              <input
+                type="checkbox"
+                checked={tagIds.includes(tag.id)}
+                onChange={() => toggleTag(tag.id)}
+              />
+              <span>{tag.name}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div>
         <p className="mb-2 font-medium">Cover image</p>
         <ImageUpload onUploaded={setCoverImageUrl} />
         {coverImageUrl && (
@@ -141,40 +201,41 @@ export default function BlogForm({ initialData, postId }: BlogFormProps) {
         />
       </div>
 
-      <button
-        type="submit"
-        disabled={saving}
-        className="px-5 py-3 rounded-lg bg-black text-white"
-      >
-        {saving ? "Saving..." : postId ? "Update Post" : "Create Post"}
-      </button>
-      {postId && (
-  <button
-    type="button"
-    onClick={async () => {
-      const ok = confirm("Move this post to trash?");
-      if (!ok) return;
+      <div className="flex gap-3">
+        <button
+          type="submit"
+          disabled={saving}
+          className="px-5 py-3 rounded-lg bg-black text-white"
+        >
+          {saving ? "Saving..." : postId ? "Update Post" : "Create Post"}
+        </button>
 
-      const res = await fetch(`/api/posts/${postId}`, {
-        method: "DELETE",
-      });
+        {postId && (
+          <button
+            type="button"
+            onClick={async () => {
+              const ok = confirm("Move this post to trash?");
+              if (!ok) return;
 
-      const result = await res.json().catch(() => null);
+              const res = await fetch(`/api/posts/${postId}`, {
+                method: "DELETE",
+              });
 
-      if (!res.ok) {
-        alert(result?.error || "Failed to delete post");
-        return;
-      }
+              const result = await res.json().catch(() => null);
 
-      if (result?.action === "trashed") {
-        window.location.href = "/admin/blogs";
-      }
-    }}
-    className="px-5 py-3 rounded-lg border border-red-400 text-red-600"
-  >
-    Move to Trash
-  </button>
-)}
+              if (!res.ok) {
+                alert(result?.error || "Failed to move post to trash");
+                return;
+              }
+
+              window.location.href = "/admin/blogs";
+            }}
+            className="px-5 py-3 rounded-lg border border-red-400 text-red-600"
+          >
+            Move to Trash
+          </button>
+        )}
+      </div>
     </form>
   );
 }

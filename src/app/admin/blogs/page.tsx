@@ -26,26 +26,19 @@ export default async function AdminBlogsPage() {
         <h1 className="text-3xl font-bold">Manage Blogs</h1>
 
         <div className="flex gap-3">
-          <Link
-            href="/admin/blogs/trash"
-            className="relative px-4 py-2 rounded-lg border"
-          >
-            Trash
-
-            {(trashCount ?? 0) > 0 && (
-              <span className="absolute -top-2 -right-2 min-w-[22px] h-[22px] px-1 rounded-full bg-red-600 text-white text-xs flex items-center justify-center">
-                {trashCount}
-              </span>
-            )}
-          </Link>
-
-          <Link
-            href="/admin/blogs/new"
-            className="px-4 py-2 rounded-lg bg-black text-white"
-          >
-            New Post
-          </Link>
-        </div>
+  <Link href="/admin/categories" className="px-4 py-2 rounded-lg border">
+    Categories
+  </Link>
+  <Link href="/admin/tags" className="px-4 py-2 rounded-lg border">
+    Tags
+  </Link>
+  <Link href="/admin/blogs/trash" className="px-4 py-2 rounded-lg border">
+    Trash
+  </Link>
+  <Link href="/admin/blogs/new" className="px-4 py-2 rounded-lg bg-black text-white">
+    New Post
+  </Link>
+</div>
       </div>
 
       <div className="space-y-4">

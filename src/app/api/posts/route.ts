@@ -4,7 +4,13 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 export async function GET() {
   const { data, error } = await supabaseAdmin
     .from("posts")
-    .select("*")
+    .select(`
+      *,
+      categories ( id, name, slug ),
+      post_tags (
+        tags ( id, name, slug )
+      )
+    `)
     .eq("published", true)
     .is("trashed_at", null)
     .order("published_at", { ascending: false });
@@ -18,10 +24,11 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const body = await req.json();
+  const { tag_ids = [], ...postData } = body;
 
-  const { data, error } = await supabaseAdmin
+  const { data: post, error } = await supabaseAdmin
     .from("posts")
-    .insert([body])
+    .insert([postData])
     .select()
     .single();
 
@@ -29,5 +36,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 
-  return NextResponse.json(data);
+  if (tag_ids.length > 0) {
+    const rows = tag_ids.map((tagId: string) => ({
+      post_id: post.id,
+      tag_id: tagId,
+    }));
+
+    const { error: tagsError } = await supabaseAdmin.from("post_tags").insert(rows);
+
+    if (tagsError) {
+      return NextResponse.json({ error: tagsError.message }, { status: 400 });
+    }
+  }
+
+  return NextResponse.json(post);
 }
