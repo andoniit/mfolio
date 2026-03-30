@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import styles from "./Header.module.scss";
 import Framer from "@/components/shared/Framer";
+import { supabase } from "@/lib/supabase";
 
 
 
@@ -34,6 +36,7 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   // Delay header animation until preloader is finished
   const [preloaderFinished, setPreloaderFinished] = useState(false);
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -50,6 +53,31 @@ export default function Header() {
       setPreloaderFinished(true);
     }, 3000);
     return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const init = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (mounted) setIsAdminLoggedIn(!!data.session);
+    };
+
+    init();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (!mounted) return;
+        setIsAdminLoggedIn(!!session);
+      }
+    );
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   return (
@@ -125,6 +153,14 @@ export default function Header() {
             View My Resume
           </motion.a>
         </Framer>
+
+        {isAdminLoggedIn && (
+          <Framer>
+            <Link href="/admin/blogs" className={styles.dashboardButton}>
+              Dashboard
+            </Link>
+          </Framer>
+        )}
 
         </motion.nav>
       </div>

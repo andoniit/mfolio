@@ -83,6 +83,20 @@
         color: white;
       }
     }
+
+    &.dashboardButton {
+      background-color: #111;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 9999px;
+      transition: all 0.3s ease;
+      font-size: 0.9em;
+      align-items: center;
+      &:hover {
+        background-color: #000;
+        color: white;
+      }
+    }
   }
 }
 
@@ -127,6 +141,10 @@
       margin-top: 0.5em;
 
       &.resumeButton {
+        display: none;
+      }
+
+      &.dashboardButton {
         display: none;
       }
     }

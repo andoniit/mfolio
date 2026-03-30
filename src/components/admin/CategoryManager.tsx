@@ -5,6 +5,7 @@ import { useState } from "react";
 export default function CategoryManager({ categories }: { categories: any[] }) {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleAdd = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -69,12 +70,57 @@ export default function CategoryManager({ categories }: { categories: any[] }) {
                   <span className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 text-sm">
                     📁
                   </span>
-                  <span className="font-medium text-gray-900">{category.name}</span>
+                  <div className="flex flex-col">
+                    <span className="font-medium text-gray-900">
+                      {category.name}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {category.postCount ? `${category.postCount} posts` : "0 posts"}
+                    </span>
+                  </div>
                 </div>
-                {/* Future-proofing: Space for edit/delete buttons if you add them later */}
-                <span className="text-sm text-gray-400 font-mono bg-gray-100 px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
-                  /{category.slug}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-gray-400 font-mono bg-gray-100 px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
+                    /{category.slug}
+                  </span>
+
+                  {category.postCount === 0 && (
+                    <button
+                      type="button"
+                      disabled={deletingId === category.id}
+                      onClick={async () => {
+                        const ok = confirm(
+                          `Delete category "${category.name}"? This cannot be undone.`
+                        );
+                        if (!ok) return;
+
+                        setDeletingId(category.id);
+                        try {
+                          const res = await fetch(`/api/categories/${category.id}`, {
+                            method: "DELETE",
+                          });
+
+                          const result = await res.json().catch(() => null);
+
+                          if (!res.ok) {
+                            alert(result?.error || "Failed to delete category");
+                            return;
+                          }
+
+                          window.location.reload();
+                        } catch (error) {
+                          console.error(error);
+                          alert("Something went wrong while deleting the category.");
+                        } finally {
+                          setDeletingId(null);
+                        }
+                      }}
+                      className="px-3 py-2 rounded-xl bg-white border border-red-200 text-red-600 font-medium hover:bg-red-50 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                    >
+                      {deletingId === category.id ? "Deleting..." : "Delete"}
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>

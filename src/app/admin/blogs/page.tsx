@@ -14,8 +14,11 @@ const formatDate = (dateString: string) => {
 };
 
 export default async function AdminBlogsPage() {
-  const [{ data: posts, error: postsError }, { count: trashCount, error: trashError }] =
-    await Promise.all([
+  const [
+    { data: posts, error: postsError },
+    { count: trashCount, error: trashError },
+    { count: categoriesCount, error: categoriesCountError },
+  ] = await Promise.all([
       supabaseAdmin
         .from("posts")
         .select("*")
@@ -26,9 +29,11 @@ export default async function AdminBlogsPage() {
         .from("posts")
         .select("*", { count: "exact", head: true })
         .not("trashed_at", "is", null),
+
+      supabaseAdmin.from("categories").select("*", { count: "exact", head: true }),
     ]);
 
-  if (postsError || trashError) {
+  if (postsError || trashError || categoriesCountError) {
     return (
       <div className="max-w-5xl mx-auto px-6 py-16 text-red-500 font-medium">
         Failed to load posts. Please try again.
@@ -51,7 +56,7 @@ export default async function AdminBlogsPage() {
             href="/admin/categories" 
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all"
           >
-            Categories
+            Categories {categoriesCount ? `(${categoriesCount})` : ""}
           </Link>
           <Link 
             href="/admin/tags" 
