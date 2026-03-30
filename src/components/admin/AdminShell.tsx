@@ -1,21 +1,72 @@
-"use client";
-
-import { usePathname } from "next/navigation";
-import { useMemo, useState } from "react";
+ "use client";
+ 
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/lib/supabase";
 import AdminNav from "@/components/admin/AdminNav";
-
+ 
 export default function AdminShell({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
-
+  const [checkingAuth, setCheckingAuth] = useState(true);
+ 
   const isLogin = useMemo(() => pathname === "/admin/login", [pathname]);
-
-  if (isLogin) return <>{children}</>;
-
+ 
+  useEffect(() => {
+    if (isLogin) {
+      setCheckingAuth(false);
+      return;
+    }
+ 
+    let mounted = true;
+ 
+    const verify = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!mounted) return;
+ 
+      if (!data.session) {
+        router.replace("/admin/login");
+      } else {
+        setCheckingAuth(false);
+      }
+    };
+ 
+    verify();
+ 
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
+      if (!session) {
+        router.replace("/admin/login");
+      } else {
+        setCheckingAuth(false);
+      }
+    });
+ 
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [isLogin, router]);
+ 
+  if (isLogin) {
+    return <>{children}</>;
+  }
+ 
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-sm text-gray-500">Checking admin access…</div>
+      </div>
+    );
+  }
+ 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="flex">
@@ -41,7 +92,7 @@ export default function AdminShell({
                   {collapsed ? "A" : "Admin"}
                 </span>
               </div>
-
+ 
               <button
                 type="button"
                 onClick={() => setCollapsed((v) => !v)}
@@ -66,11 +117,11 @@ export default function AdminShell({
                 </svg>
               </button>
             </div>
-
+ 
             <AdminNav collapsed={collapsed} />
           </div>
         </aside>
-
+ 
         <section className="flex-1 min-w-0">{children}</section>
       </div>
     </div>

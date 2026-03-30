@@ -115,8 +115,16 @@ export default function AdminNav({ collapsed = false }: Props) {
     if (!ok) return;
 
     try {
-      await supabase.auth.signOut();
-      router.push("/admin/login");
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        alert(error.message || "Logout failed. Please try again.");
+        return;
+      }
+
+      // Optimistically update local state so UI reacts immediately.
+      setIsAdminLoggedIn(false);
+
+      router.replace("/admin/login");
       router.refresh();
     } catch (error) {
       console.error(error);
