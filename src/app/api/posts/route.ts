@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { revalidateBlogCaches } from "@/lib/revalidate-blog";
 
 export async function GET() {
   const { data, error } = await supabaseAdmin
@@ -49,5 +50,6 @@ export async function POST(req: Request) {
     }
   }
 
+  revalidateBlogCaches(post?.slug);
   return NextResponse.json(post);
 }

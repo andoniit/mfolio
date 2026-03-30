@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import BlogForm from "@/components/blog/BlogForm";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
@@ -17,6 +17,10 @@ export default async function EditBlogPage({ params }: Props) {
 
   if (error || !post) {
     notFound();
+  }
+
+  if (post.trashed_at) {
+    redirect("/admin/blogs/trash");
   }
 
   return (

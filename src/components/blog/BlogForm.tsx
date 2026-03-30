@@ -161,7 +161,7 @@ export default function BlogForm({
         return;
       }
 
-      window.location.href = "/admin/blogs";
+      window.location.href = "/admin/blogs/trash";
     } catch (error) {
       console.error(error);
       alert("Something went wrong while moving the post to trash.");

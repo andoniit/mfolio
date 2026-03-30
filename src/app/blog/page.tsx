@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import Header from "@/components/layout/header/header";
-import "./blog.scss"; 
+import "./blog.scss";
+
+export const dynamic = "force-dynamic";
 
 type Props = {
   searchParams: Promise<{

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { revalidateBlogCaches } from "@/lib/revalidate-blog";
 
 export async function PUT(
   req: Request,
@@ -7,7 +8,29 @@ export async function PUT(
 ) {
   const body = await req.json();
   const { id } = await params;
-  const { tag_ids = [], ...postData } = body;
+  const {
+    tag_ids = [],
+    trashed_at: _ignoredTrash,
+    id: _ignoredBodyId,
+    ...postData
+  } = body;
+
+  const { data: existing, error: existingError } = await supabaseAdmin
+    .from("posts")
+    .select("trashed_at")
+    .eq("id", id)
+    .single();
+
+  if (existingError || !existing) {
+    return NextResponse.json({ error: "Post not found" }, { status: 404 });
+  }
+
+  if (existing.trashed_at) {
+    return NextResponse.json(
+      { error: "Post is in trash. Restore it from Trash before editing." },
+      { status: 400 }
+    );
+  }
 
   const { data, error } = await supabaseAdmin
     .from("posts")
@@ -44,6 +67,8 @@ export async function PUT(
     }
   }
 
+  revalidateBlogCaches(data?.slug);
+
   return NextResponse.json(data);
 }
 
@@ -55,7 +80,7 @@ export async function DELETE(
 
   const { data: post, error: fetchError } = await supabaseAdmin
     .from("posts")
-    .select("id, trashed_at")
+    .select("id, trashed_at, slug")
     .eq("id", id)
     .single();
 
@@ -73,6 +98,7 @@ export async function DELETE(
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
+    revalidateBlogCaches(post.slug);
     return NextResponse.json({ success: true, action: "trashed" });
   }
 
@@ -85,5 +111,6 @@ export async function DELETE(
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 
+  revalidateBlogCaches(post.slug);
   return NextResponse.json({ success: true, action: "deleted_permanently" });
 }

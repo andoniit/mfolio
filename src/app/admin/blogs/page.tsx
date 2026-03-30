@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import BlogListTrashButton from "@/components/admin/BlogListTrashButton";
+
+export const dynamic = "force-dynamic";
 
 // Helper function to format the date nicely
 const formatDate = (dateString: string) => {
@@ -91,7 +94,7 @@ export default async function AdminBlogsPage() {
                 </div>
 
                 {/* Status & Actions */}
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 sm:gap-4 flex-wrap justify-end">
                   {/* Status Badge */}
                   <span
                     className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${
@@ -110,6 +113,11 @@ export default async function AdminBlogsPage() {
                   >
                     Edit
                   </Link>
+
+                  <BlogListTrashButton
+                    postId={post.id}
+                    title={post.title || "Untitled Post"}
+                  />
                 </div>
               </div>
             ))}

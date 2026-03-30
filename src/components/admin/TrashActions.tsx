@@ -35,11 +35,11 @@ export default function TrashActions({ postId }: { postId: string }) {
   };
 
   return (
-    <div className="flex gap-3">
+    <div className="flex flex-wrap gap-2 sm:gap-3 shrink-0">
       <button
         type="button"
         onClick={handleRestore}
-        className="px-4 py-2 rounded-lg border"
+        className="px-4 py-2 text-sm font-medium text-gray-800 bg-white border border-gray-200 rounded-lg hover:bg-gray-50"
       >
         Restore
       </button>
@@ -47,9 +47,9 @@ export default function TrashActions({ postId }: { postId: string }) {
       <button
         type="button"
         onClick={handlePermanentDelete}
-        className="px-4 py-2 rounded-lg bg-red-600 text-white"
+        className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
       >
-        Delete Permanently
+        Delete permanently
       </button>
     </div>
   );
