@@ -1,6 +1,7 @@
-import Link from "next/link";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import Header from "@/components/layout/header/header";
+import BlogPostGrid from "@/components/blog/BlogPostGrid";
+import BlogListingFilters from "@/components/blog/BlogListingFilters";
 import "./blog.scss";
 
 export const dynamic = "force-dynamic";
@@ -70,92 +71,14 @@ export default async function BlogPage({ searchParams }: Props) {
         <div className="blog-content-max">
           <h1 className="blog-page-title">Blog</h1>
 
-          {/* Category Filters */}
-          <div className="filter-group">
-            <Link href="/blog" className={`filter-btn ${!categorySlug && !tagSlug ? "active" : ""}`}>
-              All
-            </Link>
-            {categories?.map((category) => (
-              <Link
-                key={category.id}
-                href={`/blog?category=${category.slug}`}
-                className={`filter-btn ${categorySlug === category.slug ? "active" : ""}`}
-              >
-                {category.name}
-              </Link>
-            ))}
-          </div>
+          <BlogListingFilters
+            categories={categories}
+            tags={tags}
+            activeCategorySlug={categorySlug}
+            activeTagSlug={tagSlug}
+          />
 
-          {/* Tag Filters */}
-          <div className="filter-group tag-filters">
-            {tags?.map((tag) => (
-              <Link
-                key={tag.id}
-                href={`/blog?tag=${tag.slug}`}
-                className={`filter-btn small ${tagSlug === tag.slug ? "active" : ""}`}
-              >
-                #{tag.name}
-              </Link>
-            ))}
-          </div>
-
-          {/* Blog Grid */}
-          {filteredPosts.length === 0 ? (
-            <div className="empty-state">No blog posts found.</div>
-          ) : (
-            <div className="blog-grid">
-              {filteredPosts.map((post: any) => (
-                <Link key={post.id} href={`/blog/${post.slug}`} className="blog-card">
-                  
-                  {/* Image & Cutout Wrapper */}
-                  <div className="card-image-wrapper">
-                    <div className="image-inner">
-                      {post.cover_image_url ? (
-                        <img src={post.cover_image_url} alt={post.title} className="card-image" />
-                      ) : (
-                        <div className="card-image-placeholder" />
-                      )}
-                    </div>
-                    
-                    {post.categories?.name && (
-                      <div className="category-badge-container">
-                        <div className="category-cutout-badge">
-                          {post.categories.name}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Card Content Area (Text & Tags) */}
-                  <div className="card-content">
-                    <h2 className="card-title">{post.title}</h2>
-                    {post.excerpt && <p className="card-excerpt">{post.excerpt}</p>}
-                    
-                    {/* flex and margin-top: auto pushes these perfectly to the bottom */}
-                    <p className="card-date">
-                      {post.published_at
-                        ? new Date(post.published_at).toLocaleDateString("en-US", {
-                            month: "long", day: "numeric", year: "numeric",
-                          })
-                        : "Draft"}
-                    </p>
-
-                    {post.post_tags?.length > 0 && (
-                      <div className="card-tags">
-                        {post.post_tags.map((item: any) =>
-                          item.tags ? (
-                            <span key={item.tags.id} className="tag">
-                              {item.tags.name}
-                            </span>
-                          ) : null
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
+          <BlogPostGrid posts={filteredPosts} />
         </div>
       </main>
     </div>

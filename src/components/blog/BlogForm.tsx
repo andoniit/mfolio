@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import slugify from "slugify";
 import BlogEditor from "@/components/blog/BlogEditor";
 import ImageUpload from "@/components/admin/ImageUpload";
@@ -52,9 +52,16 @@ export default function BlogForm({
   );
   const [categoryId, setCategoryId] = useState(initialData?.category_id || "");
   const [tagIds, setTagIds] = useState<string[]>(selectedTagIds);
+  const [availableTags, setAvailableTags] = useState<Tag[]>(tags);
+  const [newTagName, setNewTagName] = useState("");
+  const [creatingTag, setCreatingTag] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const isEditing = Boolean(postId);
+
+  useEffect(() => {
+    setAvailableTags(tags);
+  }, [tags]);
 
   const selectedCategoryName = useMemo(() => {
     return categories.find((category) => category.id === categoryId)?.name || "";
@@ -74,6 +81,52 @@ export default function BlogForm({
         ? prev.filter((id) => id !== tagId)
         : [...prev, tagId]
     );
+  };
+
+  const handleCreateTag = async () => {
+    const name = newTagName.trim();
+    if (!name) return;
+
+    setCreatingTag(true);
+    try {
+      const res = await fetch("/api/tags", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name }),
+      });
+
+      const result = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        alert(result?.error || "Failed to create tag");
+        return;
+      }
+
+      const createdTag = result as Tag | null;
+      if (!createdTag?.id) {
+        alert("Tag created, but response was unexpected.");
+        return;
+      }
+
+      setAvailableTags((prev) => {
+        if (prev.some((t) => t.id === createdTag.id)) return prev;
+        return [...prev, createdTag];
+      });
+
+      setTagIds((prev) => {
+        if (prev.includes(createdTag.id)) return prev;
+        return [...prev, createdTag.id];
+      });
+
+      setNewTagName("");
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong while creating the tag.");
+    } finally {
+      setCreatingTag(false);
+    }
   };
 
   const clearCoverImage = () => {
@@ -294,7 +347,7 @@ export default function BlogForm({
             </label>
 
             <div className="flex flex-wrap gap-2">
-              {tags.map((tag) => {
+              {availableTags.map((tag) => {
                 const isSelected = tagIds.includes(tag.id);
 
                 return (
@@ -313,11 +366,40 @@ export default function BlogForm({
                 );
               })}
 
-              {tags.length === 0 && (
+              {availableTags.length === 0 && (
                 <span className="text-sm text-gray-400 italic">
                   No tags created yet.
                 </span>
               )}
+            </div>
+
+            <div className="mt-4 space-y-2">
+              <label className="block text-xs font-semibold text-gray-700">
+                Add a tag
+              </label>
+              <div className="flex gap-3">
+                <div className="relative flex-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">
+                    #
+                  </span>
+                  <input
+                    value={newTagName}
+                    onChange={(e) => setNewTagName(e.target.value)}
+                    placeholder="e.g. react, marketing..."
+                    className="w-full bg-gray-50 text-gray-900 pl-8 pr-3 py-2 rounded-xl border border-gray-200 outline-none focus:bg-white focus:border-black focus:ring-1 focus:ring-black transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                    disabled={creatingTag}
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleCreateTag}
+                  disabled={creatingTag || !newTagName.trim()}
+                  className="px-4 py-2 rounded-xl bg-black text-white font-medium hover:bg-gray-800 transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {creatingTag ? "Adding..." : "Add Tag"}
+                </button>
+              </div>
             </div>
 
             {tagIds.length > 0 && (

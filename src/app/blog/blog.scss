@@ -41,6 +41,22 @@
   }
 }
 
+.category-tag-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s ease;
+  margin-bottom: 1.5rem;
+
+  &:hover {
+    color: var(--text-main);
+  }
+}
+
 /* --- Filters --- */
 .filter-group {
   display: flex;

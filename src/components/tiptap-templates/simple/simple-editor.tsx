@@ -60,8 +60,6 @@ import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
 import { useWindowSize } from "@/hooks/use-window-size";
 import { useCursorVisibility } from "@/hooks/use-cursor-visibility";
 
-import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle";
-
 import { MAX_FILE_SIZE } from "@/lib/tiptap-utils";
 
 import "@/components/tiptap-templates/simple/simple-editor.scss";
@@ -135,12 +133,6 @@ const MainToolbarContent = ({
       </ToolbarGroup>
 
       <Spacer />
-
-      {isMobile && <ToolbarSeparator />}
-
-      <ToolbarGroup>
-        <ThemeToggle />
-      </ToolbarGroup>
     </>
   );
 };

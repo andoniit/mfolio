@@ -91,11 +91,19 @@ export default async function BlogPostPage({ params }: Props) {
 
           {/* Post Header */}
           <div className="mb-6 flex flex-wrap items-center gap-3">
-            {post.categories?.name && (
-              <span className="text-[12px] font-bold tracking-widest uppercase text-[#86868b]">
-                {post.categories.name}
-              </span>
-            )}
+            {post.categories?.name &&
+              (post.categories.slug ? (
+                <Link
+                  href={`/category/${post.categories.slug}`}
+                  className="text-[12px] font-bold tracking-widest uppercase text-[#86868b] hover:text-[#1d1d1f] transition-colors"
+                >
+                  {post.categories.name}
+                </Link>
+              ) : (
+                <span className="text-[12px] font-bold tracking-widest uppercase text-[#86868b]">
+                  {post.categories.name}
+                </span>
+              ))}
 
             {post.published_at && (
               <>
@@ -138,7 +146,7 @@ export default async function BlogPostPage({ params }: Props) {
               {post.post_tags.map((item: any) =>
                 item.tags ? (
                   <Link
-                    href={`/blog?tag=${item.tags.slug}`}
+                    href={`/tag/${item.tags.slug}`}
                     key={item.tags.id}
                     className="text-[12px] font-semibold px-4 py-1.5 rounded-full bg-white border border-gray-200 text-[#6e6e73] hover:text-black hover:border-black transition-colors"
                   >

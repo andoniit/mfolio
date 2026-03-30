@@ -1,6 +1,10 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import Header from "@/components/layout/header/header";
+import BlogPostGrid from "@/components/blog/BlogPostGrid";
+import BlogListingFilters from "@/components/blog/BlogListingFilters";
+import "@/app/blog/blog.scss";
 
 export const dynamic = "force-dynamic";
 
@@ -11,11 +15,11 @@ type Props = {
 export default async function TagPage({ params }: Props) {
   const { slug } = await params;
 
-  const { data: tag } = await supabaseAdmin
-    .from("tags")
-    .select("*")
-    .eq("slug", slug)
-    .maybeSingle();
+  const [{ data: tag }, { data: categories }, { data: tags }] = await Promise.all([
+    supabaseAdmin.from("tags").select("*").eq("slug", slug).maybeSingle(),
+    supabaseAdmin.from("categories").select("*").order("name"),
+    supabaseAdmin.from("tags").select("*").order("name"),
+  ]);
 
   if (!tag) notFound();
 
@@ -28,11 +32,36 @@ export default async function TagPage({ params }: Props) {
 
   if (postIds.length === 0) {
     return (
-      <main className="max-w-6xl mx-auto px-6 py-16">
-        <p className="text-sm uppercase tracking-widest text-neutral-500 mb-3">Tag</p>
-        <h1 className="text-4xl font-bold mb-10">{tag.name}</h1>
-        <p>No posts found.</p>
-      </main>
+      <div className="blog-wrapper">
+        <Header />
+        <main className="blog-page-container">
+          <div className="blog-content-max">
+            <Link href="/blog" className="category-tag-back-link">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+              </svg>
+              Back to blogs
+            </Link>
+
+            <p className="text-sm uppercase tracking-widest text-[#86868b] mb-2">Tag</p>
+            <h1 className="blog-page-title">#{tag.name}</h1>
+
+            <BlogListingFilters
+              categories={categories}
+              tags={tags}
+              activeCategorySlug={null}
+              activeTagSlug={tag.slug}
+            />
+
+            <div className="empty-state">No blog posts found.</div>
+          </div>
+        </main>
+      </div>
     );
   }
 
@@ -51,19 +80,36 @@ export default async function TagPage({ params }: Props) {
     .order("published_at", { ascending: false });
 
   return (
-    <main className="max-w-6xl mx-auto px-6 py-16">
-      <p className="text-sm uppercase tracking-widest text-neutral-500 mb-3">Tag</p>
-      <h1 className="text-4xl font-bold mb-10">{tag.name}</h1>
-
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {posts?.map((post: any) => (
-          <Link key={post.id} href={`/blog/${post.slug}`} className="border rounded-2xl p-5 bg-white">
-            <h2 className="text-xl font-semibold mb-2">{post.title}</h2>
-            <p className="text-sm text-neutral-500">{post.excerpt}</p>
+    <div className="blog-wrapper">
+      <Header />
+      <main className="blog-page-container">
+        <div className="blog-content-max">
+          <Link href="/blog" className="category-tag-back-link">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+              />
+            </svg>
+            Back to blogs
           </Link>
-        ))}
-      </div>
-    </main>
+
+          <p className="text-sm uppercase tracking-widest text-[#86868b] mb-2">Tag</p>
+          <h1 className="blog-page-title">#{tag.name}</h1>
+
+          <BlogListingFilters
+            categories={categories}
+            tags={tags}
+            activeCategorySlug={null}
+            activeTagSlug={tag.slug}
+          />
+
+          <BlogPostGrid posts={posts || []} />
+        </div>
+      </main>
+    </div>
   );
 }
 
