@@ -115,7 +115,7 @@ export default function AdminNav({ collapsed = false }: Props) {
     if (!ok) return;
 
     try {
-      const { error } = await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut({ scope: "local" });
       if (error) {
         alert(error.message || "Logout failed. Please try again.");
         return;
@@ -126,6 +126,10 @@ export default function AdminNav({ collapsed = false }: Props) {
 
       router.replace("/admin/login");
       router.refresh();
+      // Fallback in case client router state is stale.
+      setTimeout(() => {
+        window.location.href = "/admin/login";
+      }, 50);
     } catch (error) {
       console.error(error);
       alert("Logout failed. Please try again.");
