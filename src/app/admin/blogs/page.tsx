@@ -1,6 +1,15 @@
 import Link from "next/link";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
+// Helper function to format the date nicely
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
 export default async function AdminBlogsPage() {
   const [{ data: posts, error: postsError }, { count: trashCount, error: trashError }] =
     await Promise.all([
@@ -17,54 +26,111 @@ export default async function AdminBlogsPage() {
     ]);
 
   if (postsError || trashError) {
-    return <div className="p-6">Failed to load posts.</div>;
+    return (
+      <div className="max-w-5xl mx-auto px-6 py-16 text-red-500 font-medium">
+        Failed to load posts. Please try again.
+      </div>
+    );
   }
 
   return (
-    <main className="max-w-5xl mx-auto px-6 py-16">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold">Manage Blogs</h1>
+    <main className="max-w-5xl mx-auto px-6 py-16 font-sans">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Manage Blogs</h1>
+          <p className="text-gray-500 mt-1 text-sm">Create, edit, and manage your blog posts.</p>
+        </div>
 
-        <div className="flex gap-3">
-  <Link href="/admin/categories" className="px-4 py-2 rounded-lg border">
-    Categories
-  </Link>
-  <Link href="/admin/tags" className="px-4 py-2 rounded-lg border">
-    Tags
-  </Link>
-  <Link href="/admin/blogs/trash" className="px-4 py-2 rounded-lg border">
-    Trash
-  </Link>
-  <Link href="/admin/blogs/new" className="px-4 py-2 rounded-lg bg-black text-white">
-    New Post
-  </Link>
-</div>
+        {/* Action Buttons */}
+        <div className="flex flex-wrap items-center gap-3">
+          <Link 
+            href="/admin/categories" 
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all"
+          >
+            Categories
+          </Link>
+          <Link 
+            href="/admin/tags" 
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all"
+          >
+            Tags
+          </Link>
+          <Link 
+            href="/admin/blogs/trash" 
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all"
+          >
+            Trash {trashCount ? `(${trashCount})` : ""}
+          </Link>
+          <Link 
+            href="/admin/blogs/new" 
+            className="px-5 py-2 text-sm font-medium text-white bg-black rounded-lg hover:bg-gray-800 transition-all shadow-sm"
+          >
+            + New Post
+          </Link>
+        </div>
       </div>
 
-      <div className="space-y-4">
+      {/* Posts List Section */}
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
         {posts?.length ? (
-          posts.map((post) => (
-            <div
-              key={post.id}
-              className="border rounded-xl p-4 flex items-center justify-between"
-            >
-              <div>
-                <h2 className="font-semibold">{post.title}</h2>
-                <p className="text-sm text-neutral-500">
-                  {post.published ? "Published" : "Draft"}
-                </p>
-              </div>
-
-              <Link
-                href={`/admin/blogs/${post.id}`}
-                className="text-sm underline"
+          <div className="divide-y divide-gray-100">
+            {posts.map((post) => (
+              <div
+                key={post.id}
+                className="group flex flex-col sm:flex-row sm:items-center justify-between p-5 hover:bg-gray-50 transition-colors"
               >
-                Edit
-              </Link>
-            </div>
-          ))
+                {/* Post Info */}
+                <div className="flex flex-col mb-3 sm:mb-0">
+                  <h2 className="text-base font-semibold text-gray-900 group-hover:text-black transition-colors truncate max-w-lg">
+                    {post.title || "Untitled Post"}
+                  </h2>
+                  <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
+                    <span>{formatDate(post.created_at)}</span>
+                  </div>
+                </div>
+
+                {/* Status & Actions */}
+                <div className="flex items-center gap-4">
+                  {/* Status Badge */}
+                  <span
+                    className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${
+                      post.published
+                        ? "bg-green-50 text-green-700 border-green-200"
+                        : "bg-gray-100 text-gray-600 border-gray-200"
+                    }`}
+                  >
+                    {post.published ? "Published" : "Draft"}
+                  </span>
+
+                  {/* Edit Button - Fades in on hover on larger screens */}
+                  <Link
+                    href={`/admin/blogs/${post.id}`}
+                    className="px-4 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-100 hover:text-black transition-all sm:opacity-0 sm:-translate-x-2 group-hover:opacity-100 group-hover:translate-x-0"
+                  >
+                    Edit
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
         ) : (
-          <p>No blog posts yet.</p>
+          /* Empty State */
+          <div className="flex flex-col items-center justify-center p-12 text-center">
+            <div className="w-16 h-16 mb-4 bg-gray-50 rounded-full flex items-center justify-center border border-gray-100">
+              <span className="text-2xl text-gray-400">📝</span>
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-1">No posts yet</h3>
+            <p className="text-gray-500 text-sm mb-6 max-w-sm">
+              You haven't created any blog posts yet. Click the button below to write your first one.
+            </p>
+            <Link
+              href="/admin/blogs/new"
+              className="px-5 py-2.5 text-sm font-medium text-white bg-black rounded-lg hover:bg-gray-800 transition-all shadow-sm"
+            >
+              Create your first post
+            </Link>
+          </div>
         )}
       </div>
     </main>

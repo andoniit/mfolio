@@ -1,42 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import Header from "@/components/layout/header/header";
+import "./blog-post.scss";
 
 type Props = {
   params: Promise<{ slug: string }>;
 };
 
-export async function generateMetadata({ params }: Props) {
-  const { slug } = await params;
-
-  const { data: post } = await supabaseAdmin
-    .from("posts")
-    .select("title, excerpt, cover_image_url, published, trashed_at")
-    .eq("slug", slug)
-    .eq("published", true)
-    .is("trashed_at", null)
-    .maybeSingle();
-
-  if (!post) {
-    return {
-      title: "Post Not Found",
-    };
-  }
-
-  return {
-    title: post.title,
-    description: post.excerpt || "Read this blog post.",
-    openGraph: {
-      title: post.title,
-      description: post.excerpt || "Read this blog post.",
-      images: post.cover_image_url ? [post.cover_image_url] : [],
-    },
-  };
-}
-
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
 
+  // 1. Fetch current post
   const { data: post, error } = await supabaseAdmin
     .from("posts")
     .select(`
@@ -55,144 +30,192 @@ export default async function BlogPostPage({ params }: Props) {
     notFound();
   }
 
-  const categoryId = post.category_id || null;
+  // 2. Fetch Previous Post (Older)
+  const { data: prevPost } = await supabaseAdmin
+    .from("posts")
+    .select("title, slug")
+    .eq("published", true)
+    .is("trashed_at", null)
+    .lt("published_at", post.published_at)
+    .order("published_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
+  // 3. Fetch Next Post (Newer)
+  const { data: nextPost } = await supabaseAdmin
+    .from("posts")
+    .select("title, slug")
+    .eq("published", true)
+    .is("trashed_at", null)
+    .gt("published_at", post.published_at)
+    .order("published_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  // 4. Fetch Related Posts (More blogs)
   let relatedQuery = supabaseAdmin
     .from("posts")
     .select(`
-      id,
-      title,
-      slug,
-      excerpt,
-      cover_image_url,
-      published_at,
-      categories ( id, name, slug )
+      id, title, slug, cover_image_url, excerpt, published_at,
+      categories ( name )
     `)
-    .neq("id", post.id)
     .eq("published", true)
     .is("trashed_at", null)
+    .neq("id", post.id) // Exclude current post
     .order("published_at", { ascending: false })
     .limit(3);
 
-  if (categoryId) {
-    relatedQuery = relatedQuery.eq("category_id", categoryId);
+  if (post.category_id) {
+    relatedQuery = relatedQuery.eq("category_id", post.category_id);
   }
-
   const { data: relatedPosts } = await relatedQuery;
 
   return (
-    <article className="min-h-screen bg-[#f5f5f7] py-16 sm:py-24 font-sans text-[#1d1d1f]">
-      <div className="max-w-4xl mx-auto px-6 sm:px-8">
-        {post.cover_image_url && (
-          <div className="w-full overflow-hidden rounded-[28px] mb-10 bg-white">
-            <img
-              src={post.cover_image_url}
-              alt={post.title}
-              className="w-full h-auto object-cover"
-            />
-          </div>
-        )}
+    <div className="blog-post-wrapper">
+      {/* FIX: Use the Header Component properly */}
+      <Header /> 
+      
+      <article className="min-h-screen py-10 sm:py-16 font-sans text-[#1d1d1f]">
+        
+        <div className="max-w-4xl mx-auto px-6 sm:px-8">
+          
+          {/* Back Button */}
+          <Link href="/blog" className="back-to-blogs">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to blogs
+          </Link>
 
-        <div className="mb-4 flex flex-wrap items-center gap-3">
-          {post.categories?.name && (
-            <Link
-              href={`/category/${post.categories.slug}`}
-              className="text-[11px] font-bold tracking-widest uppercase text-[#86868b] hover:text-black transition-colors"
-            >
-              {post.categories.name}
-            </Link>
-          )}
+          {/* Post Header */}
+          <div className="mb-6 flex flex-wrap items-center gap-3">
+            {post.categories?.name && (
+              <span className="text-[12px] font-bold tracking-widest uppercase text-[#86868b]">
+                {post.categories.name}
+              </span>
+            )}
 
-          {post.published_at && (
-            <span className="text-sm text-[#86868b]">
-              {new Date(post.published_at).toLocaleDateString("en-US", {
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-              })}
-            </span>
-          )}
-        </div>
-
-        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight mb-6">
-          {post.title}
-        </h1>
-
-        {post.excerpt && (
-          <p className="text-lg sm:text-xl leading-relaxed text-[#6e6e73] mb-8">
-            {post.excerpt}
-          </p>
-        )}
-
-        {post.post_tags?.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-10">
-            {post.post_tags.map((item: any) =>
-              item.tags ? (
-                <Link
-                  key={item.tags.id}
-                  href={`/tag/${item.tags.slug}`}
-                  className="text-[12px] px-3 py-1 rounded-full border border-[#d2d2d7] bg-white text-[#6e6e73] hover:text-black hover:border-black transition-colors"
-                >
-                  {item.tags.name}
-                </Link>
-              ) : null
+            {post.published_at && (
+              <>
+                <span className="text-[#d2d2d7]">•</span>
+                <span className="text-[13px] font-medium text-[#86868b]">
+                  {new Date(post.published_at).toLocaleDateString("en-US", {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </span>
+              </>
             )}
           </div>
-        )}
 
-        <div
-          className="prose prose-neutral max-w-none prose-img:rounded-2xl prose-headings:tracking-tight prose-p:text-[#1d1d1f]"
-          dangerouslySetInnerHTML={{ __html: post.content_html }}
-        />
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] mb-6">
+            {post.title}
+          </h1>
 
-        {relatedPosts && relatedPosts.length > 0 && (
-          <section className="mt-20 pt-12 border-t border-[#d2d2d7]">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-8">
-              Related Posts
-            </h2>
+          {post.excerpt && (
+            <p className="text-xl leading-relaxed text-[#6e6e73] mb-10">
+              {post.excerpt}
+            </p>
+          )}
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Cover Image */}
+          {post.cover_image_url && (
+            <div className="w-full overflow-hidden rounded-[28px] mb-12 bg-white shadow-sm border border-gray-100">
+              <img
+                src={post.cover_image_url}
+                alt={post.title}
+                className="w-full h-auto max-h-[500px] object-cover"
+              />
+            </div>
+          )}
+
+          {/* Tags */}
+          {post.post_tags?.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-12 border-b border-gray-200 pb-8">
+              {post.post_tags.map((item: any) =>
+                item.tags ? (
+                  <Link
+                    href={`/blog?tag=${item.tags.slug}`}
+                    key={item.tags.id}
+                    className="text-[12px] font-semibold px-4 py-1.5 rounded-full bg-white border border-gray-200 text-[#6e6e73] hover:text-black hover:border-black transition-colors"
+                  >
+                    #{item.tags.name}
+                  </Link>
+                ) : null
+              )}
+            </div>
+          )}
+
+          {/* The Rich Text Content */}
+          <div
+            className="prose prose-lg max-w-none blog-content prose-img:rounded-[24px] prose-a:text-blue-600 hover:prose-a:text-blue-500"
+            dangerouslySetInnerHTML={{ __html: post.content_html }}
+          />
+
+          {/* Next / Prev Navigation */}
+          {(prevPost || nextPost) && (
+            <div className="post-navigation">
+              {prevPost ? (
+                <Link href={`/blog/${prevPost.slug}`} className="nav-card prev">
+                  <span className="nav-label">Previous Post</span>
+                  <span className="nav-title">{prevPost.title}</span>
+                </Link>
+              ) : <div />} {/* Empty div to keep grid spacing if no prev post */}
+
+              {nextPost && (
+                <Link href={`/blog/${nextPost.slug}`} className="nav-card next">
+                  <span className="nav-label">Next Post</span>
+                  <span className="nav-title">{nextPost.title}</span>
+                </Link>
+              )}
+            </div>
+          )}
+        </div>
+      </article>
+
+      {/* More Blogs Section */}
+      {relatedPosts && relatedPosts.length > 0 && (
+        <section className="more-blogs-section">
+          <div className="max-w-6xl mx-auto px-6 sm:px-8">
+            <h2 className="section-title">More like this</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {relatedPosts.map((related: any) => (
                 <Link
                   key={related.id}
                   href={`/blog/${related.slug}`}
-                  className="group bg-white rounded-[24px] overflow-hidden hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all duration-300"
+                  className="flex flex-col group"
                 >
-                  {related.cover_image_url ? (
-                    <div className="aspect-[16/10] overflow-hidden bg-[#e8e8ed]">
+                  <div className="w-full aspect-[4/3] rounded-[24px] overflow-hidden bg-gray-100 mb-5">
+                    {related.cover_image_url ? (
                       <img
                         src={related.cover_image_url}
                         alt={related.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
-                    </div>
-                  ) : (
-                    <div className="aspect-[16/10] bg-[#e8e8ed]" />
-                  )}
-
-                  <div className="p-5">
-                    {related.categories?.name && (
-                      <p className="text-[11px] font-bold tracking-widest uppercase text-[#86868b] mb-2">
-                        {related.categories.name}
-                      </p>
-                    )}
-
-                    <h3 className="text-lg font-semibold leading-snug mb-2">
-                      {related.title}
-                    </h3>
-
-                    {related.excerpt && (
-                      <p className="text-sm text-[#6e6e73] line-clamp-2">
-                        {related.excerpt}
-                      </p>
+                    ) : (
+                      <div className="w-full h-full bg-gray-200" />
                     )}
                   </div>
+                  
+                  {related.categories?.name && (
+                    <span className="text-[11px] font-bold tracking-widest uppercase text-[#86868b] mb-2">
+                      {related.categories.name}
+                    </span>
+                  )}
+                  <h3 className="text-xl font-bold text-[#1d1d1f] group-hover:text-blue-600 transition-colors mb-2 line-clamp-2">
+                    {related.title}
+                  </h3>
+                  <p className="text-[#6e6e73] line-clamp-2 text-sm">
+                    {related.excerpt}
+                  </p>
                 </Link>
               ))}
             </div>
-          </section>
-        )}
-      </div>
-    </article>
+          </div>
+        </section>
+      )}
+    </div>
   );
 }

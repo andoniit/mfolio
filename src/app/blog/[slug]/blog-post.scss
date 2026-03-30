@@ -1,0 +1,148 @@
+/* blog-post.scss */
+
+.blog-post-wrapper {
+  background-color: #fcfbf9; /* Matches your grid page background */
+  min-height: 100vh;
+}
+
+.back-to-blogs {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #86868b;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  margin-bottom: 2rem;
+
+  &:hover {
+    color: #1d1d1f;
+  }
+}
+
+/* --- Rich Text & Code Styling --- */
+.blog-content {
+  /* Headings */
+  h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-top: 3.5rem;
+    margin-bottom: 1.5rem;
+    color: #1d1d1f;
+    letter-spacing: -0.02em;
+  }
+  
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    color: #1d1d1f;
+  }
+
+  /* Inline Code */
+  code {
+    background-color: #f5f5f7;
+    color: #e3416b; /* Sleek pink/red for inline code */
+    padding: 0.2rem 0.4rem;
+    border-radius: 6px;
+    font-size: 0.85em;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+
+  /* Large Code Blocks (Pre) */
+  pre {
+    background-color: #1d1d1f;
+    color: #f5f5f7;
+    padding: 1.5rem;
+    border-radius: 16px;
+    overflow-x: auto;
+    margin: 2rem 0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+
+    code {
+      background-color: transparent;
+      color: inherit;
+      padding: 0;
+      border-radius: 0;
+      font-size: 0.9em;
+    }
+  }
+
+  /* Blockquotes */
+  blockquote {
+    border-left: 4px solid #1d1d1f;
+    padding-left: 1.5rem;
+    font-style: italic;
+    color: #6e6e73;
+    margin: 2rem 0;
+    background: #f5f5f7;
+    padding: 1.5rem;
+    border-radius: 0 16px 16px 0;
+  }
+}
+
+/* --- Prev / Next Navigation --- */
+.post-navigation {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  border-top: 1px solid #eaeaea;
+  padding-top: 3rem;
+  margin-top: 4rem;
+
+  @media (min-width: 640px) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .nav-card {
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    border-radius: 20px;
+    background-color: #ffffff;
+    border: 1px solid #eaeaea;
+    text-decoration: none;
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: #1d1d1f;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .nav-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #86868b;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .nav-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1d1d1f;
+    }
+
+    &.next {
+      text-align: right;
+    }
+  }
+}
+
+/* --- More Blogs Section --- */
+.more-blogs-section {
+  background-color: #ffffff;
+  padding: 5rem 0;
+  margin-top: 4rem;
+  border-top: 1px solid #eaeaea;
+
+  .section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 2.5rem;
+    color: #1d1d1f;
+  }
+}

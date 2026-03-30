@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import Header from "@/components/layout/header/header";
+import "./blog.scss"; 
 
 type Props = {
   searchParams: Promise<{
@@ -60,122 +62,100 @@ export default async function BlogPage({ searchParams }: Props) {
   }
 
   return (
-    <main className="min-h-screen bg-[#f5f5f7] py-16 sm:py-24 font-sans text-[#1d1d1f]">
-      <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12">
-        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-6 text-center md:text-left">
-          Blog
-        </h1>
+    <div className="blog-wrapper">
+      <Header />
+      <main className="blog-page-container">
+        <div className="blog-content-max">
+          <h1 className="blog-page-title">Blog</h1>
 
-        <div className="mb-8 flex flex-wrap gap-3">
-          <Link
-            href="/blog"
-            className={`px-4 py-2 rounded-full border text-sm ${
-              !categorySlug && !tagSlug ? "bg-black text-white" : "bg-white"
-            }`}
-          >
-            All
-          </Link>
-
-          {categories?.map((category) => (
-            <Link
-              key={category.id}
-              href={`/blog?category=${category.slug}`}
-              className={`px-4 py-2 rounded-full border text-sm ${
-                categorySlug === category.slug ? "bg-black text-white" : "bg-white"
-              }`}
-            >
-              {category.name}
+          {/* Category Filters */}
+          <div className="filter-group">
+            <Link href="/blog" className={`filter-btn ${!categorySlug && !tagSlug ? "active" : ""}`}>
+              All
             </Link>
-          ))}
-        </div>
-
-        <div className="mb-12 flex flex-wrap gap-3">
-          {tags?.map((tag) => (
-            <Link
-              key={tag.id}
-              href={`/blog?tag=${tag.slug}`}
-              className={`px-3 py-1 rounded-full border text-xs ${
-                tagSlug === tag.slug ? "bg-black text-white" : "bg-white"
-              }`}
-            >
-              #{tag.name}
-            </Link>
-          ))}
-        </div>
-
-        {filteredPosts.length === 0 ? (
-          <div className="rounded-[24px] bg-white p-10 text-center text-[#86868b]">
-            No blog posts found.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {filteredPosts.map((post: any) => (
+            {categories?.map((category) => (
               <Link
-                key={post.id}
-                href={`/blog/${post.slug}`}
-                className="group flex flex-col bg-white rounded-[24px] overflow-hidden hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all duration-300"
+                key={category.id}
+                href={`/blog?category=${category.slug}`}
+                className={`filter-btn ${categorySlug === category.slug ? "active" : ""}`}
               >
-                {post.cover_image_url ? (
-                  <div className="w-full aspect-[4/3] sm:aspect-[16/10] bg-[#f5f5f7] overflow-hidden relative">
-                    <img
-                      src={post.cover_image_url}
-                      alt={post.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-full aspect-[4/3] sm:aspect-[16/10] bg-[#e8e8ed]" />
-                )}
-
-                <div className="p-6 sm:p-8 flex flex-col flex-grow">
-                  {post.categories?.name && (
-                    <p className="text-[11px] font-bold tracking-widest text-[#86868b] uppercase mb-3">
-                      {post.categories.name}
-                    </p>
-                  )}
-
-                  <h2 className="text-xl sm:text-[22px] font-bold tracking-tight leading-snug mb-3">
-                    {post.title}
-                  </h2>
-
-                  {post.excerpt && (
-                    <p className="text-[15px] leading-relaxed text-[#86868b] line-clamp-2 mb-5">
-                      {post.excerpt}
-                    </p>
-                  )}
-
-                  {post.post_tags?.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-6">
-                      {post.post_tags.map((item: any) =>
-                        item.tags ? (
-                          <span
-                            key={item.tags.id}
-                            className="text-[11px] px-3 py-1 rounded-full border border-[#d2d2d7] text-[#6e6e73] bg-[#fafafa]"
-                          >
-                            {item.tags.name}
-                          </span>
-                        ) : null
-                      )}
-                    </div>
-                  )}
-
-                  <div className="mt-auto pt-4">
-                    <p className="text-[13px] font-semibold text-[#86868b]">
-                      {post.published_at
-                        ? new Date(post.published_at).toLocaleDateString("en-US", {
-                            month: "long",
-                            day: "numeric",
-                            year: "numeric",
-                          })
-                        : "Draft"}
-                    </p>
-                  </div>
-                </div>
+                {category.name}
               </Link>
             ))}
           </div>
-        )}
-      </div>
-    </main>
+
+          {/* Tag Filters */}
+          <div className="filter-group tag-filters">
+            {tags?.map((tag) => (
+              <Link
+                key={tag.id}
+                href={`/blog?tag=${tag.slug}`}
+                className={`filter-btn small ${tagSlug === tag.slug ? "active" : ""}`}
+              >
+                #{tag.name}
+              </Link>
+            ))}
+          </div>
+
+          {/* Blog Grid */}
+          {filteredPosts.length === 0 ? (
+            <div className="empty-state">No blog posts found.</div>
+          ) : (
+            <div className="blog-grid">
+              {filteredPosts.map((post: any) => (
+                <Link key={post.id} href={`/blog/${post.slug}`} className="blog-card">
+                  
+                  {/* Image & Cutout Wrapper */}
+                  <div className="card-image-wrapper">
+                    <div className="image-inner">
+                      {post.cover_image_url ? (
+                        <img src={post.cover_image_url} alt={post.title} className="card-image" />
+                      ) : (
+                        <div className="card-image-placeholder" />
+                      )}
+                    </div>
+                    
+                    {post.categories?.name && (
+                      <div className="category-badge-container">
+                        <div className="category-cutout-badge">
+                          {post.categories.name}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Card Content Area (Text & Tags) */}
+                  <div className="card-content">
+                    <h2 className="card-title">{post.title}</h2>
+                    {post.excerpt && <p className="card-excerpt">{post.excerpt}</p>}
+                    
+                    {/* flex and margin-top: auto pushes these perfectly to the bottom */}
+                    <p className="card-date">
+                      {post.published_at
+                        ? new Date(post.published_at).toLocaleDateString("en-US", {
+                            month: "long", day: "numeric", year: "numeric",
+                          })
+                        : "Draft"}
+                    </p>
+
+                    {post.post_tags?.length > 0 && (
+                      <div className="card-tags">
+                        {post.post_tags.map((item: any) =>
+                          item.tags ? (
+                            <span key={item.tags.id} className="tag">
+                              {item.tags.name}
+                            </span>
+                          ) : null
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
   );
 }
