@@ -161,7 +161,7 @@ export default async function BlogPostPage({ params }: Props) {
                   <Link
                     href={`/tag/${item.tags.slug}`}
                     key={item.tags.id}
-                    className="text-[12px] font-semibold px-4 py-1.5 rounded-full bg-white border border-gray-200 text-[#6e6e73] hover:text-black hover:border-black transition-colors"
+                    className="post-tag-pill"
                   >
                     #{item.tags.name}
                   </Link>

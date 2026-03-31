@@ -5,6 +5,43 @@
   min-height: 100vh;
 }
 
+.post-tag-pill {
+  padding: 0.35rem 1rem;
+  border: 1px solid #eaeaea;
+  border-radius: 50px;
+  color: #6e6e73;
+  z-index: 1;
+  background: #ffffff;
+  position: relative;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-decoration: none;
+  transition: all 250ms;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0;
+    border-radius: 50px;
+    background-color: #212121;
+    z-index: -1;
+    transition: all 250ms;
+  }
+
+  &:hover {
+    color: #e8e8e8;
+    border-color: #212121;
+  }
+
+  &:hover::before {
+    width: 100%;
+  }
+}
+
 .back-to-blogs {
   display: inline-flex;
   align-items: center;
