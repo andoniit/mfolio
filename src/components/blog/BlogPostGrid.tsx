@@ -10,7 +10,13 @@ type Post = {
   categories?: { name?: string | null } | null;
 };
 
-export default function BlogPostGrid({ posts }: { posts: Post[] }) {
+export default function BlogPostGrid({
+  posts,
+  showCategoryBadge = true,
+}: {
+  posts: Post[];
+  showCategoryBadge?: boolean;
+}) {
   if (!posts.length) {
     return <div className="empty-state">No blog posts found.</div>;
   }
@@ -28,7 +34,7 @@ export default function BlogPostGrid({ posts }: { posts: Post[] }) {
               )}
             </div>
 
-            {post.categories?.name && (
+            {showCategoryBadge && post.categories?.name && (
               <div className="category-badge-container">
                 <div className="category-cutout-badge">{post.categories.name}</div>
               </div>

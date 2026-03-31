@@ -1,9 +1,7 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import Header from "@/components/layout/header/header";
 import BlogPostGrid from "@/components/blog/BlogPostGrid";
-import BlogListingFilters from "@/components/blog/BlogListingFilters";
 import "@/app/blog/blog.scss";
 
 export const dynamic = "force-dynamic";
@@ -15,11 +13,11 @@ type Props = {
 export default async function TagPage({ params }: Props) {
   const { slug } = await params;
 
-  const [{ data: tag }, { data: categories }, { data: tags }] = await Promise.all([
-    supabaseAdmin.from("tags").select("*").eq("slug", slug).maybeSingle(),
-    supabaseAdmin.from("categories").select("*").order("name"),
-    supabaseAdmin.from("tags").select("*").order("name"),
-  ]);
+  const { data: tag } = await supabaseAdmin
+    .from("tags")
+    .select("*")
+    .eq("slug", slug)
+    .maybeSingle();
 
   if (!tag) notFound();
 
@@ -36,27 +34,8 @@ export default async function TagPage({ params }: Props) {
         <Header />
         <main className="blog-page-container">
           <div className="blog-content-max">
-            <Link href="/blog" className="category-tag-back-link">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                />
-              </svg>
-              Back to blogs
-            </Link>
-
             <p className="text-sm uppercase tracking-widest text-[#86868b] mb-2">Tag</p>
             <h1 className="blog-page-title">#{tag.name}</h1>
-
-            <BlogListingFilters
-              categories={categories}
-              tags={tags}
-              activeCategorySlug={null}
-              activeTagSlug={tag.slug}
-            />
 
             <div className="empty-state">No blog posts found.</div>
           </div>
@@ -84,29 +63,9 @@ export default async function TagPage({ params }: Props) {
       <Header />
       <main className="blog-page-container">
         <div className="blog-content-max">
-          <Link href="/blog" className="category-tag-back-link">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
-            </svg>
-            Back to blogs
-          </Link>
-
           <p className="text-sm uppercase tracking-widest text-[#86868b] mb-2">Tag</p>
           <h1 className="blog-page-title">#{tag.name}</h1>
-
-          <BlogListingFilters
-            categories={categories}
-            tags={tags}
-            activeCategorySlug={null}
-            activeTagSlug={tag.slug}
-          />
-
-          <BlogPostGrid posts={posts || []} />
+          <BlogPostGrid posts={posts || []} showCategoryBadge={false} />
         </div>
       </main>
     </div>

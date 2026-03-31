@@ -255,10 +255,15 @@ export function SimpleEditor({
     },
   });
 
+  const hasInitializedContent = useRef(false);
+
   useEffect(() => {
-    if (editor && initialContent) {
-      editor.commands.setContent(initialContent);
-    }
+    if (!editor) return;
+    if (hasInitializedContent.current) return;
+    if (!initialContent) return;
+  
+    editor.commands.setContent(initialContent);
+    hasInitializedContent.current = true;
   }, [editor, initialContent]);
 
   const rect = useCursorVisibility({

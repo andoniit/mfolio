@@ -80,15 +80,6 @@ export default async function BlogPostPage({ params }: Props) {
       <article className="min-h-screen py-10 sm:py-16 font-sans text-[#1d1d1f]">
         
         <div className="max-w-4xl mx-auto px-6 sm:px-8">
-          
-          {/* Back Button */}
-          <Link href="/blog" className="back-to-blogs">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back to blogs
-          </Link>
-
           {/* Post Header */}
           <div className="mb-6 flex flex-wrap items-center gap-3">
             {post.categories?.name &&
@@ -104,19 +95,6 @@ export default async function BlogPostPage({ params }: Props) {
                   {post.categories.name}
                 </span>
               ))}
-
-            {post.published_at && (
-              <>
-                <span className="text-[#d2d2d7]">•</span>
-                <span className="text-[13px] font-medium text-[#86868b]">
-                  {new Date(post.published_at).toLocaleDateString("en-US", {
-                    month: "long",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
-                </span>
-              </>
-            )}
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] mb-6">
@@ -128,6 +106,41 @@ export default async function BlogPostPage({ params }: Props) {
               {post.excerpt}
             </p>
           )}
+
+          <div className="flex items-center gap-4 mb-10">
+            <img
+              src="/images/25.jpg"
+              alt="Anirudha Kapileshwari"
+              className="w-14 h-14 rounded-full object-cover border border-gray-200 shrink-0"
+            />
+            <div className="text-[#1d1d1f]">
+              <div className="flex items-center gap-2 text-[15px] text-[#4b5563]">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 7V3m8 4V3m-9 8h10m-13 9h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v11a2 2 0 002 2z"
+                  />
+                </svg>
+                <span>
+                  {post.published_at
+                    ? new Date(post.published_at).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })
+                    : "Draft"}
+                </span>
+              </div>
+              <p className="text-[28px] leading-none mt-1 text-[#6b7280]">by Anirudha Kapileshwari</p>
+            </div>
+          </div>
 
           {/* Cover Image */}
           {post.cover_image_url && (

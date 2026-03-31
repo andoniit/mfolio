@@ -25,6 +25,15 @@ type BlogFormProps = {
   selectedTagIds?: string[];
 };
 
+const getDateInputValue = (value?: string | null) => {
+  if (!value) return new Date().toISOString().split("T")[0];
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return new Date().toISOString().split("T")[0];
+  }
+  return parsed.toISOString().split("T")[0];
+};
+
 export default function BlogForm({
   initialData,
   postId,
@@ -40,9 +49,7 @@ export default function BlogForm({
   );
   const [published, setPublished] = useState(initialData?.published || false);
   const [publishedAt, setPublishedAt] = useState(
-    initialData?.published_at
-      ? new Date(initialData.published_at).toISOString().split("T")[0]
-      : new Date().toISOString().split("T")[0]
+    getDateInputValue(initialData?.published_at)
   );
   const [contentJson, setContentJson] = useState(
     initialData?.content_json || null
@@ -153,6 +160,15 @@ export default function BlogForm({
 
     setSaving(true);
 
+    const publishedAtIso =
+      published && publishedAt ? `${publishedAt}T12:00:00.000Z` : null;
+
+    if (published && !publishedAtIso) {
+      alert("Please choose a publish date.");
+      setSaving(false);
+      return;
+    }
+
     const payload = {
       title: title.trim(),
       slug: slug.trim(),
@@ -161,7 +177,7 @@ export default function BlogForm({
       content_json: contentJson,
       content_html: contentHtml,
       published,
-      published_at: published ? new Date(publishedAt).toISOString() : null,
+      published_at: publishedAtIso,
       category_id: categoryId || null,
       tag_ids: tagIds,
     };
