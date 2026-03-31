@@ -7,6 +7,7 @@ type Props = {
   tags: Item[] | null | undefined;
   activeCategorySlug?: string | null;
   activeTagSlug?: string | null;
+  showTags?: boolean;
 };
 
 export default function BlogListingFilters({
@@ -14,6 +15,7 @@ export default function BlogListingFilters({
   tags,
   activeCategorySlug,
   activeTagSlug,
+  showTags = true,
 }: Props) {
   const showAllActive = !activeCategorySlug && !activeTagSlug;
 
@@ -34,17 +36,19 @@ export default function BlogListingFilters({
         ))}
       </div>
 
-      <div className="filter-group tag-filters">
-        {tags?.map((tag) => (
-          <Link
-            key={tag.id}
-            href={`/tag/${tag.slug}`}
-            className={`filter-btn small ${activeTagSlug === tag.slug ? "active" : ""}`}
-          >
-            #{tag.name}
-          </Link>
-        ))}
-      </div>
+      {showTags && (
+        <div className="filter-group tag-filters">
+          {tags?.map((tag) => (
+            <Link
+              key={tag.id}
+              href={`/tag/${tag.slug}`}
+              className={`filter-btn small ${activeTagSlug === tag.slug ? "active" : ""}`}
+            >
+              #{tag.name}
+            </Link>
+          ))}
+        </div>
+      )}
     </>
   );
 }

@@ -1,6 +1,8 @@
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import CategoryManager from "@/components/admin/CategoryManager";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminCategoriesPage() {
   const { data: categories } = await supabaseAdmin
     .from("categories")

@@ -8,7 +8,6 @@ type Post = {
   cover_image_url?: string | null;
   published_at?: string | null;
   categories?: { name?: string | null } | null;
-  post_tags?: { tags?: { id: string; name: string } | null }[] | null;
 };
 
 export default function BlogPostGrid({ posts }: { posts: Post[] }) {
@@ -49,18 +48,6 @@ export default function BlogPostGrid({ posts }: { posts: Post[] }) {
                   })
                 : "Draft"}
             </p>
-
-            {post.post_tags && post.post_tags.length > 0 && (
-              <div className="card-tags">
-                {post.post_tags.map((item) =>
-                  item.tags ? (
-                    <span key={item.tags.id} className="tag">
-                      {item.tags.name}
-                    </span>
-                  ) : null
-                )}
-              </div>
-            )}
           </div>
         </Link>
       ))}

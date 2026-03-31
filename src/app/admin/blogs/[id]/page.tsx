@@ -2,6 +2,8 @@ import { notFound, redirect } from "next/navigation";
 import BlogForm from "@/components/blog/BlogForm";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
+export const dynamic = "force-dynamic";
+
 type Props = {
   params: Promise<{ id: string }>;
 };

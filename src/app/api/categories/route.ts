@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import slugify from "slugify";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { revalidatePath } from "next/cache";
 
 export async function POST(req: Request) {
   const body = await req.json();
@@ -21,6 +22,11 @@ export async function POST(req: Request) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
+
+  revalidatePath("/admin/categories");
+  revalidatePath("/admin/blogs/new");
+  revalidatePath("/admin/blogs/new/[id]");
+  revalidatePath("/admin/blogs");
 
   return NextResponse.json(data);
 }

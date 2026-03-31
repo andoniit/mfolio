@@ -76,6 +76,7 @@ export default async function BlogPage({ searchParams }: Props) {
             tags={tags}
             activeCategorySlug={categorySlug}
             activeTagSlug={tagSlug}
+            showTags={false}
           />
 
           <BlogPostGrid posts={filteredPosts} />
