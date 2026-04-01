@@ -138,7 +138,7 @@ export default async function BlogPostPage({ params }: Props) {
                     : "Draft"}
                 </span>
               </div>
-              <p className="text-[28px] leading-none mt-1 text-[#6b7280]">by Anirudha Kapileshwari</p>
+              <p className="text-[18px] leading-none mt-1 text-[#6b7280]">by Anirudha Kapileshwari</p>
             </div>
           </div>
 
