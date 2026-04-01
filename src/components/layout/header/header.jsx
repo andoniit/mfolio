@@ -37,6 +37,7 @@ export default function Header() {
   // Delay header animation until preloader is finished
   const [preloaderFinished, setPreloaderFinished] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+  const [resumeUrl, setResumeUrl] = useState(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -77,6 +78,24 @@ export default function Header() {
     return () => {
       mounted = false;
       subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/resume");
+        const data = await res.json().catch(() => ({}));
+        if (!cancelled && res.ok && typeof data.url === "string" && data.url) {
+          setResumeUrl(data.url);
+        }
+      } catch {
+        if (!cancelled) setResumeUrl(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
     };
   }, []);
 
@@ -143,16 +162,19 @@ export default function Header() {
             Behance
           </motion.a>
         </Framer>
-        <Framer>
-          <motion.a
-            href="https://drive.google.com/file/d/1ZcqjNJy4wuhlX9StV6VnDAXn-8b0lmdF/view?usp=sharing"
-            variants={linkVariants}
-            target="_blank"
-            className={styles.resumeButton}
-          >
-            View My Resume
-          </motion.a>
-        </Framer>
+        {resumeUrl && (
+          <Framer>
+            <motion.a
+              href={resumeUrl}
+              variants={linkVariants}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.resumeButton}
+            >
+              View My Resume
+            </motion.a>
+          </Framer>
+        )}
 
         {isAdminLoggedIn && (
           <Framer>

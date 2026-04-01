@@ -18,7 +18,11 @@ const blogSubItems = [
   { href: "/admin/blogs/trash", label: "Trash", icon: "trash" as const },
 ];
 
-function NavIcon({ kind }: { kind: (typeof blogSubItems)[number]["icon"] | "chevron" }) {
+function NavIcon({
+  kind,
+}: {
+  kind: (typeof blogSubItems)[number]["icon"] | "chevron" | "resume";
+}) {
   const common = { width: 18, height: 18, viewBox: "0 0 24 24" };
   switch (kind) {
     case "notes":
@@ -66,6 +70,17 @@ function NavIcon({ kind }: { kind: (typeof blogSubItems)[number]["icon"] | "chev
       return (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
           <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      );
+    case "resume":
+      return (
+        <svg {...common} fill="none" stroke="currentColor" strokeWidth="2">
+          <path
+            d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       );
   }
@@ -232,6 +247,35 @@ export default function AdminNav({ collapsed = false }: Props) {
               </div>
             </div>
           </div>
+
+          <Link
+            href="/admin/resume"
+            className={`group flex items-center gap-3 py-2.5 px-3 transition-all duration-200 rounded-xl ${
+              pathname === "/admin/resume"
+                ? "bg-white/50 text-black shadow-sm border border-white/40"
+                : "text-gray-500 border border-transparent hover:bg-white/30 hover:text-gray-900"
+            } ${collapsed ? "justify-center px-0 w-11 h-11 mx-auto" : ""}`}
+            title="Resume"
+          >
+            <span
+              className={`inline-flex items-center justify-center transition-transform duration-200 ${
+                pathname === "/admin/resume"
+                  ? "text-black scale-105"
+                  : "text-gray-400 group-hover:text-gray-700"
+              }`}
+            >
+              <NavIcon kind="resume" />
+            </span>
+            {!collapsed && (
+              <span
+                className={`text-[14px] tracking-wide ${
+                  pathname === "/admin/resume" ? "font-semibold" : "font-medium"
+                }`}
+              >
+                Resume
+              </span>
+            )}
+          </Link>
 
         </nav>
 
