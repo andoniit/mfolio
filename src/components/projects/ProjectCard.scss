@@ -1,0 +1,162 @@
+.folder-card-link {
+  text-decoration: none;
+  display: block;
+  transform-origin: center center;
+  background: transparent !important; /* Forces off any parent white backgrounds */
+  
+  &:hover {
+    .folder-card {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 40px rgba(109, 76, 219, 0.2);
+    }
+    
+    /* Slides the ENTIRE white paper container up, leaving no artifacts behind */
+    .folder-inside {
+      transform: translateY(-25px) rotate(2deg);
+    }
+    
+    /* 3D "Open Folder" Effect */
+    .folder-front {
+      transform: rotateX(-16deg); 
+      box-shadow: 0 15px 25px rgba(0, 0, 0, 0.15);
+    }
+  }
+}
+
+.folder-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1; 
+  background-color: transparent !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  /* Adds 3D perspective to the card so the rotateX actually looks 3D */
+  perspective: 1200px; 
+}
+
+/* Layer 1: Solid purple back */
+.folder-back {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 85%;
+  background: #6D4CDB;
+  border-radius: 0 20px 20px 20px;
+  z-index: 1;
+
+  &::before {
+    content: "";
+    position: absolute;
+    bottom: 99%;
+    left: 0;
+    width: 45%;
+    height: 20%;
+    background: #6D4CDB;
+    border-radius: 16px 16px 0 0;
+  }
+}
+
+/* Layer 2: The paper sticking out */
+.folder-inside {
+  position: absolute;
+  bottom: 15%; 
+  left: 6%;
+  width: 88%;
+  height: 75%; 
+  z-index: 2;
+  border-radius: 8px 8px 0 0;
+  
+  /* Creates the white paper background border on the wrapper itself */
+  background: #fff; 
+  padding: 4px; 
+  box-sizing: border-box;
+  box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.15);
+  
+  /* Animate this entire wrapper instead of just the image */
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-origin: bottom center;
+
+  .inside-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px 4px 0 0;
+    display: block; 
+  }
+
+  .inside-image-placeholder {
+    width: 100%;
+    height: 100%;
+    background: #e0e0e0;
+    border-radius: 4px 4px 0 0;
+  }
+}
+
+/* Layer 3: The Front Glass Pocket */
+.folder-front {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 68%; 
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  padding: 24px;
+  box-sizing: border-box;
+  
+  background: rgba(142, 114, 255, 0.45);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.4);
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.05);
+
+  /* Set hinge point to the bottom for the 3D opening effect */
+  transform-origin: bottom center;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.folder-info {
+  width: 100%;
+  height: 100%;
+  color: #ffffff; 
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  .folder-header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .folder-title {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+  }
+
+  .folder-description {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 400;
+    opacity: 0.9;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .folder-date {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 400;
+    opacity: 0.9;
+  }
+}
