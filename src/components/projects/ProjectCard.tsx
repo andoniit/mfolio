@@ -56,6 +56,11 @@ export default function ProjectCard({ project, index = 0 }: { project: Project; 
             <div className="folder-header">
               <h3 className="folder-title">{project.title}</h3>
               <p className="folder-description">{project.description}</p>
+              {(project.workplace || project.client_name) && (
+                <p className="folder-context">
+                  {[project.workplace, project.client_name].filter(Boolean).join(" · ")}
+                </p>
+              )}
             </div>
             {formattedDate && (
               <span className="folder-date">Last added time {formattedDate}</span>

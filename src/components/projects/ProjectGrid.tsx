@@ -11,6 +11,9 @@ export type Project = {
   description?: string | null;
   cover_image_url?: string | null;
   project_date?: string | null;
+  tech_stack?: string[] | null;
+  workplace?: string | null;
+  client_name?: string | null;
 };
 
 export default function ProjectGrid({ projects }: { projects: Project[] }) {

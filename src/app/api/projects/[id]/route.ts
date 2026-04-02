@@ -7,7 +7,7 @@ type GalleryImageInput = {
   alt_text?: string | null;
 };
 
-function normalizeTechStack(value: unknown): string[] {
+function normalizeStringList(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   return value
     .filter((item): item is string => typeof item === "string")
@@ -81,7 +81,10 @@ export async function PUT(
     description: rest.description ?? null,
     content_json: rest.content_json ?? null,
     content_html: rest.content_html ?? null,
-    tech_stack: normalizeTechStack(rest.tech_stack),
+    tech_stack: normalizeStringList(rest.tech_stack),
+    collaborators: normalizeStringList(rest.collaborators),
+    workplace: typeof rest.workplace === "string" ? rest.workplace.trim() || null : null,
+    client_name: typeof rest.client_name === "string" ? rest.client_name.trim() || null : null,
     project_date: projectDate,
     cover_image_url: rest.cover_image_url || null,
     published,

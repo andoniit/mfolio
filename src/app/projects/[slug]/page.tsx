@@ -16,7 +16,7 @@ export default async function ProjectDetailPage({ params }: Props) {
   const { data: project, error } = await supabaseAdmin
     .from("projects")
     .select(
-      "id, title, slug, description, content_html, project_date, cover_image_url, published_at, tech_stack"
+      "id, title, slug, description, content_html, project_date, cover_image_url, published_at, tech_stack, collaborators, workplace, client_name"
     )
     .eq("slug", slug)
     .eq("published", true)
@@ -43,6 +43,20 @@ export default async function ProjectDetailPage({ params }: Props) {
     ? project.tech_stack.filter((t): t is string => typeof t === "string" && t.trim().length > 0)
     : [];
 
+  const collaborators = Array.isArray(project.collaborators)
+    ? project.collaborators.filter((t): t is string => typeof t === "string" && t.trim().length > 0)
+    : [];
+
+  const workplace =
+    typeof project.workplace === "string" && project.workplace.trim() ? project.workplace.trim() : null;
+  const clientName =
+    typeof project.client_name === "string" && project.client_name.trim()
+      ? project.client_name.trim()
+      : null;
+
+  const hasContext =
+    Boolean(workplace || clientName || collaborators.length > 0);
+
   return (
     <div className="blog-post-wrapper">
       <Header />
@@ -59,6 +73,47 @@ export default async function ProjectDetailPage({ params }: Props) {
 
           {project.description && (
             <p className="text-xl leading-relaxed text-[#6e6e73] mb-10">{project.description}</p>
+          )}
+
+          {hasContext && (
+            <section className="mb-10 space-y-4" aria-labelledby="project-context-heading">
+              <h2
+                id="project-context-heading"
+                className="text-[12px] font-bold tracking-widest uppercase text-[#86868b]"
+              >
+                Project context
+              </h2>
+              <dl className="space-y-3 text-[15px] text-[#4b5563] m-0">
+                {workplace && (
+                  <div className="flex flex-wrap gap-2">
+                    <dt className="font-semibold text-[#1d1d1f] shrink-0">Workplace</dt>
+                    <dd className="m-0">{workplace}</dd>
+                  </div>
+                )}
+                {clientName && (
+                  <div className="flex flex-wrap gap-2">
+                    <dt className="font-semibold text-[#1d1d1f] shrink-0">Client</dt>
+                    <dd className="m-0">{clientName}</dd>
+                  </div>
+                )}
+                {collaborators.length > 0 && (
+                  <div>
+                    <dt className="font-semibold text-[#1d1d1f] mb-2">Collaborators</dt>
+                    <dd className="m-0">
+                      <ul className="flex flex-wrap gap-2 list-none p-0 m-0">
+                        {collaborators.map((name, index) => (
+                          <li key={`${index}-${name}`}>
+                            <span className="inline-flex items-center px-3.5 py-1.5 rounded-full text-sm font-medium bg-[#f5f5f7] text-[#1d1d1f] border border-[#e8e8ed]">
+                              {name}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </dd>
+                  </div>
+                )}
+              </dl>
+            </section>
           )}
 
           {techStack.length > 0 && (

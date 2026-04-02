@@ -25,7 +25,7 @@ const getDateInputValue = (value?: string | null) => {
   return parsed.toISOString().split("T")[0];
 };
 
-function parseTechStack(raw: unknown): string[] {
+function parseStringList(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
   return raw
     .filter((item): item is string => typeof item === "string")
@@ -46,9 +46,15 @@ export default function ProjectForm({ initialData, projectId }: ProjectFormProps
   const [contentJson, setContentJson] = useState(initialData?.content_json ?? null);
   const [contentHtml, setContentHtml] = useState(initialData?.content_html || "");
   const [techStack, setTechStack] = useState<string[]>(() =>
-    parseTechStack(initialData?.tech_stack)
+    parseStringList(initialData?.tech_stack)
   );
   const [techStackInput, setTechStackInput] = useState("");
+  const [collaborators, setCollaborators] = useState<string[]>(() =>
+    parseStringList(initialData?.collaborators)
+  );
+  const [collaboratorInput, setCollaboratorInput] = useState("");
+  const [workplace, setWorkplace] = useState(initialData?.workplace || "");
+  const [clientName, setClientName] = useState(initialData?.client_name || "");
   const [saving, setSaving] = useState(false);
 
   const isEditing = Boolean(projectId);
@@ -105,6 +111,27 @@ export default function ProjectForm({ initialData, projectId }: ProjectFormProps
     });
   };
 
+  const addCollaborator = () => {
+    const t = collaboratorInput.trim();
+    if (!t) return;
+    setCollaborators((prev) => [...prev, t]);
+    setCollaboratorInput("");
+  };
+
+  const removeCollaboratorAt = (index: number) => {
+    setCollaborators((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const moveCollaborator = (index: number, dir: -1 | 1) => {
+    setCollaborators((prev) => {
+      const next = index + dir;
+      if (next < 0 || next >= prev.length) return prev;
+      const copy = [...prev];
+      [copy[index], copy[next]] = [copy[next], copy[index]];
+      return copy;
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -138,6 +165,9 @@ export default function ProjectForm({ initialData, projectId }: ProjectFormProps
       content_json: contentJson,
       content_html: contentHtml,
       tech_stack: techStack,
+      collaborators,
+      workplace: workplace.trim() || null,
+      client_name: clientName.trim() || null,
       published,
       project_date: projectDate || null,
       gallery_images: gallery.map((g) => ({
@@ -311,6 +341,101 @@ export default function ProjectForm({ initialData, projectId }: ProjectFormProps
           ) : (
             <p className="text-sm text-gray-400">No tech stack items yet.</p>
           )}
+        </div>
+
+        <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-5">
+          <h3 className="text-sm font-semibold text-gray-900">Collaboration &amp; context</h3>
+          <p className="text-xs text-gray-500 -mt-2">
+            Optional: where the work happened, client name, and people you collaborated with.
+          </p>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Workplace / organization</label>
+            <input
+              type="text"
+              value={workplace}
+              onChange={(e) => setWorkplace(e.target.value)}
+              placeholder="e.g. Acme Studio, Freelance"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-gray-800 outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Client name</label>
+            <input
+              type="text"
+              value={clientName}
+              onChange={(e) => setClientName(e.target.value)}
+              placeholder="If this was client work"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-gray-800 outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Collaborators</label>
+            <p className="text-xs text-gray-500 mb-3">Add one name at a time.</p>
+            <div className="flex flex-col sm:flex-row gap-2 mb-3">
+              <input
+                type="text"
+                value={collaboratorInput}
+                onChange={(e) => setCollaboratorInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addCollaborator();
+                  }
+                }}
+                placeholder="Name"
+                className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-800 outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
+              />
+              <button
+                type="button"
+                onClick={addCollaborator}
+                className="px-4 py-2.5 rounded-xl bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 shrink-0"
+              >
+                Add
+              </button>
+            </div>
+            {collaborators.length > 0 ? (
+              <ul className="space-y-2">
+                {collaborators.map((item, index) => (
+                  <li
+                    key={`${item}-${index}`}
+                    className="flex items-center gap-2 border border-gray-100 rounded-lg px-3 py-2 bg-gray-50/80 text-sm text-gray-800"
+                  >
+                    <span className="flex-1 min-w-0 truncate">{item}</span>
+                    <div className="flex gap-1 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => moveCollaborator(index, -1)}
+                        disabled={index === 0}
+                        className="text-xs px-2 py-1 rounded border border-gray-200 bg-white disabled:opacity-40"
+                      >
+                        Up
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveCollaborator(index, 1)}
+                        disabled={index === collaborators.length - 1}
+                        className="text-xs px-2 py-1 rounded border border-gray-200 bg-white disabled:opacity-40"
+                      >
+                        Down
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeCollaboratorAt(index)}
+                        className="text-xs text-red-600 px-2 py-1 hover:bg-red-50 rounded"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-gray-400">No collaborators listed.</p>
+            )}
+          </div>
         </div>
       </div>
 
