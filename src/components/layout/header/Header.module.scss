@@ -4,7 +4,10 @@
   background-color: transparent;
   z-index: 700;
   transition: all 0.9s ease;
-  overflow: hidden;
+  
+  /* 🌟 FIXED: Changed from hidden to visible so dropdown cards don't cut off */
+  overflow: visible; 
+  
   width: 100%;
 }
 
@@ -17,7 +20,14 @@
   position: relative;
 }
 
-/* Title container now a horizontal flex row */
+/* 🌟 Protects the logo link from getting default link underlines */
+.logoLink {
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Title container */
 .title {
   display: flex;
   flex-direction: row;
@@ -34,17 +44,15 @@
     color: #ededed;
     margin: 0;
     z-index: 1000;
-
   }
   
   p {
     font-family: var(--font-shadows), cursive;
     font-size: 2em;
     color: #ff3636;
-    margin: 0 0 0 -7.6em; /* margin-left for spacing */
+    margin: 0 0 0 -7.6em; 
     align-items: center;
     z-index: 1000;
-
   }
 }
 
@@ -52,110 +60,352 @@
   font-size: 0.7rem;
 }
 
-.nav {
+/* 🌟 Interactive Pill Buttons Styles 🌟 */
+
+.contactWrapper {
   display: flex;
   align-items: center;
-  
-  a {
-    font-family: 'Tajawal';
-    font-size: 1em;
-    margin-left: 20px;
-    text-decoration: none;
-    color: #9c9c9c;
-    display: flex;
-    align-items: center;
-    transition: color 0.3s ease;
-   
-    &:hover {
-      color: #ff3636;
-    }
+  margin-left: 15px;
+}
 
-    &.resumeButton {
-      background-color: #ff3636;
-      color: white;
-      padding:6px 6px 6px 6px;
-      border-radius: 4px;
-      transition: all 0.3s ease;
-      font-size: 0.9em;
-      align-items: center;
-      &:hover {
-        background-color: #ff1a1a;
-        color: white;
-      }
-    }
+.contactButton {
+  display: flex;
+  align-items: center;
+  background-color: #111; 
+  color: white;
+  padding: 10px 20px;
+  border-radius: 9999px;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+  cursor: pointer;
+  text-decoration: none;
 
-    &.dashboardButton {
-      background-color: #111;
-      color: white;
-      padding: 6px 10px;
-      border-radius: 9999px;
-      transition: all 0.3s ease;
-      font-size: 0.9em;
-      align-items: center;
-      &:hover {
-        background-color: #000;
-        color: white;
-      }
-    }
+  &:hover {
+    background-color: #000;
   }
 }
 
-.icon {
+/* --- Resume Button & Tooltip Setup --- */
+.resumeWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-left: 15px;
+
+  /* Trigger the tooltip on hover */
+  &:hover .resumeTooltip {
+    opacity: 1;
+    transform: translate(-50%, 14px) scale(1);
+  }
+}
+
+/* Resume Button using your sliding background CSS */
+.resumeButtonPill {
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  background-color: #ff5500; 
+  color: white;
+  padding: 10px 20px;
+  border-radius: 9999px; 
+  font-family: 'Tajawal', sans-serif;
+  font-size: 0.95em;
+  font-weight: 500;
+  white-space: nowrap;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+
+  &:hover::before {
+    transform: scaleX(1);
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    background: rgb(44, 44, 44); 
+    transition: transform 0.475s ease;
+    z-index: 0;
+  }
+}
+
+/* Protects the text so it sits above the sliding background */
+.buttonContent {
+  position: relative;
+  z-index: 1;
+}
+
+/* 🌟 Scaled Document Preview Card */
+.resumeTooltip {
+  position: absolute;
+  top: 100%; 
+  left: 50%;
+  transform: translate(-50%, 0px) scale(0.95);
+  background-color: #1a1a1a; 
+  border: 6px solid #1a1a1a; 
+  border-radius: 8px; 
+  width: 240px; /* Exact scaled width */
+  height: 310px; /* Exact scaled height */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); 
+  opacity: 0;
+  pointer-events: none; 
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 10;
+  overflow: hidden; /* Important: Hides the overflow from the giant scaled wrapper */
+}
+
+/* The wrapper that holds the full-sized PDF to trick the browser */
+.iframeWrapper {
+  width: 960px; /* Tricks the browser into rendering a desktop-sized PDF */
+  height: 1240px; 
+  transform: scale(0.25); /* Shrinks it down exactly to 240x310 */
+  transform-origin: top left;
+  background-color: #fff;
+}
+
+/* The actual Iframe showing the PDF content */
+.resumePreview {
+  width: 100%;
+  height: 100%;
+  border: none;
+  pointer-events: none; 
+}
+
+.dashboardButtonPill {
+  display: flex;
+  align-items: center;
+  background-color: #111;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 9999px;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  font-family: 'Tajawal', sans-serif;
+  font-size: 0.95em;
+  font-weight: 500;
+  white-space: nowrap;
+  text-decoration: none;
+  margin-left: 15px;
+
+  &:hover {
+    background-color: #000;
+    color: white;
+  }
+}
+
+.contactText {
+  font-family: 'Tajawal', sans-serif;
+  font-size: 0.95em;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Eye Styles */
+.eyesWrapper {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  pointer-events: none; 
+}
+
+.eye {
   width: 24px;
   height: 24px;
-  margin-right: 0.5rem;
+  background-color: #fff;
+  border-radius: 50%;
+  display: flex;
   align-items: center;
-  margin-bottom: 5px;
+  justify-content: center;
+  position: relative;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.pupil {
+  width: 9px;
+  height: 9px;
+  background-color: #000;
+  border-radius: 50%;
+  position: absolute;
+  transition: transform 0.05s linear;
+}
+
+/* Roll-out Social Circles */
+.socialCircles {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* Social icons with sliding white hover effect */
+.socialCircle {
+  width: 40px; 
+  height: 40px;
+  border-radius: 50%;
+  background-color: #111; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden; 
+  flex-shrink: 0;
+  
+  /* The sliding white background */
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    background: #ffffff; 
+    transition: transform 0.475s ease;
+    z-index: 0;
+  }
+
+  /* Trigger the slide on hover */
+  &:hover::before {
+    transform: scaleX(1);
+  }
+
+  /* 🌟 FIXED: Turns icon pure black on white background instead of inverted blue */
+  &:hover .socialIcon {
+    filter: brightness(0);
+  }
+}
+
+.socialIcon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  margin: 0;
+  position: relative;
+  z-index: 1; 
+  transition: filter 0.3s ease;
+}
+
+/* 🌟 Desktop Nav & Mobile Menu Layouts */
+.desktopNav {
+  display: flex;
+  align-items: center;
+}
+
+.mobileToggleBtn {
+  display: none; 
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  z-index: 1000;
+}
+
+.mobileDropdown {
+  display: none;
 }
 
 /* Mobile Responsive Styles */
 @media screen and (max-width: 768px) {
   .container {
-    padding: 10px 20px;
+    padding: 15px 20px;
+    mix-blend-mode: normal; /* Turn off difference to make menu look clean */
   }
+
+  /* Keep the header text visible and inverted manually if needed */
+  .title h1 { color: #111; }
+  .title p { color: #ff3636; }
+  
+  .mobileToggleBtn svg path { stroke: #111; } /* Dark hamburger lines */
   
   .title {
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     
     h1 {
-      font-size: 3.1em;
+      font-size: 2.8em;
       padding-left: 0;
     }
     
     p {
-      font-size: 1.2em;
-      margin: -30px 0 0 0;
+      font-size: 1.1em;
+      margin: -20px 0 0 0;
     }
   }
-  
-  .nav {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    margin-top: 1em;
-    
-    a {
-      margin: 0 10px;
-      font-size: 0.9em;
-      margin-top: 0.5em;
 
-      &.resumeButton {
-        display: none;
-      }
-
-      &.dashboardButton {
-        display: none;
-      }
-    }
-  }
-  
-  .icon {
-    width: 15px;
-    height: 15px;
-    margin-bottom: 2px;
-  }
   .titleSmall {
     font-size: 0.6rem;
+  }
+  
+  /* Hide standard desktop items */
+  .desktopNav {
+    display: none !important;
+  }
+
+  /* Show Hamburger */
+  .mobileToggleBtn {
+    display: block;
+  }
+
+  /* Mobile Dropdown Styling */
+  .mobileDropdown {
+    display: block;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: #fcfcfc; /* Nice off-white background */
+    border-bottom: 1px solid #eaeaea;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+    overflow: hidden;
+    z-index: 600;
+  }
+
+  .mobileDropdownContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0 30px 0;
+    gap: 20px;
+  }
+
+  .mobileNavItem {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin: 0 !important;
+  }
+
+  /* Adjust buttons inside mobile menu */
+  .contactWrapper, .resumeWrapper, .dashboardButtonPill {
+    margin-left: 0;
+    justify-content: center;
+  }
+
+  .contactButton, .resumeButtonPill, .dashboardButtonPill {
+    padding: 12px 24px;
+    font-size: 1.1em; /* Make them slightly larger for touch */
+  }
+
+  .socialCircles {
+    display: none; /* Hide rollout circles on mobile to keep menu clean */
+  }
+
+  .eyesWrapper {
+    display: none !important;
+  }
+
+  .resumeTooltip {
+    display: none !important;
   }
 }
