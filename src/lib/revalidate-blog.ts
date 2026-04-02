@@ -6,6 +6,7 @@ export function revalidateBlogCaches(slug?: string | null) {
   if (slug) {
     revalidatePath(`/blog/${slug}`);
   }
+  revalidatePath("/admin");
   revalidatePath("/admin/blogs");
   revalidatePath("/admin/blogs/trash");
 }

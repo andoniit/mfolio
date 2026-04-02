@@ -1,5 +1,6 @@
- "use client";
- 
+"use client";
+
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
@@ -79,10 +80,12 @@ export default function AdminShell({
         >
           <div className="h-full p-4">
             <div className="flex items-center justify-between mb-4">
-              <div
-                className={`rounded-xl border border-gray-200 bg-white shadow-sm flex items-center justify-center ${
+              <Link
+                href="/admin"
+                className={`rounded-xl border border-gray-200 bg-white shadow-sm flex items-center justify-center hover:bg-gray-50 transition-colors ${
                   collapsed ? "w-12 h-12" : "w-full h-12 px-3"
                 }`}
+                title="Dashboard"
               >
                 <span
                   className={`font-bold text-sm ${
@@ -91,7 +94,7 @@ export default function AdminShell({
                 >
                   {collapsed ? "A" : "Admin"}
                 </span>
-              </div>
+              </Link>
  
               <button
                 type="button"

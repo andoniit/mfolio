@@ -249,7 +249,7 @@ export default function Header() {
 
       {isAdminLoggedIn && (
         <motion.div variants={linkVariants} className={isMobile ? styles.mobileNavItem : ""}>
-          <Link href="/admin/blogs" className={styles.dashboardButtonPill}>
+          <Link href="/admin" className={styles.dashboardButtonPill}>
             Dashboard
           </Link>
         </motion.div>

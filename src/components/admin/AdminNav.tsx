@@ -32,7 +32,8 @@ function NavIcon({
     | (typeof projectSubItems)[number]["icon"]
     | "chevron"
     | "resume"
-    | "grid";
+    | "grid"
+    | "home";
 }) {
   const common = { width: 18, height: 18, viewBox: "0 0 24 24" };
   switch (kind) {
@@ -100,6 +101,12 @@ function NavIcon({
           <path d="M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z" strokeLinejoin="round" />
         </svg>
       );
+    case "home":
+      return (
+        <svg {...common} fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1V9.5z" strokeLinejoin="round" />
+        </svg>
+      );
   }
 }
 
@@ -108,19 +115,22 @@ export default function AdminNav({ collapsed = false }: Props) {
   const router = useRouter();
   
   // State to handle the dropdown tab
-  const [isBlogsOpen, setIsBlogsOpen] = useState(true);
-  const [isProjectsOpen, setIsProjectsOpen] = useState(true);
+  const [isBlogsOpen, setIsBlogsOpen] = useState(false);
+  const [isProjectsOpen, setIsProjectsOpen] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
 
-  // Automatically keep the dropdown open if we are inside a blog route
   useEffect(() => {
-    const isInsideBlogs = blogSubItems.some(item => pathname === item.href || pathname.startsWith(item.href + "/"));
+    if (pathname === "/admin") {
+      setIsBlogsOpen(false);
+      setIsProjectsOpen(false);
+      return;
+    }
+    const isInsideBlogs = blogSubItems.some(
+      (item) => pathname === item.href || pathname.startsWith(item.href + "/")
+    );
     if (isInsideBlogs) {
       setIsBlogsOpen(true);
     }
-  }, [pathname]);
-
-  useEffect(() => {
     const isInsideProjects = projectSubItems.some(
       (item) => pathname === item.href || pathname.startsWith(item.href + "/")
     );
@@ -202,7 +212,35 @@ export default function AdminNav({ collapsed = false }: Props) {
 
         {/* Navigation Wrapper */}
         <nav className="space-y-2">
-          
+          <Link
+            href="/admin"
+            className={`group flex items-center gap-3 py-2.5 px-3 transition-all duration-200 rounded-xl ${
+              pathname === "/admin"
+                ? "bg-white/50 text-black shadow-sm border border-white/40"
+                : "text-gray-500 border border-transparent hover:bg-white/30 hover:text-gray-900"
+            } ${collapsed ? "justify-center px-0 w-11 h-11 mx-auto" : ""}`}
+            title="Dashboard"
+          >
+            <span
+              className={`inline-flex items-center justify-center transition-transform duration-200 ${
+                pathname === "/admin"
+                  ? "text-black scale-105"
+                  : "text-gray-400 group-hover:text-gray-700"
+              }`}
+            >
+              <NavIcon kind="home" />
+            </span>
+            {!collapsed && (
+              <span
+                className={`text-[14px] tracking-wide ${
+                  pathname === "/admin" ? "font-semibold" : "font-medium"
+                }`}
+              >
+                Dashboard
+              </span>
+            )}
+          </Link>
+
           {/* Main Dropdown Tab: BLOGS */}
           <div className="flex flex-col">
             <button

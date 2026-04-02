@@ -5,6 +5,7 @@ export function revalidateProjectCaches(slug?: string | null) {
   if (slug) {
     revalidatePath(`/projects/${slug}`);
   }
+  revalidatePath("/admin");
   revalidatePath("/admin/projects");
   revalidatePath("/admin/projects/trash");
 }
