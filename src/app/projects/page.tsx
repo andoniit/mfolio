@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export default async function ProjectsPage() {
   const { data: projects, error } = await supabaseAdmin
     .from("projects")
-    .select("id, title, slug, description, cover_image_url, project_date, published_at")
+    .select("id, title, slug, description, cover_image_url, project_date, published_at, tech_stack")
     .eq("published", true)
     .is("trashed_at", null)
     .order("project_date", { ascending: false, nullsFirst: false });

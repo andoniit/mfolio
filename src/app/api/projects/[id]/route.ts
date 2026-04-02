@@ -7,6 +7,14 @@ type GalleryImageInput = {
   alt_text?: string | null;
 };
 
+function normalizeTechStack(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item): item is string => typeof item === "string")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
 function publishedAtForSave(
   published: boolean,
   projectDate: string | null | undefined,
@@ -73,6 +81,7 @@ export async function PUT(
     description: rest.description ?? null,
     content_json: rest.content_json ?? null,
     content_html: rest.content_html ?? null,
+    tech_stack: normalizeTechStack(rest.tech_stack),
     project_date: projectDate,
     cover_image_url: rest.cover_image_url || null,
     published,

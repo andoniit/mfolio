@@ -7,6 +7,14 @@ type GalleryImageInput = {
   alt_text?: string | null;
 };
 
+function normalizeTechStack(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item): item is string => typeof item === "string")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
 function publishedAtForSave(
   published: boolean,
   projectDate: string | null | undefined,
@@ -43,6 +51,7 @@ export async function POST(req: Request) {
     description: projectFields.description ?? null,
     content_json: projectFields.content_json ?? null,
     content_html: projectFields.content_html ?? null,
+    tech_stack: normalizeTechStack(projectFields.tech_stack),
     project_date: projectDate,
     cover_image_url: projectFields.cover_image_url || null,
     published,

@@ -16,7 +16,7 @@ export default async function ProjectDetailPage({ params }: Props) {
   const { data: project, error } = await supabaseAdmin
     .from("projects")
     .select(
-      "id, title, slug, description, content_html, project_date, cover_image_url, published_at"
+      "id, title, slug, description, content_html, project_date, cover_image_url, published_at, tech_stack"
     )
     .eq("slug", slug)
     .eq("published", true)
@@ -39,6 +39,10 @@ export default async function ProjectDetailPage({ params }: Props) {
       alt: r.alt_text?.trim() || "",
     })) ?? [];
 
+  const techStack = Array.isArray(project.tech_stack)
+    ? project.tech_stack.filter((t): t is string => typeof t === "string" && t.trim().length > 0)
+    : [];
+
   return (
     <div className="blog-post-wrapper">
       <Header />
@@ -55,6 +59,26 @@ export default async function ProjectDetailPage({ params }: Props) {
 
           {project.description && (
             <p className="text-xl leading-relaxed text-[#6e6e73] mb-10">{project.description}</p>
+          )}
+
+          {techStack.length > 0 && (
+            <section className="mb-10" aria-labelledby="project-tech-stack-heading">
+              <h2
+                id="project-tech-stack-heading"
+                className="text-[12px] font-bold tracking-widest uppercase text-[#86868b] mb-4"
+              >
+                Tech stack
+              </h2>
+              <ul className="flex flex-wrap gap-2 list-none p-0 m-0">
+                {techStack.map((item, index) => (
+                  <li key={`${index}-${item}`}>
+                    <span className="inline-flex items-center px-3.5 py-1.5 rounded-full text-sm font-medium bg-[#f5f5f7] text-[#1d1d1f] border border-[#e8e8ed]">
+                      {item}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
           )}
 
           <div className="flex items-center gap-4 mb-10">

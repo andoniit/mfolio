@@ -10,6 +10,7 @@ create table if not exists public.projects (
   content_json jsonb,
   content_html text,
   cover_image_url text,
+  tech_stack text[] not null default '{}',
   project_date date,
   published boolean not null default false,
   published_at timestamptz,
