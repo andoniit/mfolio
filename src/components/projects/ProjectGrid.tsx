@@ -22,7 +22,7 @@ export default function ProjectGrid({ projects }: { projects: Project[] }) {
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
-        ".folder-card-link", // Targets the new folder card class
+        ".folder-card-link", 
         { autoAlpha: 0, y: 42 },
         {
           autoAlpha: 1,
@@ -44,8 +44,9 @@ export default function ProjectGrid({ projects }: { projects: Project[] }) {
 
   return (
     <div ref={gridRef} className="blog-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "32px" }}>
-      {projects.map((project) => (
-        <ProjectCard key={project.id} project={project} />
+      {projects.map((project, index) => (
+        // Added the index prop here!
+        <ProjectCard key={project.id} project={project} index={index} />
       ))}
     </div>
   );
