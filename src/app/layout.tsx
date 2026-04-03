@@ -1,5 +1,6 @@
 import { Tajawal,Shadows_Into_Light } from "next/font/google";
 import "./globals.css";
+import ConditionalFooter from "@/components/layout/footer/ConditionalFooter";
 // Optimized Google fonts
 const tajawal = Tajawal({
   subsets: ['arabic'],
@@ -49,7 +50,10 @@ export default function RootLayout({
         />
       </head>
       
-      <body>  {children}</body>
+      <body className="min-h-screen flex flex-col">
+        <div className="flex-1 flex flex-col min-h-0">{children}</div>
+        <ConditionalFooter />
+      </body>
       
     </html>
   );

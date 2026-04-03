@@ -17,7 +17,7 @@ export default function Contact() {
   };
 
   return (
-    <main className={styles.main}>
+    <main id="contact" className={styles.main}>
       <div className={styles.body}>
         <div className={styles.introLine}>
           <p>Contact </p>

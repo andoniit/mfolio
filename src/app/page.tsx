@@ -65,7 +65,6 @@ export default function Home() {
       <Scattertext/>
       <Projects/>
       <Slideshow/>
-      <Contact/>
     </div>
     
   );

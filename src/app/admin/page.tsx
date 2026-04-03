@@ -9,11 +9,16 @@ export default async function AdminDashboardPage() {
     { count: postsTrashCount },
     { count: projectsCount },
     { count: projectsTrashCount },
+    { count: newsletterActiveCount },
   ] = await Promise.all([
     supabaseAdmin.from("posts").select("*", { count: "exact", head: true }).is("trashed_at", null),
     supabaseAdmin.from("posts").select("*", { count: "exact", head: true }).not("trashed_at", "is", null),
     supabaseAdmin.from("projects").select("*", { count: "exact", head: true }).is("trashed_at", null),
     supabaseAdmin.from("projects").select("*", { count: "exact", head: true }).not("trashed_at", "is", null),
+    supabaseAdmin
+      .from("newsletter_subscribers")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "active"),
   ]);
 
   const cards = [
@@ -34,6 +39,15 @@ export default async function AdminDashboardPage() {
       publicHref: "/projects",
       publicLabel: "View projects",
       meta: `${projectsCount ?? 0} active${projectsTrashCount ? ` · ${projectsTrashCount} in trash` : ""}`,
+    },
+    {
+      title: "Newsletter",
+      description: "Footer signups and unsubscribe links.",
+      href: "/admin/newsletter",
+      cta: "View subscribers",
+      publicHref: null as string | null,
+      publicLabel: null as string | null,
+      meta: `${newsletterActiveCount ?? 0} active`,
     },
     {
       title: "Resume",
