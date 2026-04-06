@@ -1,7 +1,18 @@
 /* ============================
+   BRAND COLOR VARIABLES
+============================ */
+:root {
+  --mf-purple: #6b63f7;
+  --mf-dark: #343434;
+  --mf-lime: #dcf763;
+  --mf-red: #ea3e3e;
+  --mf-white: #ffffff;
+}
+
+/* ============================
    HOVER ANIMATION MIXIN
 ============================ */
-@mixin sweep-hover($text-color: inherit) {
+@mixin sweep-hover($hover-bg: var(--mf-dark), $text-color: var(--mf-white)) {
   position: relative;
   overflow: hidden;
   z-index: 1;
@@ -16,7 +27,7 @@
     width: 100%;
     height: 100%;
     border-radius: inherit;
-    background: rgb(44, 44, 44);
+    background: $hover-bg;
     transition: transform 0.475s ease;
     z-index: -1;
   }
@@ -31,15 +42,56 @@
 }
 
 /* ============================
-   MAIN CONTAINER
+   MAIN CONTAINER & WRAPPER
+============================ */
+.footerWrapper {
+  position: relative;
+  width: 100%;
+  padding: 1rem; 
+  box-sizing: border-box;
+  overflow: hidden; 
+  background-color: transparent; /* Removed the black background */
+  
+  @media (min-width: 1024px) {
+    padding: 2rem; 
+  }
+}
+
+.backgroundText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: clamp(4rem, 15vw, 16rem);
+  font-weight: 900;
+  color: #e0e0e0; /* Solid subtle gray text for light theme */
+  z-index: 0;
+  white-space: nowrap;
+  pointer-events: none; 
+  user-select: none;
+  letter-spacing: -0.04em;
+}
+
+/* ============================
+   MAIN FOOTER GLASS BOX
 ============================ */
 .footer {
+  position: relative;
+  z-index: 10;
   width: 100%;
-  background-color: #ffffff;
+  overflow: hidden; /* CRITICAL: This clips the moving red flare inside the curved box */
+  
+  /* Glassmorphism */
+  background-color: rgba(255, 255, 255, 0.45); 
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.6); 
+  
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   padding: 4rem 1.5rem;
   box-sizing: border-box;
-  overflow: hidden;
 
   * {
     box-sizing: border-box;
@@ -50,7 +102,34 @@
   }
 }
 
+/* ============================
+   RED FLARE BACKGROUND (INSIDE FOOTER)
+============================ */
+.redGlow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150vw;
+  height: 150vh;
+  margin-top: -75vh;
+  margin-left: -75vw;
+  background: radial-gradient(ellipse at center, var(--mf-red) 0%, transparent 50%);
+  filter: blur(90px);
+  opacity: 0.5; /* Tuned to glow perfectly through the content inside the box */
+  z-index: 0;
+  pointer-events: none;
+  will-change: transform; 
+  animation: pulseGlow 5s infinite alternate ease-in-out;
+}
+
+@keyframes pulseGlow {
+  0% { opacity: 0.4; filter: blur(90px); }
+  100% { opacity: 0.6; filter: blur(120px); }
+}
+
 .inner {
+  position: relative;
+  z-index: 2; /* Ensures content sits above the red flare */
   max-width: 1200px;
   margin: 0 auto;
   display: grid;
@@ -71,48 +150,22 @@
     display: contents;
   }
 
-  /* Exactly matches the stacking order of your image */
   .newsletterSection { order: 1; }
-  
-  .navPills { 
-    order: 2; 
-    margin-bottom: 8px; 
-  }
-  
-  .contactWrapper { 
-    order: 3; 
-    max-width: 100%; 
-    margin-bottom: 8px; 
-  }
+  .navPills { order: 2; margin-bottom: 8px; }
+  .contactWrapper { order: 3; max-width: 100%; margin-bottom: 8px; }
   
   .arrowBox { 
     order: 4; 
-    height: 110px; /* Scaled safely for mobile */
+    height: 110px; 
     width: calc(100% - 50px); 
     margin-right: 50px; 
     padding-left: 20px;
   }
   
-  .arrowText { 
-    font-size: 3.5rem; 
-  }
-
-  .footerBottomRight { 
-    order: 5; 
-    height: auto; 
-    justify-content: flex-start; 
-    margin-top: 10px; 
-  }
-  
-  .footerBottomLeft { 
-    order: 6; 
-    height: auto; 
-    margin-top: 10px; 
-  }
-  
-  .contactEmail { 
-    font-size: 1.5rem !important; 
-  }
+  .arrowText { font-size: 3.5rem; }
+  .footerBottomRight { order: 5; height: auto; justify-content: flex-start; margin-top: 10px; }
+  .footerBottomLeft { order: 6; height: auto; margin-top: 10px; }
+  .contactEmail { font-size: 1.5rem !important; }
 }
 
 /* ============================
@@ -159,21 +212,21 @@
   font-size: 2rem;
   font-weight: 800;
   margin: 0;
-  color: #111;
+  color: var(--mf-dark);
 }
 
 .newsletterSubtext {
   margin: 0;
   font-size: 0.95rem;
   font-weight: 500;
-  color: #555;
+  color: #333;
   line-height: 1.45;
   max-width: 28rem;
 }
 
 .arrowBox {
   position: relative;
-  background: #ea3e3e; 
+  background: var(--mf-red); 
   border-radius: 20px 0 0 20px;
   display: flex;
   align-items: center;
@@ -214,11 +267,10 @@
   }
 }
 
-/* Nav Pills (Single Line on Mobile) */
 .navPills {
   display: flex;
   flex-wrap: nowrap; 
-  gap: 6px; /* Tight gap for mobile to ensure they fit */
+  gap: 6px; 
   margin-bottom: 4px; 
   width: 100%;
   justify-content: space-between;
@@ -230,30 +282,27 @@
 }
 
 .navPillWrapper {
-  flex: 1; /* Automatically stretches so all 4 share width equally on mobile */
+  flex: 1; 
   display: flex;
   
   @media (min-width: 1024px) {
-    flex: none; /* Disables the stretching on desktop */
+    flex: none; 
   }
 }
 
 .navPill {
-  background: #6b63f7;
-  color: #fff;
+  background: var(--mf-purple);
+  color: var(--mf-white);
   text-decoration: none;
   font-weight: 600;
-  
-  /* Scales the text down dynamically to fit on tiny screens */
   font-size: clamp(0.7rem, 2.8vw, 0.95rem); 
-  
   padding: 10px 0; 
   width: 100%;
   text-align: center;
   border-radius: 99px;
   white-space: nowrap; 
   
-  @include sweep-hover(#fff);
+  @include sweep-hover(var(--mf-dark), var(--mf-white));
 
   @media (min-width: 1024px) {
     font-size: 1.1rem;
@@ -277,10 +326,10 @@
   flex-direction: column;
   justify-content: center;
   gap: 8px;
-  background-color: rgba(233, 233, 233, 0.4); 
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: #111;
+  background-color: rgba(233, 233, 233, 0.5); 
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--mf-dark);
   height: 140px; 
   width: 100%;
   border-radius: 20px;
@@ -289,7 +338,7 @@
   cursor: pointer;
   text-decoration: none;
 
-  @include sweep-hover(#fff);
+  @include sweep-hover(var(--mf-lime), var(--mf-dark));
 
   .contactLabel, .contactEmail {
     position: relative;
@@ -310,7 +359,7 @@
   }
 
   &:hover .contactLabel {
-    color: #f0f0f0;
+    color: #333;
   }
 }
 
@@ -333,8 +382,8 @@
 .copyrightText {
   margin: 0;
   font-size: 1.1rem;
-  color: #888;
-  font-weight: 400;
+  color: #555;
+  font-weight: 500;
 }
 
 .socialIcons {
@@ -343,7 +392,8 @@
 }
 
 .socialBtn {
-  background: #e9e9e9;
+  background: rgba(233, 233, 233, 0.8);
+  backdrop-filter: blur(4px);
   width: 65px;
   height: 65px;
   border-radius: 14px;
@@ -352,7 +402,7 @@
   justify-content: center;
   text-decoration: none;
 
-  @include sweep-hover();
+  @include sweep-hover(var(--mf-lime), var(--mf-dark));
   
   .socialIconImg {
     width: 36px;
@@ -360,6 +410,11 @@
     object-fit: contain;
     position: relative; 
     z-index: 2;
+    transition: filter 0.3s ease;
+  }
+
+  &:hover .socialIconImg {
+    filter: brightness(0.2);
   }
 }
 
@@ -383,7 +438,7 @@
     display: flex;
     gap: 12px;
     align-items: center;
-    flex-wrap: nowrap; /* Ensures input and button stay on one line */
+    flex-wrap: nowrap; 
     width: 100%;
   }
 
@@ -396,11 +451,11 @@
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    color: #111;
+    color: var(--mf-dark);
     text-decoration: none;
-    flex-shrink: 0; /* Prevents button from being squashed */
+    flex-shrink: 0; 
     
-    @include sweep-hover(#fff);
+    @include sweep-hover(var(--mf-dark), var(--mf-white));
 
     &:disabled {
       opacity: 0.6;
@@ -410,9 +465,9 @@
 }
 
 .inputWrapper {
-  flex: 1; /* Will take up the remaining space dynamically */
-  min-width: 0; /* Stops flex container from blowing out */
-  max-width: 15rem; /* Cap desktop size */
+  flex: 1; 
+  min-width: 0; 
+  max-width: 15rem; 
   height: 3rem;
   position: relative;
   display: flex;
@@ -431,11 +486,11 @@
   border: 1px solid rgba(107, 99, 247, 0.3);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
-  color: #111;
+  color: var(--mf-dark);
 
   &:focus {
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
-    border-color: #ea3e3e; 
+    border-color: var(--mf-purple); 
   }
 
   &:focus ~ .inputLabel,
@@ -443,8 +498,8 @@
     top: 0;
     left: 0.75rem;
     font-size: 0.875rem;
-    color: #ea3e3e;
-    background: #fff;
+    color: var(--mf-purple);
+    background: var(--mf-white);
     padding: 0 0.25rem;
     border-radius: 4px;
   }
@@ -470,7 +525,7 @@
 .statusMessage {
   font-size: 0.9rem;
   font-weight: 500;
-  color: #6b63f7; 
+  color: var(--mf-purple); 
   margin: 0;
   margin-left: 8px; 
   animation: fadeIn 0.3s ease;

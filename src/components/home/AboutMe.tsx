@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
-import styles from "./InteractiveSection.module.scss";
+import styles from "./AboutMe.module.scss";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -12,22 +12,22 @@ const paragraphText =
 
 const greetings = ["Hello!", "¡Hola!", "Ola!", "こんにちは!", "안녕하세요!", "नमस्ते!"];
 
-export default function InteractiveSection() {
+export default function AboutMe() {
   const [isAndon, setIsAndon] = useState(false);
   const hasAutoToggled = useRef(false);
 
   const sectionRef = useRef<HTMLElement>(null);
   const bgDotsRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLParagraphElement>(null);
-  
+
   const nameWrapperRef = useRef<HTMLDivElement>(null);
   const name1Ref = useRef<HTMLHeadingElement>(null);
   const name2Ref = useRef<HTMLHeadingElement>(null);
 
   const greetingWrapperRef = useRef<HTMLDivElement>(null);
-  const introStaticRefs = useRef<(HTMLElement | null)[]>([]); 
-  const wordsRef = useRef<(HTMLSpanElement | null)[]>([]); 
-  const allWordsRef = useRef<(HTMLSpanElement | null)[]>([]); 
+  const introStaticRefs = useRef<(HTMLElement | null)[]>([]);
+  const wordsRef = useRef<(HTMLSpanElement | null)[]>([]);
+  const allWordsRef = useRef<(HTMLSpanElement | null)[]>([]);
   const greetingsRef = useRef<(HTMLSpanElement | null)[]>([]);
   const stickersRef = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -49,7 +49,7 @@ export default function InteractiveSection() {
     gsap.to(nameWrapperRef.current, {
       width: isAndon ? w2 : w1,
       duration: 0.6,
-      ease: "power3.inOut"
+      ease: "power3.inOut",
     });
 
     gsap.to(name1Ref.current, {
@@ -57,7 +57,7 @@ export default function InteractiveSection() {
       y: isAndon ? -15 : 0,
       duration: 0.6,
       ease: "power3.inOut",
-      pointerEvents: isAndon ? "none" : "auto"
+      pointerEvents: isAndon ? "none" : "auto",
     });
 
     gsap.to(name2Ref.current, {
@@ -65,17 +65,16 @@ export default function InteractiveSection() {
       y: isAndon ? 0 : 15,
       duration: 0.6,
       ease: "power3.inOut",
-      pointerEvents: isAndon ? "auto" : "none"
+      pointerEvents: isAndon ? "auto" : "none",
     });
 
     const handleResize = () => {
       gsap.set(nameWrapperRef.current, {
-        width: isAndon ? name2Ref.current?.offsetWidth : name1Ref.current?.offsetWidth
+        width: isAndon ? name2Ref.current?.offsetWidth : name1Ref.current?.offsetWidth,
       });
     };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, [isAndon]);
 
   useEffect(() => {
@@ -102,7 +101,7 @@ export default function InteractiveSection() {
           duration: 1.5,
           ease: "power2.out",
           scrollTrigger: { trigger: sectionRef.current, start: "top 75%" },
-        }
+        },
       );
 
       const greetingTl = gsap.timeline({ repeat: -1, paused: true });
@@ -120,11 +119,11 @@ export default function InteractiveSection() {
         start: "top 75%",
         onEnter: () => {
           greetingTl.play();
-          
+
           if (!hasAutoToggled.current) {
             hasAutoToggled.current = true;
-            setTimeout(() => setIsAndon(true), 1500); 
-            setTimeout(() => setIsAndon(false), 2500); 
+            setTimeout(() => setIsAndon(true), 1500);
+            setTimeout(() => setIsAndon(false), 2500);
           }
         },
         onEnterBack: () => greetingTl.play(),
@@ -132,22 +131,22 @@ export default function InteractiveSection() {
         onLeaveBack: () => greetingTl.pause(),
       });
 
-      gsap.to(introStaticRefs.current, { 
-        y: 0, 
-        opacity: 1, 
-        duration: 1, 
-        stagger: 0.2, 
+      gsap.to(introStaticRefs.current, {
+        y: 0,
+        opacity: 1,
+        duration: 1,
+        stagger: 0.2,
         ease: "power3.out",
-        scrollTrigger: { trigger: sectionRef.current, start: "top 75%" }
+        scrollTrigger: { trigger: sectionRef.current, start: "top 75%" },
       });
 
-      gsap.to(allWordsRef.current, { 
-        y: 0, 
-        opacity: 1, 
-        duration: 0.8, 
+      gsap.to(allWordsRef.current, {
+        y: 0,
+        opacity: 1,
+        duration: 0.8,
         stagger: 0.015,
-        ease: "power3.out", 
-        scrollTrigger: { trigger: sectionRef.current, start: "top 75%" }
+        ease: "power3.out",
+        scrollTrigger: { trigger: sectionRef.current, start: "top 75%" },
       });
 
       wordsRef.current.forEach((wordElement) => {
@@ -201,7 +200,12 @@ export default function InteractiveSection() {
   }, []);
 
   return (
-    <section ref={sectionRef} className={styles.section}>
+    <section
+      ref={sectionRef}
+      id="about-me"
+      className={styles.aboutMe}
+      aria-label="About me"
+    >
       <div ref={bgDotsRef} className={styles.bgDots} />
 
       <div className={styles.inner}>
@@ -284,11 +288,7 @@ export default function InteractiveSection() {
           </div>
 
           <label className={styles.switch}>
-            <input
-              type="checkbox"
-              checked={isAndon}
-              onChange={(e) => setIsAndon(e.target.checked)}
-            />
+            <input type="checkbox" checked={isAndon} onChange={(e) => setIsAndon(e.target.checked)} />
             <span className={styles.slider} />
           </label>
         </div>

@@ -4,13 +4,22 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: var(--mf-white);
   --foreground: #171717;
+}
+
+/* Global UI fonts (loaded in layout.tsx via next/font/local) */
+.font-satoshi {
+  font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
+}
+
+.font-sue-ellen {
+  font-family: var(--font-sue-ellen), var(--font-shadows), cursive;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #ffffff;
+    --background: var(--mf-white);
     --foreground: #ededed;
   }
 }
@@ -18,14 +27,14 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-satoshi), Arial, Helvetica, sans-serif;
   overflow-x: hidden;
 }
 
 .handwriting {
-  font-family: var(--font-shadows), cursive;
+  font-family: var(--font-sue-ellen), var(--font-shadows), cursive;
   font-size: 5em;
-  color: #ff3636;
+  color: var(--mf-red);
   margin-top: -2em;
   align-items: center;
   padding-left: 1.5em;

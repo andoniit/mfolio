@@ -1,7 +1,8 @@
-import { Tajawal,Shadows_Into_Light } from "next/font/google";
+import { Tajawal, Shadows_Into_Light } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import ConditionalFooter from "@/components/layout/footer/ConditionalFooter";
-// Optimized Google fonts
+
 const tajawal = Tajawal({
   subsets: ['arabic'],
   weight: ['200', '300', '400', '500', '700', '800', '900'],
@@ -12,6 +13,18 @@ const shadows = Shadows_Into_Light({
   subsets: ['latin'],
   weight: ['400'],
   variable: '--font-shadows',
+});
+
+const satoshi = localFont({
+  src: "../../public/fonts/Satoshi-Variable.ttf",
+  variable: "--font-satoshi",
+  display: "swap",
+});
+
+const sueEllenFrancisco = localFont({
+  src: "../../public/fonts/SueEllenFrancisco-Regular.ttf",
+  variable: "--font-sue-ellen",
+  display: "swap",
 });
 
 export const metadata = {
@@ -26,7 +39,10 @@ export default function RootLayout({
 }>) {
   return (
     
-      <html lang="en" className={`${tajawal.variable} ${shadows.variable}`}>
+      <html
+        lang="en"
+        className={`${tajawal.variable} ${shadows.variable} ${satoshi.variable} ${sueEllenFrancisco.variable}`}
+      >
       <head>
         
         {/* Boldonse must be added via <link> because it's not supported by next/font */}

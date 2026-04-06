@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react'
 import Hero from '../components/home/hero';
-import InteractiveSection from '../components/home/InteractiveSection';
+import AboutMe from '../components/home/AboutMe';
 import  Timeline  from "@/components/home/Timeline";
 import Contact from "@/components/home/contact/Contact"
 import Scattertext from "@/components/home/Scattertext"
@@ -55,12 +55,19 @@ export default function Home() {
                     
                 }}
             />
-<AnimatePresence mode='wait'>
+<AnimatePresence
+        mode="wait"
+        onExitComplete={() => {
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new CustomEvent("mf:preloader-exited"));
+          }
+        }}
+      >
         {isLoading && <Preloader />}
       </AnimatePresence>
       <Header/>
       <Hero />
-      <InteractiveSection />
+      <AboutMe />
       <Timeline/>
       <Scattertext/>
       <Projects/>

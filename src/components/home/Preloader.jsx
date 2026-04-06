@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import styles from "./Preloader.module.scss";
 
+// Home-page logo intro timing is aligned via LOGO_INTRO_DELAY_SEC in @/constants/preloader-logo
+
 const words = ["10%", "20%", "30%", "40%", "50%", "60%", "70%", "80%", "90%", "100%"];
 
 export const opacity = {

@@ -82,18 +82,23 @@ export default function AdminShell({
             <div className="flex items-center justify-between mb-4">
               <Link
                 href="/admin"
-                className={`rounded-xl border border-gray-200 bg-white shadow-sm flex items-center justify-center hover:bg-gray-50 transition-colors ${
-                  collapsed ? "w-12 h-12" : "w-full h-12 px-3"
+                className={`rounded-xl border border-gray-200 bg-white shadow-sm flex items-center justify-center hover:bg-gray-50 transition-colors overflow-hidden ${
+                  collapsed ? "w-12 h-12 p-1.5" : "w-full h-12 px-2"
                 }`}
                 title="Dashboard"
               >
-                <span
-                  className={`font-bold text-sm ${
-                    collapsed ? "" : "text-gray-900"
-                  }`}
-                >
-                  {collapsed ? "A" : "Admin"}
-                </span>
+                <img
+                  src="/logo/anikap.svg"
+                  alt="anikap"
+                  className={
+                    collapsed
+                      ? "h-full w-full object-contain"
+                      : "h-9 w-auto max-w-full object-contain object-left"
+                  }
+                  width={200}
+                  height={48}
+                  decoding="async"
+                />
               </Link>
  
               <button
