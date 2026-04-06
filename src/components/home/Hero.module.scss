@@ -52,7 +52,6 @@
   .section2 .textContent {
     font-size: 2rem;
     color: #330000;
-    font-family: 'Boldonse', cursive;
     z-index: 3;
   }
   
@@ -87,14 +86,9 @@
   .section4 .textContent {
     font-size: 1.5rem;
     color: #333;
-    font-family: 'Tajawal';
-
 }
 .section4 .highlight {
     color: #ff3636;
-    font-family: var(--font-shadows), cursive;
-
-    /* Example: Yellow color */
     font-size: 2em;
   }
   
@@ -159,10 +153,8 @@
     height: 100%;
     font-weight: 400;
     text-align: center;
-     /* semi-transparent overlay */
     border-radius: 20px;
-    font-family: 'Tajawal';
-
+    font-family: var(--font-sue-ellen), var(--font-shadows), cursive;
   }
 
 @media screen and (max-width: 768px) {

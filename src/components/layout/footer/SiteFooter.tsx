@@ -86,7 +86,7 @@ export default function SiteFooter() {
           {/* LEFT COLUMN */}
           <div className={styles.leftCol}>
             <div className={styles.newsletterSection}>
-              <h2 className={styles.newsletterHeading}>Subscribe to my newsletter</h2>
+              <h3 className={styles.newsletterHeading}>Subscribe to my newsletter</h3>
               <p className={styles.newsletterSubtext}>
                 Get blog posts and updates from me.
               </p>

@@ -7,7 +7,7 @@
     border-top: 1px solid rgb(201, 201, 201);
     cursor: pointer;
     transition: all 0.2s;
-    font-family: 'Tajawal';
+    font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
 }
 .project:last-of-type{
     border-bottom: 1px solid rgb(201, 201, 201);
@@ -17,7 +17,7 @@
     opacity: 0.5;
 }
 
-.project:hover h2{
+.project:hover h3{
     transform: translateX(-10px);
     color:#ff0000;
 
@@ -28,7 +28,7 @@
 
 }
 
-.project h2{
+.project h3{
     font-size: 2rem;
     margin: 0px;
     font-weight: 700;
@@ -51,7 +51,7 @@
     align-items: flex-start;
   }
   
-  .project h2 {
+  .project h3 {
     font-size: 1.5rem;
   }
   

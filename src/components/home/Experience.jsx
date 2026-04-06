@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import Framer from "@/components/shared/Framer";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -10,7 +9,7 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-const Timeline = () => {
+const Experience = () => {
   useEffect(() => {
     // --- 1. Original Custom Scroll Logic (Gradient Timeline Tracker) ---
     const timelines = document.querySelectorAll(".timeline__right");
@@ -28,9 +27,9 @@ const Timeline = () => {
         if (trackers[i]) {
           timeline.style.background = `linear-gradient(
             180deg, 
-            #ff3636 0%, 
-            #ff3636 0%, 
-            #ff3636 ${trackers[i].offsetTop + 5}px, 
+            #ea3e3e 0%, 
+            #ea3e3e 0%, 
+            #ea3e3e ${trackers[i].offsetTop + 5}px, 
             black ${trackers[i].offsetTop + 5}px, 
             black 100%
           )`;
@@ -44,7 +43,7 @@ const Timeline = () => {
     
     // Animate the main Experience Title
     gsap.fromTo(
-      ".experienceTitle h1",
+      ".experienceTitle h2",
       { opacity: 0, y: -50 },
       {
         opacity: 1,
@@ -122,11 +121,11 @@ const Timeline = () => {
   }, []);
 
   return (
-    <div>
-      <div style={{ height: "30vh" }}></div>
+    <section id="experience" aria-label="Experience">
+      <div style={{ height: "30vh" }} />
 
       <div className="experienceTitle">
-        <h1>Experience</h1>
+        <h2>Experience</h2>
       </div>
       <div className="experience-container">
         {/* LEFT COLUMN: Voluntary Section */}
@@ -134,8 +133,8 @@ const Timeline = () => {
           <div className="voluntaryRoles">Voluntary Roles</div>
           
           <div className="voluntary-item">
-            <h3>Javascript Developer</h3>
-            <h4>Carboncopies Foundation</h4>
+            <h4>Javascript Developer</h4>
+            <h5>Carboncopies Foundation</h5>
             <p>
               The Carboncopies Foundation is a nonprofit dedicated to advancing the science and
               development of Whole Brain Emulation. As a JavaScript Developer, I engineer their
@@ -150,8 +149,8 @@ const Timeline = () => {
           </div>
           
           <div className="voluntary-item">
-            <h3>Design Head</h3>
-            <h4>Indian Student Association – Illinois Tech | Aug 2023 – Jan 2025 · 1 yr 6 mos</h4>
+            <h4>Design Head</h4>
+            <h5>Indian Student Association – Illinois Tech | Aug 2023 – Jan 2025 · 1 yr 6 mos</h5>
             <p>
               I served as Design Head for 3 semesters at ISA@IIT Chicago. I was also offered a 4th
               tenure as Design Head, but as I was in the final semester of my master's, I had to
@@ -162,8 +161,8 @@ const Timeline = () => {
           </div>
 
           <div className="voluntary-item">
-            <h3>Joint Secretary</h3>
-            <h4>IEEE KLS GIT | Dec 2021 – Oct 2022 · 11 mos</h4>
+            <h4>Joint Secretary</h4>
+            <h5>IEEE KLS GIT | Dec 2021 – Oct 2022 · 11 mos</h5>
             <p>
               As Joint Secretary at IEEE KLS GIT, I coordinated internal communications, managed
               event logistics, and maintained documentation to ensure smooth operation of the team.
@@ -173,8 +172,8 @@ const Timeline = () => {
           </div>
 
           <div className="voluntary-item">
-            <h3>Webmaster</h3>
-            <h4>IEEE KLS GIT | Jan 2020 – Nov 2021 · 1 yr 10 mos</h4>
+            <h4>Webmaster</h4>
+            <h5>IEEE KLS GIT | Jan 2020 – Nov 2021 · 1 yr 10 mos</h5>
             <p>
               As Webmaster at IEEE KLS GIT, I led website maintenance and development initiatives,
               ensuring the site was both visually appealing and functionally robust. I collaborated
@@ -184,7 +183,7 @@ const Timeline = () => {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Timeline */}
+        {/* Work history (visual timeline) */}
         <div className="timeline-wrapper">
           <div className="timeline">
             {/* TIMELINE SECTION 1 */}
@@ -202,15 +201,15 @@ const Timeline = () => {
               <div className="timeline__right">
                 <div>
                   <div className="timeline__content">
-                    <h3>Software Developer</h3>
-                    <h4>Artversion (Full-Time) | May 2025 – Jan 2026</h4>
+                    <h4>Software Developer</h4>
+                    <h5>Artversion (Full-Time) | May 2025 – Jan 2026</h5>
                     <ul>
                       <li>Owned the development of automated Dayforce API integrations for multiple client platforms using JavaScript, PHP, REST APIs, and cron jobs, reducing manual job-posting effort by 70% and increasing cross-platform publishing reliability.</li>
                       <li>Built secure Chrome and Safari extensions to bridge disconnected systems across multiple client environments, reducing data transfer time by 90% and improving workflow efficiency for business operations.</li>
                       <li>Drove accessibility improvements across multiple React-based client applications by implementing ADA, WCAG, and ARIA standards, increasing accessible reach by 40% and strengthening overall user engagement.</li>
                       <li>Developed and launched a high-performance web platform on WordPress VIP, engineering fluid, interactive UI components with GSAP web animations, which increased user time-on-page by 35% and significantly enhanced visual engagement.</li>
                     </ul>
-                    <h4>Tech Stack</h4>
+                    <h5 className="timeline__techLabel">Tech Stack</h5>
                     <p>JavaScript, PHP, React, REST APIs, Dayforce API, Chrome/Safari Extensions, WordPress VIP, GSAP, ADA/WCAG/ARIA, Cron Jobs</p>
                   </div>
                 </div>
@@ -232,14 +231,14 @@ const Timeline = () => {
               <div className="timeline__right">
                 <div>
                   <div className="timeline__content">
-                    <h3>Software Developer</h3>
-                    <h4>Artarray (Full-Time) | Feb 2020 – Jun 2023</h4>
+                    <h4>Software Developer</h4>
+                    <h5>Artarray (Full-Time) | Feb 2020 – Jun 2023</h5>
                     <ul>
                       <li>Owned the development of a high-traffic course registration platform using React, Node.js, JavaScript (ES6+), and RESTful APIs, improving enrollment workflow efficiency by 35% and delivering a secure end-to-end user experience.</li>
                       <li>Architected and implemented distributed business logic for schedule conflict detection, prerequisite validation, and automated waitlist management, reducing registration errors by 40% and increasing successful enrollment processing by 30%.</li>
                       <li>Improved platform reliability and scalability by integrating Firebase Authentication, deploying Dockerized services on AWS, and building centralized monitoring with AWS OpenSearch, reducing incident resolution time by 50% and supporting 99.9% availability during peak registration cycles.</li>
                     </ul>
-                    <h4>Tech Stack</h4>
+                    <h5 className="timeline__techLabel">Tech Stack</h5>
                     <p>React, Node.js, JavaScript (ES6+), RESTful APIs, Firebase, Docker, AWS, AWS OpenSearch</p>
                   </div>
                 </div>
@@ -261,14 +260,14 @@ const Timeline = () => {
               <div className="timeline__right">
                 <div>
                   <div className="timeline__content">
-                    <h3>Freelance Web Developer</h3>
-                    <h4>Mar 2020 – Feb 2022</h4>
+                    <h4>Freelance Web Developer</h4>
+                    <h5>Mar 2020 – Feb 2022</h5>
                     <ul>
                       <li>Owned end-to-end web application development for multiple freelance clients, driving requirements gathering, system design, implementation, deployment, and post-launch support for scalable, business-critical solutions.</li>
                       <li>Developed dynamic, responsive front-end systems using React, Angular, JavaScript (ES6+), HTML5/CSS3, REST APIs, and state management, improving performance by 35% and delivering consistent cross-device experiences.</li>
                       <li>Leveraged analytics integration and event tracking to analyze user behavior and conversion funnels, guiding feature enhancements that boosted engagement by 25%.</li>
                     </ul>
-                    <h4>Tech Stack</h4>
+                    <h5 className="timeline__techLabel">Tech Stack</h5>
                     <p>React, Angular, JavaScript (ES6+), HTML5, CSS3, REST APIs, State Management, Web Analytics</p>
                   </div>
                 </div>
@@ -290,14 +289,14 @@ const Timeline = () => {
               <div className="timeline__right">
                 <div>
                   <div className="timeline__content">
-                    <h3>Webmaster</h3>
-                    <h4>IEEE Bangalore Young Professionals (Intern) | Nov 2020 – Sep 2023</h4>
+                    <h4>Webmaster</h4>
+                    <h5>IEEE Bangalore Young Professionals (Intern) | Nov 2020 – Sep 2023</h5>
                     <ul>
                       <li>Secured this competitive internship by winning the IEEE YP Online Website Contest, showcasing strong technical and web design capabilities.</li>
                       <li>Developed and launched the official IEEE Bangalore Young Professionals website, creating a responsive and modern digital hub for organizational engagement.</li>
                       <li>Engineered the flagship event platform for the Young Professionals Global Summit 2020, delivering a high-performance web experience for global attendees.</li>
                     </ul>
-                    <h4>Tech Stack</h4>
+                    <h5 className="timeline__techLabel">Tech Stack</h5>
                     <p>HTML, CSS, JavaScript, Web Design, Responsive UI, Web Performance Optimization</p>
                   </div>
                 </div>
@@ -337,24 +336,31 @@ const Timeline = () => {
         }
         .experienceTitle {
           font-size: 6em;
-          font-family: var(--font-shadows);
+          font-family: var(--font-sue-ellen), var(--font-shadows), cursive;
           text-align: left;
           margin-bottom: -4rem;
           margin-left: 14rem;
+        }
+        .experienceTitle h2 {
+          margin: 0;
+          font-family: inherit;
+          font-size: inherit;
+          font-weight: inherit;
         }
         .voluntaryRoles {
           font-size: 3em;
           margin-bottom: 1rem;
           margin-top: 7rem;
           color: var(--color-white);
-          font-family: Tajawal;
+          font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
+          font-weight: 600;
         }
         @media (max-width: 768px) {
           .experienceTitle {
             font-size: 4rem;
             margin: 0px;
           }
-          .experienceTitle h1 {
+          .experienceTitle h2 {
             font-size: 4rem;
             margin-left: 1rem !important;
             margin-bottom: 0px !important;
@@ -369,24 +375,28 @@ const Timeline = () => {
           padding-bottom: 1rem;
           will-change: transform, opacity;
         }
-        .voluntary-item h3 {
-          font-size: 2rem;
-          font-weight: bold;
-          margin-bottom: 0.5rem;
-          color: var(--color-white);
-          font-family: Tajawal;
-        }
         .voluntary-item h4 {
+          font-size: 2rem;
+          font-weight: 700;
+          margin: 0 0 0.5rem;
+          color: var(--color-white);
+          font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
+        }
+        .voluntary-item h5 {
           font-size: 1rem;
           font-weight: 500;
-          color: #ff3636;
-          margin-bottom: 0.5rem;
-          font-family: Tajawal;
+          color: var(--mf-red, #ea3e3e);
+          margin: 0 0 0.5rem;
+          font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
         }
         .voluntary-item p {
           font-size: 1rem;
           color: var(--color-grey);
           margin-top: 0.25rem;
+          font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
+        }
+        .voluntary-item a {
+          font-family: inherit;
         }
 
         .timeline {
@@ -404,7 +414,7 @@ const Timeline = () => {
           text-align: right;
           text-transform: uppercase;
           color: rgb(63, 63, 63);
-          font-family: 'Tajawal';
+          font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
         }
         .timeline__left,
         .timeline__middle,
@@ -415,8 +425,8 @@ const Timeline = () => {
         .timeline__right {
           background: linear-gradient(
             180deg,
-            red 0%,
-            red 0%,
+            #ea3e3e 0%,
+            #ea3e3e 0%,
             var(--color-grey) 0%,
             var(--color-grey) 100%
           );
@@ -443,36 +453,43 @@ const Timeline = () => {
           font-size: 1rem;
           color: var(--color-grey);
           transition: color 1s cubic-bezier(0, 0.39, 0.58, 1);
-          font-family: 'Tajawal';
+          font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
           will-change: transform, opacity;
         }
         .animate-on-scroll {
           color: var(--color-white);
         }
 
-        .timeline__content h3 {
+        .timeline__content h4 {
           font-size: 2rem;
-          font-weight: bold;
-          margin-bottom: 0.5rem;
+          font-weight: 700;
+          margin: 0 0 0.5rem;
+          font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
         }
-        .timeline__content h4:first-of-type {
+        .timeline__content h5:first-of-type {
           font-size: 1rem;
           font-weight: 500;
-          color: #ff3636;
-          margin-bottom: 0.5rem;
+          color: var(--mf-red, #ea3e3e);
+          margin: 0 0 0.5rem;
+          font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
         }
-        .timeline__content h4:nth-of-type(2) {
+        .timeline__content .timeline__techLabel {
           font-size: 1.15rem;
-          font-weight: 500;
+          font-weight: 600;
           color: var(--color-white);
-          margin-top: 1rem;
-          margin-bottom: 0.25rem;
+          margin: 1rem 0 0.25rem;
+          font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
         }
-        .timeline__content h4:nth-of-type(2) + p {
+        .timeline__content .timeline__techLabel + p {
           font-size: 1rem;
           color: var(--color-grey);
           font-style: italic;
           margin-top: 0.25rem;
+          font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
+        }
+        .timeline__content ul,
+        .timeline__content li {
+          font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
         }
 
         @media (max-width: 768px) {
@@ -481,7 +498,7 @@ const Timeline = () => {
             flex-direction: column;
             padding: 0 10px;
           }
-          .voluntary-item h3 {
+          .voluntary-item h4 {
             font-size: 1.5rem;
           }
           .timeline__section {
@@ -490,10 +507,10 @@ const Timeline = () => {
           .timeline__right > div {
             padding-left: 10px;
           }
-          .timeline__content h3 {
+          .timeline__content h4 {
             font-size: 1.5rem;
           }
-          .timeline__content h4:first-of-type {
+          .timeline__content h5:first-of-type {
             font-size: 1.1rem;
           }
           .timeline__content p,
@@ -521,8 +538,8 @@ const Timeline = () => {
           line-height: 1.5;
         }
       `}</style>
-    </div>
+    </section>
   );
 };
 
-export default Timeline;
+export default Experience;

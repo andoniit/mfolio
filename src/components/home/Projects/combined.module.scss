@@ -22,11 +22,13 @@
 }
 
 .featuredTitle {
-  font-size: clamp(4rem, 6vw, 6rem); /* responsive font sizing */
-  font-family: var(--font-shadows);
+  margin: 0;
+  font-size: clamp(4rem, 6vw, 6rem);
+  font-family: var(--font-sue-ellen), var(--font-shadows), cursive;
   text-align: left;
   margin-bottom: 0rem;
   margin-left: 6rem;
+  font-weight: inherit;
 }
 
 .button2 {
@@ -45,7 +47,7 @@
   box-shadow: 6px 6px 12px #efefef, -6px -6px 12px #ffffff;
   margin-top: 2rem;
   /* Keeping it inline-block to maintain intrinsic sizing */
-  font-family: 'Tajawal';
+  font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
   text-align: left;
 }
 

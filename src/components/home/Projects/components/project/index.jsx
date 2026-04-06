@@ -11,7 +11,7 @@ export default function index({index, title, description,link, setModal}) {
             onClick={() => window.open(link, '_blank')}
             className={styles.project}>
             
-            <h2>{title}</h2>
+            <h3>{title}</h3>
             <p>{description}</p>
         </div>
     )

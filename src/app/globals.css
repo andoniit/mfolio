@@ -27,37 +27,8 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-satoshi), Arial, Helvetica, sans-serif;
+  font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
   overflow-x: hidden;
-}
-
-.handwriting {
-  font-family: var(--font-sue-ellen), var(--font-shadows), cursive;
-  font-size: 5em;
-  color: var(--mf-red);
-  margin-top: -2em;
-  align-items: center;
-  padding-left: 1.5em;
-}
-
-.boldonse {
-  font-family: 'Boldonse', cursive;
-  font-size:10em;
-  padding-left: 1em;
-}
-
-/* Mobile Responsive Styles */
-@media screen and (max-width: 768px) {
-  .handwriting {
-    font-size: 3em;
-    margin-top: -1em;
-    padding-left: 1em;
-  }
-
-  .boldonse {
-    font-size: 6em;
-    padding-left: 0.5em;
-  }
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {
@@ -90,8 +61,4 @@ body {
   padding: 1rem;
   border-radius: 12px;
   overflow-x: auto;
-}
-
-.h1{
-  color: black;
 }

@@ -19,7 +19,7 @@ export default function AboutMe() {
   const sectionRef = useRef<HTMLElement>(null);
 
   const nameWrapperRef = useRef<HTMLDivElement>(null);
-  const name1Ref = useRef<HTMLHeadingElement>(null);
+  const name1Ref = useRef<HTMLHeadingElement>(null); // sole page h1 (legal name)
   const name2Ref = useRef<HTMLHeadingElement>(null);
 
   const greetingWrapperRef = useRef<HTMLDivElement>(null);
@@ -199,12 +199,12 @@ export default function AboutMe() {
           className={styles.rowName}
         >
           <div ref={nameWrapperRef} className={styles.nameWrapper}>
-            <h2 ref={name1Ref} className={styles.nameHeading}>
+            <h1 ref={name1Ref} className={styles.nameHeading}>
               Anirudha Kapileshwari
-            </h2>
-            <h2 ref={name2Ref} className={styles.nameHeading}>
+            </h1>
+            <h3 ref={name2Ref} className={styles.nameHeading}>
               ANDON
-            </h2>
+            </h3>
           </div>
 
           <label className={styles.switch}>

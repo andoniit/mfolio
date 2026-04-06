@@ -12,7 +12,7 @@
   }
   
   .voluntary-section h2 {
-    font-family: var(--font-shadows);
+    font-family: var(--font-sue-ellen), var(--font-shadows), cursive;
     text-transform: uppercase;
   }
   
@@ -63,7 +63,7 @@
     text-align: right;
     text-transform: uppercase;
     color: rgb(63, 63, 63);
-    font-family: "Tajawal";
+    font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
   }
   
   .timeline__left,
@@ -113,7 +113,7 @@
     font-size: 1rem;
     color: var(--color-grey);
     transition: color 1s cubic-bezier(0, 0.39, 0.58, 1);
-    font-family: "Tajawal";
+    font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
   }
   
   .animate-on-scroll {
@@ -151,7 +151,7 @@
   /* ExperienceTitle.module.css */
 .experienceTitle {
     font-size: 3em;
-    font-family: var(--font-shadows);
+    font-family: var(--font-sue-ellen), var(--font-shadows), cursive;
     text-align: left;
     margin-bottom: 2rem;
     margin-left: 10rem;

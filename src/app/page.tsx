@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react'
 import Hero from '../components/home/hero';
 import AboutMe from '../components/home/AboutMe';
-import  Timeline  from "@/components/home/Timeline";
+import Experience from "@/components/home/Experience";
 import Contact from "@/components/home/contact/Contact"
 import Scattertext from "@/components/home/Scattertext"
 import Preloader from "@/components/home/Preloader"
@@ -68,7 +68,7 @@ export default function Home() {
       <Header/>
       <Hero />
       <AboutMe />
-      <Timeline/>
+      <Experience />
       <Scattertext/>
       <Projects/>
       <Slideshow/>

@@ -60,9 +60,9 @@ export default function Projects() {
 
   return (
     <>
-    <div className={styles.featuredTitle}>
+    <h2 className={styles.featuredTitle}>
       Featured Projects
-    </div>
+    </h2>
   <div className={styles.mainp}>
     
     <div className={styles.bodyp}>

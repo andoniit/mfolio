@@ -15,7 +15,7 @@ export default function ScatterText() {
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const element = containerRef.current.querySelector(".h1");
+    const element = containerRef.current.querySelector(".scatter-quote");
     if (!element) return;
     const { chars } = splitText(element);
 
@@ -54,9 +54,9 @@ export default function ScatterText() {
   return (
     <div className="scatter" ref={containerRef}>
       <div className="half left">
-        <h1 className="h1">
+        <h2 className="scatter-quote">
           "Imagine <span className="extraordinary">extraordinary</span> in the ordinary"
-        </h1>
+        </h2>
       </div>
       <div className="half right">
         <img src="/4.PNG" alt="Scatter Image" />
@@ -94,14 +94,14 @@ function Stylesheet() {
         height: 120vh;
         overflow: hidden;
         text-align: left;
-        font-family: 'Tajawal', sans-serif;
+        font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
         color: #0f1115;
         margin: 0 auto; /* center container horizontally */
         padding: 0 2rem;
       }
       
-      .h1 {
-        /* Use clamp() to ensure the font scales well between a minimum and maximum size */
+      .scatter-quote {
+        margin: 0;
         font-size: clamp(3rem, 8vw, 8rem);
         font-weight: 200;
         line-height: 1;
@@ -161,8 +161,8 @@ function Stylesheet() {
           width: 100%;
           height: auto;
         }
-        .h1 {
-          font-size: 2rem; /* reduced from 4rem */
+        .scatter-quote {
+          font-size: 2rem;
           text-align: center;
           margin: 1em 0;
         }
@@ -190,16 +190,15 @@ function Stylesheet() {
   
   /* Adjust overlay text positioning on larger screens */
   .overlay-text {
-    margin-top:-2em        /* Move it a bit higher from the bottom */
-    left: 5%;          /* Add some left spacing */
+    margin-top: -2em;
+    left: 5%;
     max-width: 85%;    /* Constrain the width to avoid overlapping */
     font-size: 1rem;   /* Ensure the font scales appropriately */
     transform: none;   /* Remove any transforms used for mobile */
     margin: 0;
   }
   
-  /* Optionally, adjust the main heading if needed */
-  .h1 {
+  .scatter-quote {
     font-size: clamp(3rem, 6vw, 8rem);
   }
 }

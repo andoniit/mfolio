@@ -7,7 +7,7 @@
     position: fixed;
     z-index: 999;
     background-color: #141516;
-    font-family: var(--font-shadows), cursive;
+    font-family: var(--font-sue-ellen), var(--font-shadows), cursive;
   
     svg {
       position: absolute;
@@ -27,7 +27,8 @@
       align-items: center;
       position: absolute;
       z-index: 6;
-      font-family: var(--font-shadows), cursive;
+      font-family: inherit;
+      font-weight: 400;
       padding-left: 1em;
 
       span {
@@ -37,7 +38,6 @@
         background-color: white;
         border-radius: 50%;
         margin-right: 10px;
-        font-family: var(--font-shadows), cursive;
       }
     }
 }
