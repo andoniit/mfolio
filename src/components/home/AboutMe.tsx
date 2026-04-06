@@ -17,8 +17,6 @@ export default function AboutMe() {
   const hasAutoToggled = useRef(false);
 
   const sectionRef = useRef<HTMLElement>(null);
-  const bgDotsRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLParagraphElement>(null);
 
   const nameWrapperRef = useRef<HTMLDivElement>(null);
   const name1Ref = useRef<HTMLHeadingElement>(null);
@@ -29,7 +27,6 @@ export default function AboutMe() {
   const wordsRef = useRef<(HTMLSpanElement | null)[]>([]);
   const allWordsRef = useRef<(HTMLSpanElement | null)[]>([]);
   const greetingsRef = useRef<(HTMLSpanElement | null)[]>([]);
-  const stickersRef = useRef<(HTMLDivElement | null)[]>([]);
 
   const words = paragraphText.split(" ");
 
@@ -82,7 +79,6 @@ export default function AboutMe() {
       gsap.set(greetingsRef.current, { opacity: 0, rotationX: -90, y: 20 });
       gsap.set(introStaticRefs.current, { y: 30, opacity: 0 });
       gsap.set(allWordsRef.current, { y: 20, opacity: 0 });
-      gsap.set(stickersRef.current, { scale: 0, opacity: 0 });
 
       const firstGreetingWidth = greetingsRef.current[0]?.offsetWidth || 100;
       gsap.set(greetingWrapperRef.current, { width: firstGreetingWidth });
@@ -91,18 +87,6 @@ export default function AboutMe() {
         gsap.set(nameWrapperRef.current, { width: name1Ref.current.offsetWidth });
         gsap.set(name2Ref.current, { opacity: 0, y: 15 });
       }
-
-      gsap.fromTo(
-        bgDotsRef.current,
-        { opacity: 0, scale: 0.95 },
-        {
-          opacity: 1,
-          scale: 1,
-          duration: 1.5,
-          ease: "power2.out",
-          scrollTrigger: { trigger: sectionRef.current, start: "top 75%" },
-        },
-      );
 
       const greetingTl = gsap.timeline({ repeat: -1, paused: true });
       greetingsRef.current.forEach((el, index) => {
@@ -171,29 +155,6 @@ export default function AboutMe() {
           });
         }
       });
-
-      gsap.to(stickersRef.current, {
-        scale: 1,
-        opacity: 1,
-        duration: 1.2,
-        stagger: 0.15,
-        ease: "back.out(1.5)",
-        scrollTrigger: { trigger: sectionRef.current, start: "top 70%" },
-        onComplete: () => {
-          stickersRef.current.forEach((sticker, i) => {
-            if (!sticker) return;
-            gsap.to(sticker, {
-              y: i % 2 === 0 ? "-=12" : "+=12",
-              x: i === 1 ? "+=6" : "-=6",
-              rotation: i === 2 ? "+=3" : "-=3",
-              duration: 2.5 + i * 0.5,
-              yoyo: true,
-              repeat: -1,
-              ease: "sine.inOut",
-            });
-          });
-        },
-      });
     }, sectionRef);
 
     return () => ctx.revert();
@@ -206,48 +167,7 @@ export default function AboutMe() {
       className={styles.aboutMe}
       aria-label="About me"
     >
-      <div ref={bgDotsRef} className={styles.bgDots} />
-
       <div className={styles.inner}>
-        <div
-          ref={(el) => {
-            if (el) stickersRef.current[0] = el;
-          }}
-          className={styles.sticker0}
-        >
-          <img
-            src="/stickers/iamcreative.png"
-            alt="I'm Creative"
-            className={`${styles.stickerImg} ${styles.stickerImgCreative}`}
-          />
-        </div>
-
-        <div
-          ref={(el) => {
-            if (el) stickersRef.current[1] = el;
-          }}
-          className={styles.sticker1}
-        >
-          <img
-            src="/stickers/madein1999.png"
-            alt="Made in 1999"
-            className={`${styles.stickerImg} ${styles.stickerImg1999}`}
-          />
-        </div>
-
-        <div
-          ref={(el) => {
-            if (el) stickersRef.current[2] = el;
-          }}
-          className={styles.sticker2}
-        >
-          <img
-            src="/stickers/tecchheart.png"
-            alt="Tech Heart"
-            className={`${styles.stickerImg} ${styles.stickerImgHeart}`}
-          />
-        </div>
-
         <div className={styles.rowGreeting}>
           <div ref={greetingWrapperRef} className={styles.greetingWrapper}>
             {greetings.map((text, i) => (
@@ -293,7 +213,7 @@ export default function AboutMe() {
           </label>
         </div>
 
-        <p ref={containerRef} className={styles.paragraph}>
+        <p className={styles.paragraph}>
           {words.map((word, i) => {
             const typeIndex = (i * 7 + 3) % 4;
             const wordType = `word${typeIndex}`;
