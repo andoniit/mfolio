@@ -17,7 +17,12 @@ export type Project = {
   client_name?: string | null;
 };
 
-export default function ProjectGrid({ projects }: { projects: Project[] }) {
+type ProjectGridProps = {
+  projects: Project[];
+  columns?: 1 | 2 | 3;
+};
+
+export default function ProjectGrid({ projects, columns }: ProjectGridProps) {
   const gridRef = useRef<HTMLDivElement | null>(null);
 
   useLayoutEffect(() => {
@@ -47,7 +52,20 @@ export default function ProjectGrid({ projects }: { projects: Project[] }) {
   }
 
   return (
-    <div ref={gridRef} className="blog-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "32px" }}>
+    <div
+      ref={gridRef}
+      className="blog-grid"
+      style={{
+        display: "grid",
+        gridTemplateColumns:
+          columns === 3
+            ? "repeat(3, minmax(0, 1fr))"
+            : columns === 2
+              ? "repeat(2, minmax(0, 1fr))"
+              : "repeat(auto-fill, minmax(280px, 1fr))",
+        gap: "32px",
+      }}
+    >
       {projects.map((project, index) => (
         // Added the index prop here!
         <ProjectCard key={project.id} project={project} index={index} />

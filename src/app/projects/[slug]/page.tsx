@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import Header from "@/components/layout/header/header";
+import ProjectGrid from "@/components/projects/ProjectGrid";
 import "../../blog/[slug]/blog-post.scss";
 
 export const dynamic = "force-dynamic";
@@ -32,6 +33,18 @@ export default async function ProjectDetailPage({ params }: Props) {
     .select("image_url, alt_text, sort_order")
     .eq("project_id", project.id)
     .order("sort_order", { ascending: true });
+
+  const { data: moreProjects } = await supabaseAdmin
+    .from("projects")
+    .select(
+      "id, title, slug, description, external_url, cover_image_url, project_date, tech_stack, workplace, client_name"
+    )
+    .eq("published", true)
+    .is("trashed_at", null)
+    .neq("id", project.id)
+    .order("project_date", { ascending: false, nullsFirst: false })
+    .order("published_at", { ascending: false })
+    .limit(3);
 
   const gallery =
     galleryRows?.map((r) => ({
@@ -221,6 +234,21 @@ export default async function ProjectDetailPage({ params }: Props) {
                   </div>
                 ))}
               </div>
+            </section>
+          )}
+
+          {moreProjects && moreProjects.length > 0 && (
+            <section className="border-t border-gray-200 pt-12 mt-14">
+              <div className="flex items-center justify-between gap-4 mb-8">
+                <h2 className="text-2xl font-bold text-[#1d1d1f]">More Projects</h2>
+                <Link
+                  href="/projects"
+                  className="text-sm font-medium text-[#6e6e73] hover:text-[#1d1d1f] transition-colors"
+                >
+                  View all
+                </Link>
+              </div>
+              <ProjectGrid projects={moreProjects} columns={3} />
             </section>
           )}
         </div>
