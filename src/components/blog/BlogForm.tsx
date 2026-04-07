@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import slugify from "slugify";
 import BlogEditor from "@/components/blog/BlogEditor";
+import AdminDateField from "@/components/admin/AdminDateField";
 import ImageUpload from "@/components/admin/ImageUpload";
 
 type Category = {
@@ -69,6 +70,12 @@ export default function BlogForm({
   useEffect(() => {
     setAvailableTags(tags);
   }, [tags]);
+
+  useEffect(() => {
+    if (published && !publishedAt) {
+      setPublishedAt(getDateInputValue());
+    }
+  }, [published, publishedAt]);
 
   const selectedCategoryName = useMemo(() => {
     return categories.find((category) => category.id === categoryId)?.name || "";
@@ -309,17 +316,12 @@ export default function BlogForm({
             </label>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Publish Date
-            </label>
-            <input
-              type="date"
-              value={publishedAt}
-              onChange={(e) => setPublishedAt(e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:border-black transition-colors"
-            />
-          </div>
+          <AdminDateField
+            label="Publish Date"
+            value={publishedAt}
+            onChange={setPublishedAt}
+            helperText="Choose when this blog post should appear as published."
+          />
         </div>
 
         <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-6">

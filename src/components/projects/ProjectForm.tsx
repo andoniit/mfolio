@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import slugify from "slugify";
+import AdminDateField from "@/components/admin/AdminDateField";
 import BlogEditor from "@/components/blog/BlogEditor";
 import ImageUpload from "@/components/admin/ImageUpload";
 import { PROJECT_IMAGES_BUCKET } from "@/lib/project-storage";
@@ -62,6 +63,12 @@ export default function ProjectForm({ initialData, projectId }: ProjectFormProps
   const [saving, setSaving] = useState(false);
 
   const isEditing = Boolean(projectId);
+
+  useEffect(() => {
+    if (published && !projectDate) {
+      setProjectDate(getDateInputValue());
+    }
+  }, [published, projectDate]);
 
   const handleTitleChange = (value: string) => {
     setTitle(value);
@@ -478,17 +485,12 @@ export default function ProjectForm({ initialData, projectId }: ProjectFormProps
             </label>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Project date
-            </label>
-            <input
-              type="date"
-              value={projectDate}
-              onChange={(e) => setProjectDate(e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:border-black transition-colors"
-            />
-          </div>
+          <AdminDateField
+            label="Project Date"
+            value={projectDate}
+            onChange={setProjectDate}
+            helperText="Choose the date that should be shown for this project."
+          />
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
