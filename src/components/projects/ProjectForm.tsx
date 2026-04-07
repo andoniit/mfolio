@@ -37,6 +37,7 @@ export default function ProjectForm({ initialData, projectId }: ProjectFormProps
   const [title, setTitle] = useState(initialData?.title || "");
   const [slug, setSlug] = useState(initialData?.slug || "");
   const [description, setDescription] = useState(initialData?.description || "");
+  const [externalUrl, setExternalUrl] = useState(initialData?.external_url || "");
   const [coverImageUrl, setCoverImageUrl] = useState(initialData?.cover_image_url || "");
   const [gallery, setGallery] = useState<GalleryItem[]>(
     initialData?.gallery_images || []
@@ -161,6 +162,7 @@ export default function ProjectForm({ initialData, projectId }: ProjectFormProps
       title: title.trim(),
       slug: slug.trim(),
       description: description.trim() || null,
+      external_url: externalUrl.trim() || null,
       cover_image_url: coverImageUrl || null,
       content_json: contentJson,
       content_html: contentHtml,
@@ -272,6 +274,22 @@ export default function ProjectForm({ initialData, projectId }: ProjectFormProps
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className="w-full border border-gray-200 rounded-xl p-4 text-gray-800 outline-none focus:border-black focus:ring-1 focus:ring-black transition-all min-h-[100px] resize-y"
+          />
+        </div>
+
+        <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+          <label className="block text-sm font-semibold text-gray-900 mb-2">
+            Project link
+          </label>
+          <p className="text-xs text-gray-500 mb-4">
+            Optional: add either a GitHub URL or a live site URL. The frontend will show a button automatically.
+          </p>
+          <input
+            type="url"
+            placeholder="https://github.com/... or https://your-live-site.com"
+            value={externalUrl}
+            onChange={(e) => setExternalUrl(e.target.value)}
+            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-800 outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
           />
         </div>
 

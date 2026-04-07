@@ -15,6 +15,22 @@ function normalizeStringList(value: unknown): string[] {
     .filter(Boolean);
 }
 
+function normalizeExternalUrl(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+
+  try {
+    const url = new URL(trimmed);
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      throw new Error("Invalid protocol");
+    }
+    return url.toString();
+  } catch {
+    throw new Error("Project link must be a valid http or https URL");
+  }
+}
+
 function publishedAtForSave(
   published: boolean,
   projectDate: string | null | undefined,
@@ -49,6 +65,7 @@ export async function POST(req: Request) {
     title: projectFields.title,
     slug: projectFields.slug,
     description: projectFields.description ?? null,
+    external_url: normalizeExternalUrl(projectFields.external_url),
     content_json: projectFields.content_json ?? null,
     content_html: projectFields.content_html ?? null,
     tech_stack: normalizeStringList(projectFields.tech_stack),

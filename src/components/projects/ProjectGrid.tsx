@@ -9,6 +9,7 @@ export type Project = {
   title: string;
   slug: string;
   description?: string | null;
+  external_url?: string | null;
   cover_image_url?: string | null;
   project_date?: string | null;
   tech_stack?: string[] | null;

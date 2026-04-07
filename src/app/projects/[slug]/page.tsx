@@ -16,7 +16,7 @@ export default async function ProjectDetailPage({ params }: Props) {
   const { data: project, error } = await supabaseAdmin
     .from("projects")
     .select(
-      "id, title, slug, description, content_html, project_date, cover_image_url, published_at, tech_stack, collaborators, workplace, client_name"
+      "id, title, slug, description, external_url, content_html, project_date, cover_image_url, published_at, tech_stack, collaborators, workplace, client_name"
     )
     .eq("slug", slug)
     .eq("published", true)
@@ -57,6 +57,14 @@ export default async function ProjectDetailPage({ params }: Props) {
   const hasContext =
     Boolean(workplace || clientName || collaborators.length > 0);
 
+  const externalUrl =
+    typeof project.external_url === "string" && project.external_url.trim()
+      ? project.external_url.trim()
+      : null;
+
+  const externalUrlLabel =
+    externalUrl && /github\.com/i.test(externalUrl) ? "View on GitHub" : "Visit Live Site";
+
   return (
     <div className="blog-post-wrapper">
       <Header />
@@ -73,6 +81,19 @@ export default async function ProjectDetailPage({ params }: Props) {
 
           {project.description && (
             <p className="text-xl leading-relaxed text-[#6e6e73] mb-10">{project.description}</p>
+          )}
+
+          {externalUrl && (
+            <div className="mb-10">
+              <a
+                href={externalUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center rounded-full bg-[#1d1d1f] px-5 py-3 text-sm font-semibold text-white transition hover:bg-black"
+              >
+                {externalUrlLabel}
+              </a>
+            </div>
           )}
 
           {hasContext && (
