@@ -4,6 +4,11 @@
 @import "tailwindcss";
 
 :root {
+  --mf-purple: #6b63f7;
+  --mf-dark: #343434;
+  --mf-lime: #dcf763;
+  --mf-red: #ea3e3e;
+  --mf-white: #ffffff;
   --background: var(--mf-white);
   --foreground: #171717;
 }

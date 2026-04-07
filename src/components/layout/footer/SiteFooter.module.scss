@@ -1,15 +1,4 @@
 /* ============================
-   BRAND COLOR VARIABLES
-============================ */
-:root {
-  --mf-purple: #6b63f7;
-  --mf-dark: #343434;
-  --mf-lime: #dcf763;
-  --mf-red: #ea3e3e;
-  --mf-white: #ffffff;
-}
-
-/* ============================
    HOVER ANIMATION MIXIN
 ============================ */
 @mixin sweep-hover($hover-bg: var(--mf-dark), $text-color: var(--mf-white)) {

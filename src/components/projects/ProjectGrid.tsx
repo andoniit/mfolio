@@ -59,7 +59,7 @@ export default function ProjectGrid({ projects, columns }: ProjectGridProps) {
         display: "grid",
         gridTemplateColumns:
           columns === 3
-            ? "repeat(3, minmax(0, 1fr))"
+            ? "repeat(auto-fit, minmax(min(100%, 280px), 1fr))"
             : columns === 2
               ? "repeat(2, minmax(0, 1fr))"
               : "repeat(auto-fill, minmax(280px, 1fr))",

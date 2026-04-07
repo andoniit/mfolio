@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import Header from "@/components/layout/header/header";
+import ProjectGalleryLightbox from "@/components/projects/ProjectGalleryLightbox";
 import ProjectGrid from "@/components/projects/ProjectGrid";
 import "../../blog/[slug]/blog-post.scss";
 
@@ -77,163 +78,200 @@ export default async function ProjectDetailPage({ params }: Props) {
 
   const externalUrlLabel =
     externalUrl && /github\.com/i.test(externalUrl) ? "View on GitHub" : "Visit Live Site";
+  const detailsGridClassName = hasContext
+    ? "grid grid-cols-1 lg:grid-cols-[max-content_minmax(240px,340px)] gap-[50px] items-start"
+    : "grid grid-cols-1 gap-5 items-start";
+
+  const displayDate = project.project_date
+    ? new Date(`${project.project_date}T12:00:00`).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : project.published_at
+      ? new Date(project.published_at).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        })
+      : "";
 
   return (
     <div className="blog-post-wrapper">
       <Header />
 
-      <article className="min-h-screen py-10 sm:py-16 font-sans text-[#1d1d1f]">
-        <div className="max-w-4xl mx-auto px-6 sm:px-8">
-          <Link href="/projects" className="back-to-blogs">
-            <span aria-hidden>←</span> All projects
-          </Link>
-
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] mb-6">
-            {project.title}
-          </h1>
-
-          {project.description && (
-            <p className="text-xl leading-relaxed text-[#6e6e73] mb-10">{project.description}</p>
-          )}
-
-          {externalUrl && (
-            <div className="mb-10">
-              <a
-                href={externalUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center rounded-full bg-[#1d1d1f] px-5 py-3 text-sm font-semibold text-white transition hover:bg-black"
-              >
-                {externalUrlLabel}
-              </a>
-            </div>
-          )}
-
-          {hasContext && (
-            <section className="mb-10 space-y-4" aria-labelledby="project-context-heading">
-              <h2
-                id="project-context-heading"
-                className="text-[12px] font-bold tracking-widest uppercase text-[#86868b]"
-              >
-                Project context
-              </h2>
-              <dl className="space-y-3 text-[15px] text-[#4b5563] m-0">
-                {workplace && (
-                  <div className="flex flex-wrap gap-2">
-                    <dt className="font-semibold text-[#1d1d1f] shrink-0">Workplace</dt>
-                    <dd className="m-0">{workplace}</dd>
+      <article className="min-h-screen py-10 sm:py-16 font-sans" style={{ color: "var(--mf-dark)" }}>
+        <div className="max-w-6xl mx-auto px-6 sm:px-8">
+          <section className="mb-10 lg:mb-14">
+            <div className="grid grid-cols-1 lg:grid-cols-[max-content_minmax(280px,420px)] gap-2 lg:gap-5 items-start lg:items-center">
+              <div className="min-w-0 max-w-max">
+                <h1
+                  className="text-[2.3rem] sm:text-[4.1rem] lg:text-[4.7rem] font-bold tracking-[-0.065em] leading-[0.92] m-0 whitespace-normal break-words lg:whitespace-nowrap"
+                  style={{ color: "var(--mf-dark)" }}
+                >
+                  {project.title}
+                </h1>
+                {displayDate && (
+                  <div
+                    className="mt-3 inline-flex items-center gap-2 text-sm sm:text-base font-medium"
+                    style={{ color: "#6f6f6f" }}
+                  >
+                    <svg
+                      className="h-4 w-4 shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.8"
+                      aria-hidden="true"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10m-13 9h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v11a2 2 0 002 2z" />
+                    </svg>
+                    <span>{displayDate}</span>
                   </div>
                 )}
-                {clientName && (
-                  <div className="flex flex-wrap gap-2">
-                    <dt className="font-semibold text-[#1d1d1f] shrink-0">Client</dt>
-                    <dd className="m-0">{clientName}</dd>
-                  </div>
-                )}
-                {collaborators.length > 0 && (
-                  <div>
-                    <dt className="font-semibold text-[#1d1d1f] mb-2">Collaborators</dt>
-                    <dd className="m-0">
-                      <ul className="flex flex-wrap gap-2 list-none p-0 m-0">
-                        {collaborators.map((name, index) => (
-                          <li key={`${index}-${name}`}>
-                            <span className="inline-flex items-center px-3.5 py-1.5 rounded-full text-sm font-medium bg-[#f5f5f7] text-[#1d1d1f] border border-[#e8e8ed]">
-                              {name}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </dd>
-                  </div>
-                )}
-              </dl>
-            </section>
-          )}
-
-          {techStack.length > 0 && (
-            <section className="mb-10" aria-labelledby="project-tech-stack-heading">
-              <h2
-                id="project-tech-stack-heading"
-                className="text-[12px] font-bold tracking-widest uppercase text-[#86868b] mb-4"
-              >
-                Tech stack
-              </h2>
-              <ul className="flex flex-wrap gap-2 list-none p-0 m-0">
-                {techStack.map((item, index) => (
-                  <li key={`${index}-${item}`}>
-                    <span className="inline-flex items-center px-3.5 py-1.5 rounded-full text-sm font-medium bg-[#f5f5f7] text-[#1d1d1f] border border-[#e8e8ed]">
-                      {item}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          <div className="flex items-center gap-4 mb-10">
-            <img
-              src="/images/25.jpg"
-              alt="Anirudha Kapileshwari"
-              className="w-14 h-14 rounded-full object-cover border border-gray-200 shrink-0"
-            />
-            <div className="text-[#1d1d1f]">
-              <div className="flex items-center gap-2 text-[15px] text-[#4b5563]">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 7V3m8 4V3m-9 8h10m-13 9h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v11a2 2 0 002 2z"
-                  />
-                </svg>
-                <span>
-                  {project.project_date
-                    ? new Date(project.project_date + "T12:00:00").toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })
-                    : project.published_at
-                      ? new Date(project.published_at).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })
-                      : ""}
-                </span>
               </div>
-              <p className="text-[18px] leading-none mt-1 text-[#6b7280]">by Anirudha Kapileshwari</p>
+
+              {project.description ? (
+                <div className="max-w-[420px] lg:border-l lg:border-black/10 lg:pl-4 lg:self-center flex items-center min-h-full">
+                  <p
+                    className="text-lg sm:text-xl leading-relaxed m-0"
+                    style={{ color: "var(--mf-purple)" }}
+                  >
+                    {project.description}
+                  </p>
+                </div>
+              ) : null}
             </div>
-          </div>
+          </section>
+
+          <section className="mb-10 lg:mb-12">
+            <div className={detailsGridClassName}>
+              {hasContext ? (
+                <section aria-labelledby="project-context-heading" className="max-w-[500px]">
+                  <h2
+                    id="project-context-heading"
+                    className="text-sm font-bold uppercase tracking-wide mb-4"
+                    style={{ color: "var(--mf-dark)" }}
+                  >
+                    Project Context
+                  </h2>
+                  <dl className="space-y-4 text-[15px] leading-relaxed m-0">
+                    {workplace && (
+                      <div>
+                        <dt className="font-semibold mb-1" style={{ color: "var(--mf-dark)" }}>
+                          Workplace / origination
+                        </dt>
+                        <dd className="m-0" style={{ color: "var(--mf-dark)" }}>
+                          {workplace}
+                        </dd>
+                      </div>
+                    )}
+                    {clientName && (
+                      <div>
+                        <dt className="font-semibold mb-1" style={{ color: "var(--mf-dark)" }}>
+                          Client
+                        </dt>
+                        <dd className="m-0" style={{ color: "var(--mf-dark)" }}>
+                          {clientName}
+                        </dd>
+                      </div>
+                    )}
+                    {collaborators.length > 0 && (
+                      <div>
+                        <dt className="font-semibold mb-1" style={{ color: "var(--mf-dark)" }}>
+                          Collaborators
+                        </dt>
+                        <dd className="m-0" style={{ color: "var(--mf-dark)" }}>
+                          <ul className="list-disc pl-5 m-0">
+                            {collaborators.map((name, index) => (
+                              <li key={`${index}-${name}`}>{name}</li>
+                            ))}
+                          </ul>
+                        </dd>
+                      </div>
+                    )}
+                  </dl>
+                </section>
+              ) : null}
+
+              <section
+                aria-labelledby="project-tech-stack-heading"
+                className="w-full max-w-[340px] justify-self-start text-left"
+              >
+                {techStack.length > 0 && (
+                  <>
+                    <h2
+                      id="project-tech-stack-heading"
+                      className="text-sm font-bold uppercase tracking-wide mb-4"
+                      style={{ color: "var(--mf-dark)" }}
+                    >
+                      Tech stack
+                    </h2>
+                    <ul className="flex flex-wrap gap-2.5 list-none p-0 m-0 mb-6">
+                      {techStack.map((item, index) => (
+                        <li key={`${index}-${item}`}>
+                          <span
+                            className="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-semibold"
+                            style={{
+                              background: "var(--mf-purple)",
+                              color: "var(--mf-white)",
+                            }}
+                          >
+                            {item}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+
+                {externalUrl && (
+                  <a
+                    href={externalUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="projectCtaButton"
+                  >
+                    {externalUrlLabel}
+                  </a>
+                )}
+              </section>
+            </div>
+          </section>
 
           {project.cover_image_url && (
-            <div className="w-full overflow-hidden rounded-[28px] mb-12 bg-white shadow-sm border border-gray-100">
+            <div className="w-full overflow-hidden rounded-[16px] mb-10 bg-white shadow-sm border border-black/5">
               <img
                 src={project.cover_image_url}
                 alt={project.title}
-                className="w-full h-auto max-h-[500px] object-cover"
+                className="w-full h-auto max-h-[640px] object-cover"
               />
             </div>
           )}
 
+          {project.description && (
+            <p
+              className="max-w-4xl text-lg sm:text-[1.35rem] leading-relaxed mb-8"
+              style={{ color: "var(--mf-dark)" }}
+            >
+              {project.description}
+            </p>
+          )}
+
           <div
-            className="prose prose-lg max-w-none blog-content prose-img:rounded-[24px] prose-a:text-blue-600 hover:prose-a:text-blue-500 mb-14"
+            className="prose prose-lg max-w-none blog-content project-detail-content mb-14"
             dangerouslySetInnerHTML={{ __html: project.content_html || "" }}
           />
 
           {gallery.length > 0 && (
-            <section className="border-t border-gray-200 pt-12">
-              <h2 className="text-2xl font-bold text-[#1d1d1f] mb-8">Gallery</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {gallery.map((item, index) => (
-                  <div
-                    key={`${item.url}-${index}`}
-                    className="rounded-[24px] overflow-hidden bg-gray-100 border border-gray-100 shadow-sm"
-                  >
-                    <img src={item.url} alt={item.alt} className="w-full h-full object-cover" />
-                  </div>
-                ))}
-              </div>
+            <section className="pt-4">
+              <h2
+                className="text-[2rem] font-bold mb-6"
+                style={{ color: "var(--mf-dark)", letterSpacing: "-0.04em" }}
+              >
+                Gallery
+              </h2>
+              <ProjectGalleryLightbox items={gallery} />
             </section>
           )}
 
