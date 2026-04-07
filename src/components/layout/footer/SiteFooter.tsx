@@ -53,13 +53,10 @@ export default function SiteFooter() {
   const pill1Scale = useTransform(scrollYProgress, [0.1, 0.5], [0.6, 1]);
   const pill2Scale = useTransform(scrollYProgress, [0.2, 0.6], [0.6, 1]);
   const pill3Scale = useTransform(scrollYProgress, [0.3, 0.7], [0.6, 1]);
-  const pill4Scale = useTransform(scrollYProgress, [0.4, 0.8], [0.6, 1]);
 
   return (
     <section className={styles.footerWrapper}>
-      
-      {/* Giant background text placed behind everything */}
-      <div className={styles.backgroundText}>anikap.tech</div>
+
 
       {/* Main Footer Box - Mouse Tracking applied here now */}
       <motion.footer 

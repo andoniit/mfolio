@@ -166,7 +166,9 @@
   .arrowText { font-size: 3.5rem; }
   .footerBottomRight { order: 5; height: auto; justify-content: flex-start; margin-top: 10px; }
   .footerBottomLeft { order: 6; height: auto; margin-top: 10px; }
-  .contactEmail { font-size: 1.5rem !important; }
+  .contactEmail {
+    font-size: clamp(1rem, 5.2vw, 1.2rem) !important;
+  }
 }
 
 /* ============================
@@ -356,7 +358,9 @@
   .contactEmail {
     font-size: 2rem;
     font-weight: 600;
-    word-break: break-all;
+    white-space: nowrap;
+    word-break: normal;
+    overflow-wrap: normal;
   }
 
   &:hover .contactLabel {
