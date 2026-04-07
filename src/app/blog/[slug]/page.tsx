@@ -86,12 +86,12 @@ export default async function BlogPostPage({ params }: Props) {
               (post.categories.slug ? (
                 <Link
                   href={`/category/${post.categories.slug}`}
-                  className="text-[12px] font-bold tracking-widest uppercase text-[#86868b] hover:text-[#1d1d1f] transition-colors"
+                  className="post-top-category"
                 >
                   {post.categories.name}
                 </Link>
               ) : (
-                <span className="text-[12px] font-bold tracking-widest uppercase text-[#86868b]">
+                <span className="post-top-category">
                   {post.categories.name}
                 </span>
               ))}
@@ -138,7 +138,7 @@ export default async function BlogPostPage({ params }: Props) {
                     : "Draft"}
                 </span>
               </div>
-              <p className="text-[18px] leading-none mt-1 text-[#6b7280]">by Anirudha Kapileshwari</p>
+              <p className="post-author-name">by Anirudha Kapileshwari</p>
             </div>
           </div>
 
@@ -163,7 +163,7 @@ export default async function BlogPostPage({ params }: Props) {
                     key={item.tags.id}
                     className="post-tag-pill"
                   >
-                    #{item.tags.name}
+                    {item.tags.name}
                   </Link>
                 ) : null
               )}

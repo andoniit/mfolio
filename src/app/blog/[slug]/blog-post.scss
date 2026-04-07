@@ -8,11 +8,11 @@
 
 .post-tag-pill {
   padding: 0.35rem 1rem;
-  border: 1px solid #eaeaea;
+  border: 1px solid rgba(107, 99, 247, 0.28);
   border-radius: 50px;
-  color: #6e6e73;
+  color: var(--mf-white);
   z-index: 1;
-  background: rgb(237, 237, 237);
+  background: var(--mf-purple);
   position: relative;
   font-weight: 600;
   font-size: 0.75rem;
@@ -34,13 +34,37 @@
   }
 
   &:hover {
-    color: #e8e8e8;
+    color: var(--mf-white);
     border-color: #212121;
   }
 
   &:hover::before {
     width: 100%;
   }
+}
+
+.post-top-category {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--mf-purple);
+  text-decoration: none;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+
+  &:hover {
+    color: #000000;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+}
+
+.post-author-name {
+  font-size: 18px;
+  line-height: 1;
+  margin-top: 0.25rem;
+  color: #000000;
+  font-weight: 700;
 }
 
 .back-to-blogs {

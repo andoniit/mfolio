@@ -73,13 +73,13 @@
   padding: 15px 25px;
   border: 1px solid transparent;
   border-radius: 15px;
-  color: #212121;
+  color: var(--mf-dark);
   z-index: 1;
-  background: #e8e8e8;
+  background: var(--mf-lime);
   position: relative;
   font-weight: 800;
   font-size: 17px;
-  box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
+  box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.16);
   text-decoration: none;
   transition: all 250ms;
   overflow: hidden;
@@ -147,7 +147,10 @@
 .blog-card {
   display: flex;
   flex-direction: column;
-  background-color: #ffffff;
+  background: #ffffff;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.65);
   border-radius: 24px;
   text-decoration: none;
   height: 100%; /* Ensures cards stretch nicely in a grid */
@@ -155,7 +158,7 @@
   /* Soft, diffused shadow */
   box-shadow: 
     0 1px 3px rgba(0, 0, 0, 0.02), 
-    0 10px 30px rgba(0, 0, 0, 0.08);
+    0 18px 36px rgba(0, 0, 0, 0.1);
   
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 
@@ -163,7 +166,7 @@
     transform: translateY(-4px);
     box-shadow: 
       0 1px 3px rgba(0, 0, 0, 0.02), 
-      0 20px 40px rgba(0, 0, 0, 0.12);
+      0 22px 44px rgba(0, 0, 0, 0.14);
 
     .card-image {
       transform: scale(1.05);
@@ -177,7 +180,9 @@
   width: 100%;
   aspect-ratio: 4 / 3;
   border-radius: 24px 24px 0 0; /* Match the top corners of the card */
-  background-color: #f5f5f7;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .image-inner {
@@ -207,7 +212,9 @@
   position: absolute;
   bottom: 0;
   right: 0;
-  background-color: #ffffff; 
+  background: #ffffff;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   padding-top: 16px;
   padding-left: 16px;
   padding-right: 16px;
@@ -244,20 +251,20 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: #f5eedc; 
-  color: #1a1a1a;
+  background-color: var(--mf-purple);
+  color: var(--mf-white);
   padding: 0.5rem 1.25rem;
   border-radius: 40px; 
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  border: 1px solid rgba(107, 99, 247, 0.28);
 }
 
-/* Dynamic pastel colors for the badges */
-.blog-card:nth-child(3n + 1) .category-cutout-badge { background-color: #fbd6c0; } /* Soft Peach */
-.blog-card:nth-child(3n + 2) .category-cutout-badge { background-color: #c0e2c6; } /* Soft Green */
-.blog-card:nth-child(3n + 3) .category-cutout-badge { background-color: #c9c0e2; } /* Soft Purple */
+.blog-card:nth-child(3n + 1) .category-cutout-badge { background-color: var(--mf-purple); color: var(--mf-white); }
+.blog-card:nth-child(3n + 2) .category-cutout-badge { background-color: var(--mf-purple); color: var(--mf-white); }
+.blog-card:nth-child(3n + 3) .category-cutout-badge { background-color: var(--mf-purple); color: var(--mf-white); }
 
 
 
@@ -266,8 +273,16 @@
   display: flex;
   flex-direction: column;
   flex: 1; 
-  /* CHANGE THIS: 1.5rem top/bottom, 2rem left/right */
-  padding: 1.5rem 2rem; 
+  padding: 1.5rem 2rem;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.96) 0%,
+    rgba(255, 255, 255, 1) 100%
+  );
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-top: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 0 0 24px 24px;
 }
 
 .card-title {
