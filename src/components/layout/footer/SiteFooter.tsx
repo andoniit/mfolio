@@ -131,9 +131,6 @@ export default function SiteFooter() {
                 <motion.div style={{ scale: pill3Scale }} className={styles.navPillWrapper}>
                   <Link href="/projects" className={styles.navPill}>Projects</Link>
                 </motion.div>
-                <motion.div style={{ scale: pill4Scale }} className={styles.navPillWrapper}>
-                  <Link href="/contact" className={styles.navPill}>Contact</Link>
-                </motion.div>
               </div>
 
               {/* Animated Contact Box */}
