@@ -1,24 +1,21 @@
 .mainp {
   display: flex;
-  height: 100vh;
-  align-items: center;
   justify-content: center;
   text-align: left;
-  /* Optional: add horizontal padding for very wide screens */
   padding: 0 2rem;
-  margin-top:7em ;
-  margin-bottom: 10em;
+  margin-top: 3rem;
+  margin-bottom: 8rem;
 }
 
 .bodyp {
   width: 100%;
-  max-width: 1000px; /* constrains the content on very wide screens */
+  max-width: 1400px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: stretch;
   text-align: left;
   margin: 0 auto;
+  gap: 2rem;
 }
 
 .featuredTitle {
@@ -29,6 +26,13 @@
   margin-bottom: 0rem;
   margin-left: 6rem;
   font-weight: inherit;
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 0.5rem;
 }
 
 .button2 {
@@ -45,16 +49,8 @@
   background: #ffffff;
   border: 1px solid #ffffff;
   box-shadow: 6px 6px 12px #efefef, -6px -6px 12px #ffffff;
-  margin-top: 2rem;
-  /* Keeping it inline-block to maintain intrinsic sizing */
   font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
   text-align: left;
-}
-
-.buttonContainer {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
 }
 
 .button2:active {
@@ -73,8 +69,8 @@
   background-color: rgba(0, 0, 0, 0.05);
   border-radius: 50%;
   display: block;
-  transition: all 0.5s 0.1s cubic-bezier(0.55, 0, 0.1, 1);
   z-index: -1;
+  transition: all 0.5s 0.1s cubic-bezier(0.55, 0, 0.1, 1);
 }
 
 .button2:after {
@@ -114,6 +110,8 @@
   .mainp {
     height: auto;
     padding: 0.5rem;
+    margin-top: 2rem;
+    margin-bottom: 5rem;
   }
   
   .bodyp {
@@ -124,5 +122,10 @@
     font-size: 3rem;
     margin-left: 1rem;
     margin-bottom: 0;
+  }
+
+  .button2 {
+    width: 100%;
+    text-align: center;
   }
 }

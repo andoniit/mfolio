@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache";
 
 export function revalidateProjectCaches(slug?: string | null) {
+  revalidatePath("/");
   revalidatePath("/projects");
   if (slug) {
     revalidatePath(`/projects/${slug}`);

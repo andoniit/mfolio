@@ -1,6 +1,5 @@
 import { useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 import styles from './style.module.css';
 import gsap from 'gsap';
 
@@ -28,7 +27,7 @@ export default function index({modal, projects}) {
     let xMoveCursorLabel = gsap.quickTo(cursorLabel.current, "left", {duration: 0.45, ease: "power3"})
     let yMoveCursorLabel = gsap.quickTo(cursorLabel.current, "top", {duration: 0.45, ease: "power3"})
 
-    window.addEventListener('mousemove', (e) => {
+    const handleMouseMove = (e) => {
       const { pageX, pageY } = e;
       xMoveContainer(pageX)
       yMoveContainer(pageY)
@@ -36,7 +35,13 @@ export default function index({modal, projects}) {
       yMoveCursor(pageY)
       xMoveCursorLabel(pageX)
       yMoveCursorLabel(pageY)
-    })
+    };
+
+    window.addEventListener('mousemove', handleMouseMove)
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+    }
   }, [])
 
   return (
@@ -47,19 +52,25 @@ export default function index({modal, projects}) {
   initial="initial"
   animate={active ? "enter" : "closed"}
   className={styles.modalContainer}
-  onClick={() => window.open(projects[index].link, '_blank')}
+  onClick={() => {
+    if (projects[index]?.href) {
+      window.location.href = projects[index].href;
+    }
+  }}
 >
             <div style={{top: index * -100 + "%"}} className={styles.modalSlider}>
             {
                 projects.map( (project, index) => {
-                const { src, color, link } = project
+                const { cover_image_url, color, title } = project
                 return <div className={styles.modal} style={{backgroundColor: color}} key={`modal_${index}`}>
-                    <Image 
-                    src={`/images/${src}`}
-                    width={300}
-                    height={0}
-                    alt="image"
-                    />
+                    {cover_image_url ? (
+                      <img
+                        src={cover_image_url}
+                        alt={title}
+                      />
+                    ) : (
+                      <div className={styles.modalPlaceholder}>{title}</div>
+                    )}
                 </div>
                 })
             }
@@ -72,7 +83,11 @@ export default function index({modal, projects}) {
   variants={scaleAnimation}
   initial="initial"
   animate={active ? "enter" : "closed"}
-  onClick={() => window.open(projects[index].link, '_blank')}
+  onClick={() => {
+    if (projects[index]?.href) {
+      window.location.href = projects[index].href;
+    }
+  }}
 >
   View
 </motion.div>

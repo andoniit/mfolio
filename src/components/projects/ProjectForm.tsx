@@ -38,6 +38,9 @@ export default function ProjectForm({ initialData, projectId }: ProjectFormProps
   const [slug, setSlug] = useState(initialData?.slug || "");
   const [description, setDescription] = useState(initialData?.description || "");
   const [externalUrl, setExternalUrl] = useState(initialData?.external_url || "");
+  const [homeFeatureOrder, setHomeFeatureOrder] = useState(
+    initialData?.home_feature_order ? String(initialData.home_feature_order) : ""
+  );
   const [coverImageUrl, setCoverImageUrl] = useState(initialData?.cover_image_url || "");
   const [gallery, setGallery] = useState<GalleryItem[]>(
     initialData?.gallery_images || []
@@ -163,6 +166,7 @@ export default function ProjectForm({ initialData, projectId }: ProjectFormProps
       slug: slug.trim(),
       description: description.trim() || null,
       external_url: externalUrl.trim() || null,
+      home_feature_order: homeFeatureOrder ? Number(homeFeatureOrder) : null,
       cover_image_url: coverImageUrl || null,
       content_json: contentJson,
       content_html: contentHtml,
@@ -484,6 +488,25 @@ export default function ProjectForm({ initialData, projectId }: ProjectFormProps
               onChange={(e) => setProjectDate(e.target.value)}
               className="w-full border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:border-black transition-colors"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Home feature order
+            </label>
+            <p className="text-xs text-gray-500 mb-3">
+              Optional: choose `1`, `2`, or `3` to show this project on the home page. Leave empty to hide it there.
+            </p>
+            <select
+              value={homeFeatureOrder}
+              onChange={(e) => setHomeFeatureOrder(e.target.value)}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:border-black transition-colors bg-white"
+            >
+              <option value="">Not featured on home</option>
+              <option value="1">Home slot 1</option>
+              <option value="2">Home slot 2</option>
+              <option value="3">Home slot 3</option>
+            </select>
           </div>
         </div>
 

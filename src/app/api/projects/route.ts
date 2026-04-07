@@ -7,6 +7,11 @@ type GalleryImageInput = {
   alt_text?: string | null;
 };
 
+function parsePositiveInt(value: string | null, fallback: number) {
+  const parsed = Number.parseInt(value || "", 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
 function normalizeStringList(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   return value
@@ -29,6 +34,15 @@ function normalizeExternalUrl(value: unknown): string | null {
   } catch {
     throw new Error("Project link must be a valid http or https URL");
   }
+}
+
+function normalizeHomeFeatureOrder(value: unknown): number | null {
+  if (value === null || value === undefined || value === "") return null;
+  const parsed = Number.parseInt(String(value), 10);
+  if (!Number.isFinite(parsed) || parsed < 1 || parsed > 3) {
+    throw new Error("Home feature order must be 1, 2, 3, or empty");
+  }
+  return parsed;
 }
 
 function publishedAtForSave(
@@ -54,6 +68,37 @@ async function insertProjectImages(projectId: string, images: GalleryImageInput[
   if (error) throw new Error(error.message);
 }
 
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const featured = searchParams.get("featured");
+  const limit = parsePositiveInt(searchParams.get("limit"), 50);
+
+  let query = supabaseAdmin
+    .from("projects")
+    .select(
+      "id, title, slug, description, cover_image_url, project_date, workplace, client_name, home_feature_order"
+    )
+    .eq("published", true)
+    .is("trashed_at", null);
+
+  if (featured === "home") {
+    query = query
+      .not("home_feature_order", "is", null)
+      .order("home_feature_order", { ascending: true, nullsFirst: false })
+      .order("updated_at", { ascending: false });
+  } else {
+    query = query.order("project_date", { ascending: false, nullsFirst: false });
+  }
+
+  const { data, error } = await query.limit(limit);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+
+  return NextResponse.json(data ?? []);
+}
+
 export async function POST(req: Request) {
   const body = await req.json();
   const { gallery_images = [], ...projectFields } = body;
@@ -66,6 +111,7 @@ export async function POST(req: Request) {
     slug: projectFields.slug,
     description: projectFields.description ?? null,
     external_url: normalizeExternalUrl(projectFields.external_url),
+    home_feature_order: normalizeHomeFeatureOrder(projectFields.home_feature_order),
     content_json: projectFields.content_json ?? null,
     content_html: projectFields.content_html ?? null,
     tech_stack: normalizeStringList(projectFields.tech_stack),

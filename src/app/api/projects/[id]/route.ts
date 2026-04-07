@@ -31,6 +31,15 @@ function normalizeExternalUrl(value: unknown): string | null {
   }
 }
 
+function normalizeHomeFeatureOrder(value: unknown): number | null {
+  if (value === null || value === undefined || value === "") return null;
+  const parsed = Number.parseInt(String(value), 10);
+  if (!Number.isFinite(parsed) || parsed < 1 || parsed > 3) {
+    throw new Error("Home feature order must be 1, 2, 3, or empty");
+  }
+  return parsed;
+}
+
 function publishedAtForSave(
   published: boolean,
   projectDate: string | null | undefined,
@@ -96,6 +105,7 @@ export async function PUT(
     slug: rest.slug,
     description: rest.description ?? null,
     external_url: normalizeExternalUrl(rest.external_url),
+    home_feature_order: normalizeHomeFeatureOrder(rest.home_feature_order),
     content_json: rest.content_json ?? null,
     content_html: rest.content_html ?? null,
     tech_stack: normalizeStringList(rest.tech_stack),
