@@ -4,10 +4,8 @@
   background-color: transparent;
   z-index: 700;
   transition: all 0.9s ease;
-  
-  /* 🌟 FIXED: Changed from hidden to visible so dropdown cards don't cut off */
-  overflow: visible; 
-  
+  overflow-x: clip;
+  overflow-y: visible;
   width: 100%;
 }
 
@@ -18,6 +16,8 @@
   padding: 20px 40px 0;
   mix-blend-mode: difference;
   position: relative;
+  width: 100%;
+  overflow-x: clip;
 }
 
 /* 🌟 Protects the logo link from getting default link underlines */
@@ -274,17 +274,94 @@
   align-items: center;
 }
 
-.mobileToggleBtn {
-  display: none; 
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 8px;
-  z-index: 1000;
+.mobileActions {
+  display: none;
+  min-width: 0;
 }
 
-.mobileDropdown {
-  display: none;
+.mobileActionSlot {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.mobileActionsCompact {
+  align-items: flex-end;
+  width: auto;
+}
+
+.mobileActionButton {
+  justify-content: center;
+  width: 100%;
+  padding: 8px 14px;
+  font-size: 0.78rem;
+}
+
+.mobileActionDot {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  padding: 0;
+  border: 0;
+  border-radius: 9999px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+}
+
+.mobileActionDotResume {
+  background: #ff5500;
+}
+
+.mobileActionDotContact {
+  background: #111111;
+}
+
+.mobileContactGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.mobileContactButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 8px 14px;
+  border-radius: 9999px;
+  background: #111111;
+  color: #ffffff;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+}
+
+.mobileContactText {
+  font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.mobileSocialRow {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.mobileSocialCircle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #111111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
 
 /* Mobile Responsive Styles */
@@ -297,8 +374,6 @@
   /* Keep the header text visible and inverted manually if needed */
   .title h1 { color: #111; }
   .title p { color: #ff3636; }
-  
-  .mobileToggleBtn svg path { stroke: #111; } /* Dark hamburger lines */
   
   .title {
     flex-direction: column;
@@ -324,53 +399,22 @@
     display: none !important;
   }
 
-  /* Show Hamburger */
-  .mobileToggleBtn {
-    display: block;
-  }
-
-  /* Mobile Dropdown Styling */
-  .mobileDropdown {
-    display: block;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    background-color: #fcfcfc; /* Nice off-white background */
-    border-bottom: 1px solid #eaeaea;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-    overflow: hidden;
-    z-index: 600;
-  }
-
-  .mobileDropdownContent {
+  .mobileActions {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    padding: 20px 0 30px 0;
-    gap: 20px;
+    align-items: stretch;
+    gap: 8px;
+    width: 126px;
+    max-width: 100%;
   }
 
-  .mobileNavItem {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    margin: 0 !important;
-  }
-
-  /* Adjust buttons inside mobile menu */
-  .contactWrapper, .resumeWrapper, .dashboardButtonPill {
-    margin-left: 0;
-    justify-content: center;
-  }
-
-  .contactButton, .resumeButtonPill, .dashboardButtonPill {
-    padding: 12px 24px;
-    font-size: 1.1em; /* Make them slightly larger for touch */
+  .mobileActionsCompact {
+    align-items: flex-end;
+    width: auto;
   }
 
   .socialCircles {
-    display: none; /* Hide rollout circles on mobile to keep menu clean */
+    display: none;
   }
 
   .eyesWrapper {
@@ -379,6 +423,12 @@
 
   .resumeTooltip {
     display: none !important;
+  }
+
+  .contactWrapper,
+  .resumeWrapper,
+  .dashboardButtonPill {
+    margin-left: 0;
   }
 }
 

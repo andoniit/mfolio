@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import styles from "./Header.module.scss";
 import { supabase } from "@/lib/supabase";
 import gsap from "gsap";
@@ -34,6 +34,24 @@ const linkVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { duration: 0.5 } },
 };
+
+const SOCIAL_LINKS = [
+  {
+    href: "https://www.linkedin.com/in/anirudha-kapileshwari-293826202/",
+    icon: "/3.png",
+    label: "LinkedIn",
+  },
+  {
+    href: "https://github.com/andoniit",
+    icon: "/2.png",
+    label: "GitHub",
+  },
+  {
+    href: "https://www.behance.net/aniruddkapiles1",
+    icon: "/1.png",
+    label: "Behance",
+  },
+];
 
 // 🌟 GSAP Animated SVG Logo Component
 const AnimatedSvgLogo = ({ isScrolled }) => {
@@ -321,33 +339,18 @@ const InteractiveContactButton = () => {
         }}
         transition={{ duration: 0.4, ease: "easeOut" }}
       >
-        <motion.a 
-          variants={circleVariants}
-          href="https://www.linkedin.com/in/anirudha-kapileshwari-293826202/" 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          className={styles.socialCircle}
-        >
-          <img src="/3.png" alt="LinkedIn" className={styles.socialIcon} />
-        </motion.a>
-        <motion.a 
-          variants={circleVariants}
-          href="https://github.com/andoniit" 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          className={styles.socialCircle}
-        >
-          <img src="/2.png" alt="GitHub" className={styles.socialIcon} />
-        </motion.a>
-        <motion.a 
-          variants={circleVariants}
-          href="https://www.behance.net/aniruddkapiles1" 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          className={styles.socialCircle}
-        >
-          <img src="/1.png" alt="Behance" className={styles.socialIcon} />
-        </motion.a>
+        {SOCIAL_LINKS.map((link) => (
+          <motion.a
+            key={link.label}
+            variants={circleVariants}
+            href={link.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.socialCircle}
+          >
+            <img src={link.icon} alt={link.label} className={styles.socialIcon} />
+          </motion.a>
+        ))}
       </motion.div>
 
       <a 
@@ -366,33 +369,196 @@ const InteractiveContactButton = () => {
   );
 };
 
-// 🌟 Smooth Framer-Motion Hamburger Icon
-const HamburgerIcon = ({ isOpen }) => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <motion.path
-      stroke="#ededed"
-      strokeWidth="2"
-      strokeLinecap="round"
-      animate={isOpen ? { d: "M 6 18 L 18 6" } : { d: "M 4 8 L 20 8" }}
-      transition={{ duration: 0.3, ease: "easeInOut" }}
-    />
-    <motion.path
-      stroke="#ededed"
-      strokeWidth="2"
-      strokeLinecap="round"
-      animate={isOpen ? { d: "M 6 6 L 18 18" } : { d: "M 4 16 L 20 16" }}
-      transition={{ duration: 0.3, ease: "easeInOut" }}
-    />
-  </svg>
-);
+const MobileHeaderActions = ({ resumeUrl, isScrolled }) => {
+  const [expandedAction, setExpandedAction] = useState(null);
+  const wrapperRef = useRef(null);
+  const isCompact = isScrolled;
+
+  useEffect(() => {
+    if (!isCompact) {
+      setExpandedAction(null);
+    }
+  }, [isCompact]);
+
+  useEffect(() => {
+    if (!isCompact || !expandedAction) return;
+
+    const handlePointerDown = (event) => {
+      if (!wrapperRef.current?.contains(event.target)) {
+        setExpandedAction(null);
+      }
+    };
+
+    const handleScroll = () => {
+      setExpandedAction(null);
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [expandedAction, isCompact]);
+
+  const showResumeButton = !isCompact || expandedAction === "resume";
+  const showContactButton = !isCompact || expandedAction === "contact";
+
+  return (
+    <div
+      ref={wrapperRef}
+      className={`${styles.mobileActions} ${isCompact ? styles.mobileActionsCompact : ""}`}
+    >
+      {resumeUrl ? (
+        <motion.div layout className={styles.mobileActionSlot}>
+          <AnimatePresence mode="popLayout" initial={false}>
+            {showResumeButton ? (
+              <motion.a
+                key="resume-button"
+                layout
+                initial={{ opacity: 0, scale: 0.86, width: 18 }}
+                animate={{ opacity: 1, scale: 1, width: "auto" }}
+                exit={{ opacity: 0, scale: 0.86, width: 18 }}
+                transition={{ duration: 0.22, ease: "easeInOut" }}
+                href={resumeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${styles.resumeButtonPill} ${styles.mobileActionButton}`}
+              >
+                <span className={styles.buttonContent}>View My Resume</span>
+              </motion.a>
+            ) : (
+              <motion.button
+                key="resume-dot"
+                layout
+                initial={{ opacity: 0, scale: 0.86, width: 18 }}
+                animate={{ opacity: 1, scale: 1, width: 18 }}
+                exit={{ opacity: 0, scale: 0.86, width: 18 }}
+                transition={{ duration: 0.22, ease: "easeInOut" }}
+                type="button"
+                className={`${styles.mobileActionDot} ${styles.mobileActionDotResume}`}
+                aria-label="Show resume button"
+                onClick={() => setExpandedAction("resume")}
+              />
+            )}
+          </AnimatePresence>
+        </motion.div>
+      ) : null}
+
+      <motion.div layout className={styles.mobileActionSlot}>
+        <AnimatePresence mode="popLayout" initial={false}>
+          {showContactButton ? (
+            <motion.div
+              key="contact-button"
+              layout
+              initial={{ opacity: 0, scale: 0.86, width: 18 }}
+              animate={{ opacity: 1, scale: 1, width: "auto" }}
+              exit={{ opacity: 0, scale: 0.86, width: 18 }}
+              transition={{ duration: 0.22, ease: "easeInOut" }}
+            >
+              <MobileContactButton
+                compactMode={isCompact}
+                onCollapseRequest={() => setExpandedAction(null)}
+              />
+            </motion.div>
+          ) : (
+            <motion.button
+              key="contact-dot"
+              layout
+              initial={{ opacity: 0, scale: 0.86, width: 18 }}
+              animate={{ opacity: 1, scale: 1, width: 18 }}
+              exit={{ opacity: 0, scale: 0.86, width: 18 }}
+              transition={{ duration: 0.22, ease: "easeInOut" }}
+              type="button"
+              className={`${styles.mobileActionDot} ${styles.mobileActionDotContact}`}
+              aria-label="Show contact button"
+              onClick={() => setExpandedAction("contact")}
+            />
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </div>
+  );
+};
+
+const MobileContactButton = ({ compactMode = false, onCollapseRequest = null }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const wrapperRef = useRef(null);
+
+  const handleContactClick = (event) => {
+    if (!isExpanded) {
+      event.preventDefault();
+      setIsExpanded(true);
+    }
+  };
+
+  useEffect(() => {
+    if (!isExpanded) return;
+
+    const handlePointerDown = (event) => {
+      if (!wrapperRef.current?.contains(event.target)) {
+        setIsExpanded(false);
+        if (compactMode) onCollapseRequest?.();
+      }
+    };
+
+    const handleScroll = () => {
+      setIsExpanded(false);
+      if (compactMode) onCollapseRequest?.();
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [compactMode, isExpanded, onCollapseRequest]);
+
+  return (
+    <div ref={wrapperRef} className={styles.mobileContactGroup}>
+      <a
+        href="mailto:anikap1999@gmail.com"
+        className={styles.mobileContactButton}
+        onClick={handleContactClick}
+      >
+        <span className={styles.mobileContactText}>Get in touch</span>
+      </a>
+
+      <AnimatePresence initial={false}>
+        {isExpanded ? (
+          <motion.div
+            className={styles.mobileSocialRow}
+            initial={{ opacity: 0, y: -6, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: "auto" }}
+            exit={{ opacity: 0, y: -6, height: 0 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+          >
+          {SOCIAL_LINKS.map((link) => (
+            <a
+              key={link.label}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.mobileSocialCircle}
+              aria-label={link.label}
+            >
+              <img src={link.icon} alt={link.label} className={styles.socialIcon} />
+            </a>
+          ))}
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </div>
+  );
+};
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [resumeUrl, setResumeUrl] = useState(null);
-  
-  // Mobile Menu State
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -486,32 +652,8 @@ export default function Header() {
           <NavItems isMobile={false} />
         </motion.nav>
 
-        {/* Mobile Hamburger Toggle Button */}
-        <button 
-          className={styles.mobileToggleBtn}
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          aria-label="Toggle Menu"
-        >
-          <HamburgerIcon isOpen={isMobileMenuOpen} />
-        </button>
+        <MobileHeaderActions resumeUrl={resumeUrl} isScrolled={isScrolled} />
       </div>
-
-      {/* 📱 Mobile Sliding Menu */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div 
-            className={styles.mobileDropdown}
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-          >
-            <div className={styles.mobileDropdownContent}>
-              <NavItems isMobile={true} />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </motion.header>
   );
 }

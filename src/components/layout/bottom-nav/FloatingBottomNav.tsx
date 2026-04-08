@@ -1,0 +1,353 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import styles from "./FloatingBottomNav.module.scss";
+
+const HOME_SECTIONS = [
+  {
+    id: "hero-section",
+    label: "Hello welcome to my portfolio - Anirudha Kapileshwari - Andon",
+  },
+  { id: "about-me", label: "About Me" },
+  { id: "experience", label: "Experience" },
+  { id: "featured-projects", label: "Featured Projects" },
+  { id: "my-vision", label: "My Vision" },
+] as const;
+
+const prettifySegment = (segment: string) =>
+  decodeURIComponent(segment)
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+
+const getLocationLabel = (pathname: string) => {
+  if (pathname === "/") return "Home";
+
+  const segments = pathname.split("/").filter(Boolean);
+  if (segments.length === 0) return "Home";
+
+  const [first, second] = segments;
+
+  if (first === "projects") {
+    return second ? `Projects / ${prettifySegment(second)}` : "Projects";
+  }
+
+  if (first === "blog") {
+    return second ? `Blog / ${prettifySegment(second)}` : "Blog";
+  }
+
+  if (first === "category") {
+    return second ? `Category / ${prettifySegment(second)}` : "Category";
+  }
+
+  if (first === "tag") {
+    return second ? `Tag / ${prettifySegment(second)}` : "Tag";
+  }
+
+  return segments.map(prettifySegment).join(" / ");
+};
+
+export default function FloatingBottomNav() {
+  const pathname = usePathname();
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const measureRef = useRef<HTMLSpanElement>(null);
+  const flipResetRef = useRef<number | null>(null);
+  const [shouldMarquee, setShouldMarquee] = useState(false);
+  const [marqueeDuration, setMarqueeDuration] = useState(14);
+  const [isNearFooter, setIsNearFooter] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeHomeLabel, setActiveHomeLabel] = useState(HOME_SECTIONS[0].label);
+  const [flipDirection, setFlipDirection] = useState<"forward" | "backward">(
+    "forward"
+  );
+  const [previousLabel, setPreviousLabel] = useState<string | null>(null);
+  const [isFlipping, setIsFlipping] = useState(false);
+
+  const locationLabel = useMemo(
+    () => (pathname === "/" ? activeHomeLabel : getLocationLabel(pathname || "/")),
+    [activeHomeLabel, pathname]
+  );
+  const closeMobileMenu = () => setIsMobileMenuOpen(false);
+
+  useEffect(() => {
+    if (!pathname || pathname.startsWith("/admin")) {
+      return;
+    }
+
+    const footer = document.querySelector('[data-site-footer="true"]');
+    if (!footer) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsNearFooter(entry.intersectionRatio >= 0.3);
+      },
+      {
+        threshold: [0, 0.3, 1],
+      }
+    );
+
+    observer.observe(footer);
+
+    return () => observer.disconnect();
+  }, [pathname]);
+
+  useEffect(() => {
+    if (pathname !== "/") {
+      setActiveHomeLabel(HOME_SECTIONS[0].label);
+      setPreviousLabel(null);
+      setIsFlipping(false);
+      return;
+    }
+
+    const sections = HOME_SECTIONS.map(({ id }) => document.getElementById(id)).filter(
+      (section): section is HTMLElement => Boolean(section)
+    );
+
+    if (sections.length === 0) return;
+
+    let ticking = false;
+
+    const updateActiveSection = () => {
+      const viewportCenter = window.innerHeight * 0.45;
+      let nextIndex = 0;
+      let smallestDistance = Number.POSITIVE_INFINITY;
+
+      sections.forEach((section, index) => {
+        const rect = section.getBoundingClientRect();
+        const isCenterInside = rect.top <= viewportCenter && rect.bottom >= viewportCenter;
+
+        if (isCenterInside) {
+          nextIndex = index;
+          smallestDistance = -1;
+          return;
+        }
+
+        if (smallestDistance !== -1) {
+          const distance = Math.min(
+            Math.abs(rect.top - viewportCenter),
+            Math.abs(rect.bottom - viewportCenter)
+          );
+
+          if (distance < smallestDistance) {
+            smallestDistance = distance;
+            nextIndex = index;
+          }
+        }
+      });
+
+      const nextLabel = HOME_SECTIONS[nextIndex]?.label ?? HOME_SECTIONS[0].label;
+
+      setActiveHomeLabel((currentLabel) => {
+        if (currentLabel === nextLabel) {
+          return currentLabel;
+        }
+
+        const currentIndex = HOME_SECTIONS.findIndex(
+          (section) => section.label === currentLabel
+        );
+
+        setFlipDirection(nextIndex > currentIndex ? "forward" : "backward");
+        setPreviousLabel(currentLabel);
+        setIsFlipping(true);
+
+        if (flipResetRef.current) {
+          window.clearTimeout(flipResetRef.current);
+        }
+
+        flipResetRef.current = window.setTimeout(() => {
+          setPreviousLabel(null);
+          setIsFlipping(false);
+          flipResetRef.current = null;
+        }, 420);
+
+        return nextLabel;
+      });
+    };
+
+    const requestUpdate = () => {
+      if (ticking) return;
+      ticking = true;
+
+      window.requestAnimationFrame(() => {
+        updateActiveSection();
+        ticking = false;
+      });
+    };
+
+    updateActiveSection();
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+
+    return () => {
+      window.removeEventListener("scroll", requestUpdate);
+      window.removeEventListener("resize", requestUpdate);
+    };
+  }, [pathname]);
+
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    return () => {
+      if (flipResetRef.current) {
+        window.clearTimeout(flipResetRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!viewportRef.current || !measureRef.current) return;
+
+    const measure = () => {
+      const viewportWidth = viewportRef.current?.clientWidth ?? 0;
+      const textWidth = measureRef.current?.scrollWidth ?? 0;
+      const overflowing = textWidth > viewportWidth + 8;
+
+      setShouldMarquee(overflowing);
+
+      if (overflowing) {
+        setMarqueeDuration(Math.max(7, textWidth / 42));
+      }
+    };
+
+    measure();
+
+    const resizeObserver = new ResizeObserver(measure);
+    resizeObserver.observe(viewportRef.current);
+    resizeObserver.observe(measureRef.current);
+
+    return () => resizeObserver.disconnect();
+  }, [locationLabel]);
+
+  if (!pathname || pathname.startsWith("/admin")) {
+    return null;
+  }
+
+  return (
+    <div
+      className={`${styles.wrapper} ${isNearFooter ? styles.hidden : ""}`}
+      aria-hidden={isNearFooter}
+    >
+      <nav
+        className={styles.pill}
+        aria-label="Floating site navigation"
+      >
+        <div
+          id="floating-bottom-nav-mobile-menu"
+          className={`${styles.mobileMenuPanel} ${
+            isMobileMenuOpen ? styles.mobileMenuPanelOpen : ""
+          }`}
+        >
+          <Link href="/" className={styles.mobileMenuLink} onClick={closeMobileMenu}>
+            Home
+          </Link>
+          <Link href="/projects" className={styles.mobileMenuLink} onClick={closeMobileMenu}>
+            Projects
+          </Link>
+          <Link href="/blog" className={styles.mobileMenuLink} onClick={closeMobileMenu}>
+            Blog
+          </Link>
+        </div>
+
+        <div className={styles.locationSection}>
+          <div className={styles.locationViewport} ref={viewportRef}>
+            {pathname === "/" && shouldMarquee ? (
+              <div
+                className={styles.locationTrack}
+                style={
+                  {
+                    "--location-scroll-duration": `${marqueeDuration}s`,
+                  } as CSSProperties
+                }
+              >
+                <span>{locationLabel}</span>
+                <span aria-hidden="true">{locationLabel}</span>
+              </div>
+            ) : pathname === "/" ? (
+              <div className={styles.locationFlipStage}>
+                {previousLabel ? (
+                  <span
+                    key={`prev-${previousLabel}-${flipDirection}`}
+                    className={`${styles.locationFlipLabel} ${
+                      flipDirection === "forward"
+                        ? styles.locationFlipOutForward
+                        : styles.locationFlipOutBackward
+                    }`}
+                    aria-hidden="true"
+                  >
+                    {previousLabel}
+                  </span>
+                ) : null}
+                <span
+                  key={`current-${locationLabel}-${flipDirection}`}
+                  className={`${styles.locationFlipLabel} ${
+                    isFlipping
+                      ? flipDirection === "forward"
+                        ? styles.locationFlipInForward
+                        : styles.locationFlipInBackward
+                      : styles.locationFlipStatic
+                  }`}
+                >
+                  {locationLabel}
+                </span>
+              </div>
+            ) : shouldMarquee ? (
+              <div
+                className={styles.locationTrack}
+                style={
+                  {
+                    "--location-scroll-duration": `${marqueeDuration}s`,
+                  } as CSSProperties
+                }
+              >
+                <span>{locationLabel}</span>
+                <span aria-hidden="true">{locationLabel}</span>
+              </div>
+            ) : (
+              <span className={styles.locationText}>
+                {locationLabel}
+              </span>
+            )}
+
+            <span ref={measureRef} className={styles.measureText} aria-hidden="true">
+              {locationLabel}
+            </span>
+          </div>
+        </div>
+
+        <span className={styles.divider} aria-hidden="true" />
+
+        <div className={styles.links}>
+          <Link href="/" className={styles.link}>
+            Home
+          </Link>
+          <Link href="/projects" className={styles.link}>
+            Projects
+          </Link>
+          <Link href="/blog" className={styles.link}>
+            Blog
+          </Link>
+        </div>
+
+        <div className={styles.mobileMenu}>
+          <button
+            type="button"
+            className={`${styles.menuButton} ${isMobileMenuOpen ? styles.menuButtonActive : ""}`}
+            aria-label="Toggle navigation menu"
+            aria-expanded={isMobileMenuOpen}
+            aria-controls="floating-bottom-nav-mobile-menu"
+            onClick={() => setIsMobileMenuOpen((open) => !open)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+        </div>
+      </nav>
+    </div>
+  );
+}

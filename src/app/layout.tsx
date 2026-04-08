@@ -1,6 +1,7 @@
 import { Shadows_Into_Light } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
+import FloatingBottomNav from "@/components/layout/bottom-nav/FloatingBottomNav";
 import ConditionalFooter from "@/components/layout/footer/ConditionalFooter";
 
 const shadows = Shadows_Into_Light({
@@ -56,6 +57,7 @@ export default function RootLayout({
       
       <body className="min-h-screen flex flex-col">
         <div className="flex-1 flex flex-col min-h-0">{children}</div>
+        <FloatingBottomNav />
         <ConditionalFooter />
       </body>
       

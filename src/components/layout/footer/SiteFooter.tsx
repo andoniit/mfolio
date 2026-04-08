@@ -55,7 +55,7 @@ export default function SiteFooter() {
   const pill3Scale = useTransform(scrollYProgress, [0.3, 0.7], [0.6, 1]);
 
   return (
-    <section className={styles.footerWrapper}>
+    <section className={styles.footerWrapper} data-site-footer="true">
 
 
       {/* Main Footer Box - Mouse Tracking applied here now */}

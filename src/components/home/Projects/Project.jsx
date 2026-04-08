@@ -42,11 +42,11 @@ export default function Projects() {
   }
 
   return (
-    <>
+    <section id="featured-projects" aria-label="Featured projects">
       <h2 className={styles.featuredTitle}>
         Featured Projects
       </h2>
-      <section className={styles.mainp}>
+      <div className={styles.mainp}>
         <div className={styles.bodyp}>
           <ProjectGrid projects={projects} />
           <div className={styles.buttonContainer}>
@@ -55,7 +55,7 @@ export default function Projects() {
             </Link>
           </div>
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   )
 }

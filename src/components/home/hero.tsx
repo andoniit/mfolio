@@ -72,7 +72,7 @@ useEffect(() => {
   }, []);
 
   return (
-    <div ref={container} className={styles.container}>
+    <div id="hero-section" ref={container} className={styles.container}>
       <motion.div
         className={styles.sticky}
         initial="hidden"

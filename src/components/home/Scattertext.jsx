@@ -52,7 +52,7 @@ export default function ScatterText() {
   }, []);
 
   return (
-    <div className="scatter" ref={containerRef}>
+    <section id="my-vision" aria-label="My vision" className="scatter" ref={containerRef}>
       <div className="half left">
         <h2 className="scatter-quote">
           "Imagine <span className="extraordinary">extraordinary</span> in the ordinary"
@@ -78,7 +78,7 @@ export default function ScatterText() {
         </div>
       </div>
       <Stylesheet />
-    </div>
+    </section>
   );
 }
 
