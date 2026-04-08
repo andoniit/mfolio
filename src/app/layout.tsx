@@ -25,6 +25,10 @@ const sueEllenFrancisco = localFont({
 export const metadata = {
   title: 'Anirudha Kapileshwari - Software Engineer',
   description: 'Potefolio website of me ',
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({
