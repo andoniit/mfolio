@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import FloatingBottomNav from "@/components/layout/bottom-nav/FloatingBottomNav";
 import ConditionalFooter from "@/components/layout/footer/ConditionalFooter";
+import TabTitleWatcher from "@/components/layout/TabTitleWatcher";
 
 const shadows = Shadows_Into_Light({
   subsets: ['latin'],
@@ -60,6 +61,7 @@ export default function RootLayout({
       </head>
       
       <body className="min-h-screen flex flex-col">
+        <TabTitleWatcher />
         <div className="flex-1 flex flex-col min-h-0">{children}</div>
         <FloatingBottomNav />
         <ConditionalFooter />

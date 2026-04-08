@@ -16,6 +16,8 @@ const HOME_SECTIONS = [
   { id: "my-vision", label: "My Vision" },
 ] as const;
 
+type HomeSectionLabel = (typeof HOME_SECTIONS)[number]["label"];
+
 const prettifySegment = (segment: string) =>
   decodeURIComponent(segment)
     .replace(/[-_]+/g, " ")
@@ -59,11 +61,13 @@ export default function FloatingBottomNav() {
   const [marqueeDuration, setMarqueeDuration] = useState(14);
   const [isNearFooter, setIsNearFooter] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activeHomeLabel, setActiveHomeLabel] = useState(HOME_SECTIONS[0].label);
+  const [activeHomeLabel, setActiveHomeLabel] = useState<HomeSectionLabel>(
+    HOME_SECTIONS[0].label
+  );
   const [flipDirection, setFlipDirection] = useState<"forward" | "backward">(
     "forward"
   );
-  const [previousLabel, setPreviousLabel] = useState<string | null>(null);
+  const [previousLabel, setPreviousLabel] = useState<HomeSectionLabel | null>(null);
   const [isFlipping, setIsFlipping] = useState(false);
 
   const locationLabel = useMemo(
