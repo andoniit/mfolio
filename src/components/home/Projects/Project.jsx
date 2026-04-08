@@ -48,7 +48,7 @@ export default function Projects() {
       </h2>
       <div className={styles.mainp}>
         <div className={styles.bodyp}>
-          <ProjectGrid projects={projects} />
+          <ProjectGrid projects={projects} columns={3} />
           <div className={styles.buttonContainer}>
             <Link href="/projects" style={{ textDecoration: 'none' }}>
               <div className={styles.button2}>View More Projects</div>
