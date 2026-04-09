@@ -7,6 +7,7 @@
   overflow-x: clip;
   overflow-y: visible;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .container {
@@ -18,10 +19,15 @@
   position: relative;
   width: 100%;
   overflow-x: clip;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 /* 🌟 Protects the logo link from getting default link underlines */
 .logoLink {
+  display: flex;
+  min-width: 0;
+  flex-shrink: 1;
   text-decoration: none;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -277,6 +283,7 @@
 .mobileActions {
   display: none;
   min-width: 0;
+  flex-shrink: 0;
 }
 
 .mobileActionSlot {
@@ -429,6 +436,10 @@
   .resumeWrapper,
   .dashboardButtonPill {
     margin-left: 0;
+  }
+
+  .logoLink {
+    max-width: calc(100vw - 166px);
   }
 }
 
