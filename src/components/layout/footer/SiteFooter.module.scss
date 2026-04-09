@@ -72,7 +72,7 @@
   overflow: hidden; /* CRITICAL: This clips the moving red flare inside the curved box */
   
   /* Glassmorphism */
-  background-color: rgba(255, 255, 255, 0.45); 
+  background-color: rgba(255, 255, 255, 0.45);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   
@@ -90,31 +90,92 @@
   @media (min-width: 1024px) {
     padding: 6rem 2rem 4rem;
   }
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  &::before {
+    height: 42%;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.02) 18%,
+      rgba(220, 247, 99, 0.12) 34%,
+      rgba(107, 99, 247, 0.16) 54%,
+      rgba(234, 62, 62, 0.28) 72%,
+      rgba(234, 62, 62, 0.52) 100%
+    );
+  }
+
+  &::after {
+    left: 50%;
+    bottom: 14%;
+    width: 82%;
+    height: 22%;
+    transform: translateX(-50%);
+    background: radial-gradient(
+      ellipse at center,
+      rgba(107, 99, 247, 0.24) 0%,
+      rgba(220, 247, 99, 0.12) 38%,
+      transparent 72%
+    );
+    filter: blur(32px);
+  }
 }
 
 /* ============================
-   RED FLARE BACKGROUND (INSIDE FOOTER)
+   REACTIVE GRADIENT FLARES
 ============================ */
+.limeGlow,
+.purpleGlow,
 .redGlow {
   position: absolute;
-  top: 50%;
+  top: auto;
+  bottom: -12%;
   left: 50%;
-  width: 150vw;
-  height: 150vh;
-  margin-top: -75vh;
-  margin-left: -75vw;
+  width: 132vw;
+  height: 52vh;
+  margin-left: -66vw;
   background: radial-gradient(ellipse at center, var(--mf-red) 0%, transparent 50%);
-  filter: blur(90px);
-  opacity: 0.5; /* Tuned to glow perfectly through the content inside the box */
+  filter: blur(110px);
+  opacity: 0.78;
   z-index: 0;
   pointer-events: none;
   will-change: transform; 
   animation: pulseGlow 5s infinite alternate ease-in-out;
 }
 
+.limeGlow {
+  bottom: 2%;
+  width: 118vw;
+  height: 34vh;
+  margin-left: -59vw;
+  background: radial-gradient(ellipse at center, var(--mf-lime) 0%, transparent 58%);
+  filter: blur(90px);
+  opacity: 0.34;
+  animation-duration: 6.5s;
+}
+
+.purpleGlow {
+  bottom: -2%;
+  width: 104vw;
+  height: 30vh;
+  margin-left: -52vw;
+  background: radial-gradient(ellipse at center, var(--mf-purple) 0%, transparent 60%);
+  filter: blur(82px);
+  opacity: 0.24;
+  animation-duration: 5.8s;
+}
+
 @keyframes pulseGlow {
-  0% { opacity: 0.4; filter: blur(90px); }
-  100% { opacity: 0.6; filter: blur(120px); }
+  0% { filter: blur(104px); }
+  100% { filter: blur(132px); }
 }
 
 .inner {
@@ -347,6 +408,7 @@
   .contactEmail {
     font-size: 2rem;
     font-weight: 600;
+    color: var(--mf-red);
     white-space: nowrap;
     word-break: normal;
     overflow-wrap: normal;

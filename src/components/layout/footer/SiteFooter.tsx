@@ -37,8 +37,26 @@ export default function SiteFooter() {
     mouseY.set(y);
   };
 
-  const glowScrollY = useTransform(scrollYProgress, [0, 1], [150, -50]);
+  const glowScrollY = useTransform(scrollYProgress, [0, 1], [80, -30]);
   const glowScale = useTransform(scrollYProgress, [0, 1], [0.85, 1.1]);
+  const limeGlowX = useTransform(smoothX, (value) => value * -0.55);
+  const limeGlowY = useTransform(smoothY, (value) => value * -0.4);
+  const purpleGlowX = useTransform(smoothX, (value) => value * 0.18);
+  const purpleGlowY = useTransform(smoothY, (value) => value * -0.2);
+  const redGlowX = useTransform(smoothX, (value) => value * 0.9);
+  const redGlowY = useTransform(smoothY, (value) => value * 0.75);
+  const limeGlowOffsetY = useTransform(
+    [limeGlowY, glowScrollY],
+    ([mouse, scroll]: number[]) => mouse + scroll
+  );
+  const purpleGlowOffsetY = useTransform(
+    [purpleGlowY, glowScrollY],
+    ([mouse, scroll]: number[]) => mouse + scroll
+  );
+  const redGlowOffsetY = useTransform(
+    [redGlowY, glowScrollY],
+    ([mouse, scroll]: number[]) => mouse + scroll
+  );
 
   // ==========================================
   // Element Animations
@@ -67,13 +85,28 @@ export default function SiteFooter() {
         onMouseMove={handleMouseMove}
       >
         
-        {/* 🔴 Moving Red Flare Background INSIDE the footer */}
+        {/* Reactive lime + red gradient flares inside the footer */}
+        <motion.div 
+          className={styles.limeGlow}
+          style={{
+            x: limeGlowX,
+            y: limeGlowOffsetY,
+            scale: glowScale
+          }}
+        />
+        <motion.div 
+          className={styles.purpleGlow}
+          style={{
+            x: purpleGlowX,
+            y: purpleGlowOffsetY,
+            scale: glowScale
+          }}
+        />
         <motion.div 
           className={styles.redGlow}
           style={{
-            x: smoothX,
-            y: smoothY,
-            marginTop: glowScrollY,
+            x: redGlowX,
+            y: redGlowOffsetY,
             scale: glowScale
           }}
         />
@@ -100,7 +133,7 @@ export default function SiteFooter() {
                   className={styles.arrowText}
                   style={{ backgroundImage: textFillGradient }}
                 >
-                  ANDON
+                  Hey let's chat
                 </motion.span>
               </motion.div>
               
