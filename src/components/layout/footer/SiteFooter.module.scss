@@ -207,13 +207,20 @@
   
   .arrowBox { 
     order: 4; 
-    height: 110px; 
-    width: calc(100% - 50px); 
-    margin-right: 50px; 
-    padding-left: 20px;
+    min-height: 94px;
+    height: auto;
+    width: calc(100% - 28px); 
+    margin-right: 28px; 
+    padding: 18px 18px 18px 20px;
   }
   
-  .arrowText { font-size: 3.5rem; }
+  .arrowText {
+    font-size: clamp(1.7rem, 9vw, 3rem);
+    line-height: 0.95;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
   .footerBottomRight { order: 5; height: auto; justify-content: flex-start; margin-top: 10px; }
   .footerBottomLeft { order: 6; height: auto; margin-top: 10px; }
   .contactEmail {
