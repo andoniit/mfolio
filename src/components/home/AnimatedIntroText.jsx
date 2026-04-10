@@ -3,7 +3,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 
-export default function AnimatedIntroText({ children, text = "", className = "" }) {
+export default function AnimatedIntroText({ children, text = "", className = "", startAnimation = true }) {
   const ref = useRef(null);
   // Trigger animation when the element is somewhat in view
   const isInView = useInView(ref, { once: true, margin: "-10% 0px" });
@@ -66,7 +66,7 @@ export default function AnimatedIntroText({ children, text = "", className = "" 
       className={className}
       variants={containerVariants}
       initial="hidden"
-      animate={isInView ? "visible" : "hidden"}
+      animate={isInView && startAnimation ? "visible" : "hidden"}
     >
       {/* If children is not just a string and no text prop is passed, render children wrapped in animation */}
       {!text && typeof children !== "string" ? (

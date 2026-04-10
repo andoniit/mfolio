@@ -10,6 +10,8 @@ import Picture2 from '../../../public/images/2.jpg';
 import Picture3 from '../../../public/images/4.jpg';
 import Picture5 from '../../../public/images/25.jpg';
 import Picture7 from '../../../public/images/7.jpg';
+import AnimatedIntroText from './AnimatedIntroText';
+import SplitterText from './SplitterText';
 
 
 export default function Hero() {
@@ -19,6 +21,11 @@ export default function Hero() {
     offset: ['start start', 'end end']
   });
 
+  // Landing overlay transforms
+  const opacityLanding = useTransform(scrollYProgress, [0, 0.05], [1, 0]);
+  const yLanding = useTransform(scrollYProgress, [0, 0.05], [0, -50]);
+  const scaleLanding = useTransform(scrollYProgress, [0, 0.05], [1, 0.95]);
+
   // Scale transforms for each section.
   const scaleSection1 = useTransform(scrollYProgress, [0, 1], [1, 4.2]);
   const scaleSection2 = useTransform(scrollYProgress, [0, 1], [1, 5]);
@@ -27,6 +34,9 @@ export default function Hero() {
   const scaleSection5 = useTransform(scrollYProgress, [0, 1], [1, 6]);
   const scaleSection6 = useTransform(scrollYProgress, [0, 1], [1, 8]);
   const scaleSection7 = useTransform(scrollYProgress, [0, 1], [1, 9]);
+
+  // Opacity for other images to appear on scroll
+  const opacityOthers = useTransform(scrollYProgress, [0.02, 0.08], [0, 1]);
 
  // Seattle local time (without seconds)
 const [seattleTime, setSeattleTime] = useState("");
@@ -91,8 +101,50 @@ useEffect(() => {
           </div>
         </motion.div>
 
+        {/* Landing Overlay - fades out on scroll */}
+        <motion.div
+          style={{ opacity: opacityLanding, y: yLanding, scale: scaleLanding }}
+          className={styles.landingOverlay}
+        >
+          <div className={styles.welcomeTextContainer}>
+            <h1 className={`${styles.welcomeLine} ${styles.top}`}>
+              <AnimatedIntroText startAnimation={preloaderFinished}><span>Welcome,</span></AnimatedIntroText>
+            </h1>
+            <h1 className={`${styles.welcomeLine} ${styles.bottom}`}>
+              <AnimatedIntroText startAnimation={preloaderFinished}><span>Hello There</span></AnimatedIntroText>
+            </h1>
+          </div>
+          
+          <motion.div 
+            className={styles.purpleStar}
+            initial={{ opacity: 0, x: 100, rotate: 90 }}
+            animate={preloaderFinished ? { opacity: 1, x: 0, rotate: 0 } : { opacity: 0, x: 100, rotate: 90 }}
+            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+          >
+            <Image src="/star.png" alt="Star graphic" fill style={{ objectFit: 'contain' }} />
+          </motion.div>
+
+          <div className={styles.bottomLeftInfo}>
+            <AnimatedIntroText startAnimation={preloaderFinished}>
+              <span>USA Based</span>
+            </AnimatedIntroText>
+            <AnimatedIntroText startAnimation={preloaderFinished}>
+              <span>Software Developer</span>
+            </AnimatedIntroText>
+          </div>
+
+          <div className={styles.bottomRightInfo}>
+            <AnimatedIntroText startAnimation={preloaderFinished}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div className={styles.greenDot}></div>
+                <span className={styles.blendingText}>Open to work</span>
+              </div>
+            </AnimatedIntroText>
+          </div>
+        </motion.div>
+
         {/* Section 2: Text */}
-        <motion.div variants={itemVariants} style={{ scale: scaleSection2 }} className={`${styles.el} ${styles.section2}`}>
+        <motion.div style={{ scale: scaleSection2, opacity: opacityOthers }} className={`${styles.el} ${styles.section2}`}>
           <div className={styles.imageContainer}>
             <div className={styles.textContent}>
               I am a Developer
@@ -107,7 +159,7 @@ useEffect(() => {
         </motion.div>
 
         {/* Section 3: Text */}
-        <motion.div variants={itemVariants} style={{ scale: scaleSection3 }} className={`${styles.el} ${styles.section3}`}>
+        <motion.div style={{ scale: scaleSection3, opacity: opacityOthers }} className={`${styles.el} ${styles.section3}`}>
           <div className={styles.imageContainer}>
             <div className={styles.textContent}>
               United States
@@ -122,7 +174,7 @@ useEffect(() => {
         </motion.div>
 
         {/* Section 4: Text with Chicago Local Time */}
-        <motion.div variants={itemVariants} style={{ scale: scaleSection4 }} className={`${styles.el} ${styles.section4}`}>
+        <motion.div style={{ scale: scaleSection4, opacity: opacityOthers }} className={`${styles.el} ${styles.section4}`}>
           <div className={styles.imageContainer}>
             <div className={styles.textContent}>
               I am from <span className={styles.highlight}>Seattle, WA</span>
@@ -133,7 +185,7 @@ useEffect(() => {
         </motion.div>
         
         {/* Section 5: Text */}
-        <motion.div variants={itemVariants} style={{ scale: scaleSection5 }} className={`${styles.el} ${styles.section5}`}>
+        <motion.div style={{ scale: scaleSection5, opacity: opacityOthers }} className={`${styles.el} ${styles.section5}`}>
           <div className={styles.imageContainer}>
             <div className={styles.textContent}>
               I am from Chicago
@@ -148,7 +200,7 @@ useEffect(() => {
         </motion.div>
 
         {/* Section 6: Text */}
-        <motion.div variants={itemVariants} style={{ scale: scaleSection6 }} className={`${styles.el} ${styles.section6}`}>
+        <motion.div style={{ scale: scaleSection6, opacity: opacityOthers }} className={`${styles.el} ${styles.section6}`}>
           <div className={styles.imageContainer}>
             <div className={styles.textContent}>
               I study at IIT
@@ -163,7 +215,7 @@ useEffect(() => {
         </motion.div>
 
         {/* Section 7: Text */}
-        <motion.div variants={itemVariants} style={{ scale: scaleSection7 }} className={`${styles.el} ${styles.section7}`}>
+        <motion.div style={{ scale: scaleSection7, opacity: opacityOthers }} className={`${styles.el} ${styles.section7}`}>
           <div className={styles.imageContainer}>
             <div className={styles.textContent}>
               I am a Developer

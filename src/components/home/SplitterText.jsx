@@ -3,7 +3,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 
-export default function SplitterText({ children, text = "", className = "", variant = "soft", isBlock = false }) {
+export default function SplitterText({ children, text = "", className = "", variant = "soft", isBlock = false, startAnimation = true }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-10% 0px" });
 
@@ -76,7 +76,7 @@ export default function SplitterText({ children, text = "", className = "", vari
       className={className}
       variants={containerVariants}
       initial="hidden"
-      animate={isInView ? "visible" : "hidden"}
+      animate={isInView && startAnimation ? "visible" : "hidden"}
     >
       {!text && typeof children !== "string" ? (
         <span style={{ display: isBlock ? "block" : "inline-block", overflow: "hidden", paddingBottom: "4px", verticalAlign: "bottom" }}>
