@@ -11,6 +11,18 @@ const shadows = Shadows_Into_Light({
   variable: '--font-shadows',
 });
 
+const coolvetica = localFont({
+  src: "../../public/fonts/Coolvetica Rg.otf",
+  variable: "--font-coolvetica",
+  display: "swap",
+});
+
+const coolveticaItalic = localFont({
+  src: "../../public/fonts/Coolvetica Rg It.otf",
+  variable: "--font-coolvetica-italic",
+  display: "swap",
+});
+
 const satoshi = localFont({
   src: "../../public/fonts/Satoshi-Variable.ttf",
   variable: "--font-satoshi",
@@ -41,7 +53,7 @@ export default function RootLayout({
     
       <html
         lang="en"
-        className={`${shadows.variable} ${satoshi.variable} ${sueEllenFrancisco.variable}`}
+        className={`${shadows.variable} ${satoshi.variable} ${sueEllenFrancisco.variable} ${coolvetica.variable} ${coolveticaItalic.variable}`}
       >
       <head>
         <script

@@ -4,6 +4,9 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 import Header from "@/components/layout/header/header";
 import ProjectGalleryLightbox from "@/components/projects/ProjectGalleryLightbox";
 import ProjectGrid from "@/components/projects/ProjectGrid";
+import AnimatedIntroText from "@/components/home/AnimatedIntroText";
+import SplitterText from "@/components/home/SplitterText";
+import AnimatedDivider from "@/components/home/AnimatedDivider";
 import "../../blog/[slug]/blog-post.scss";
 
 export const dynamic = "force-dynamic";
@@ -109,36 +112,38 @@ export default async function ProjectDetailPage({ params }: Props) {
                   className="text-[2.3rem] sm:text-[4.1rem] lg:text-[4.7rem] font-bold tracking-[-0.065em] leading-[0.92] m-0 whitespace-normal break-words lg:whitespace-nowrap"
                   style={{ color: "var(--mf-dark)" }}
                 >
-                  {project.title}
+                  <AnimatedIntroText>
+                    {project.title}
+                  </AnimatedIntroText>
                 </h1>
                 {displayDate && (
-                  <div
-                    className="mt-3 inline-flex items-center gap-2 text-sm sm:text-base font-medium"
-                    style={{ color: "#6f6f6f" }}
-                  >
-                    <svg
-                      className="h-4 w-4 shrink-0"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      strokeWidth="1.8"
-                      aria-hidden="true"
+                  <SplitterText variant="soft">
+                    <div
+                      className="mt-3 inline-flex items-center gap-2 text-sm sm:text-base font-medium"
+                      style={{ color: "#6f6f6f" }}
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10m-13 9h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v11a2 2 0 002 2z" />
-                    </svg>
-                    <span>{displayDate}</span>
-                  </div>
+                      <svg
+                        className="h-4 w-4 shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        strokeWidth="1.8"
+                        aria-hidden="true"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10m-13 9h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v11a2 2 0 002 2z" />
+                      </svg>
+                      <span>{displayDate}</span>
+                    </div>
+                  </SplitterText>
                 )}
               </div>
 
               {project.description ? (
-                <div className="max-w-[420px] lg:border-l lg:border-black/10 lg:pl-4 lg:self-center flex items-center min-h-full">
-                  <p
-                    className="text-lg sm:text-xl leading-relaxed m-0"
-                    style={{ color: "var(--mf-purple)" }}
-                  >
+                <div className="relative max-w-[420px] lg:pl-4 lg:self-center flex items-center min-h-full text-lg sm:text-xl leading-relaxed m-0" style={{ color: "var(--mf-purple)" }}>
+                  <AnimatedDivider className="hidden lg:block absolute left-0 top-0 bottom-0 w-[1px] bg-black/10" orientation="vertical" />
+                  <SplitterText variant="fast">
                     {project.description}
-                  </p>
+                  </SplitterText>
                 </div>
               ) : null}
             </div>
@@ -153,38 +158,42 @@ export default async function ProjectDetailPage({ params }: Props) {
                     className="text-sm font-bold uppercase tracking-wide mb-4"
                     style={{ color: "var(--mf-dark)" }}
                   >
-                    Project Context
+                    <SplitterText variant="fast">
+                      Project Context
+                    </SplitterText>
                   </h2>
                   <dl className="space-y-4 text-[15px] leading-relaxed m-0">
                     {workplace && (
                       <div>
                         <dt className="font-semibold mb-1" style={{ color: "var(--mf-dark)" }}>
-                          Workplace / origination
+                          <SplitterText variant="fast">Workplace / origination</SplitterText>
                         </dt>
                         <dd className="m-0" style={{ color: "var(--mf-dark)" }}>
-                          {workplace}
+                          <SplitterText variant="soft">{workplace}</SplitterText>
                         </dd>
                       </div>
                     )}
                     {clientName && (
                       <div>
                         <dt className="font-semibold mb-1" style={{ color: "var(--mf-dark)" }}>
-                          Client
+                          <SplitterText variant="fast">Client</SplitterText>
                         </dt>
                         <dd className="m-0" style={{ color: "var(--mf-dark)" }}>
-                          {clientName}
+                          <SplitterText variant="soft">{clientName}</SplitterText>
                         </dd>
                       </div>
                     )}
                     {collaborators.length > 0 && (
                       <div>
                         <dt className="font-semibold mb-1" style={{ color: "var(--mf-dark)" }}>
-                          Collaborators
+                          <SplitterText variant="fast">Collaborators</SplitterText>
                         </dt>
                         <dd className="m-0" style={{ color: "var(--mf-dark)" }}>
                           <ul className="list-disc pl-5 m-0">
                             {collaborators.map((name, index) => (
-                              <li key={`${index}-${name}`}>{name}</li>
+                              <li key={`${index}-${name}`}>
+                                <SplitterText variant="soft">{name}</SplitterText>
+                              </li>
                             ))}
                           </ul>
                         </dd>
@@ -205,20 +214,24 @@ export default async function ProjectDetailPage({ params }: Props) {
                       className="text-sm font-bold uppercase tracking-wide mb-4"
                       style={{ color: "var(--mf-dark)" }}
                     >
-                      Tech stack
+                      <SplitterText variant="fast">
+                        Tech stack
+                      </SplitterText>
                     </h2>
                     <ul className="flex flex-wrap gap-2.5 list-none p-0 m-0 mb-6">
                       {techStack.map((item, index) => (
                         <li key={`${index}-${item}`}>
-                          <span
-                            className="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-semibold"
-                            style={{
-                              background: "var(--mf-purple)",
-                              color: "var(--mf-white)",
-                            }}
-                          >
-                            {item}
-                          </span>
+                          <SplitterText variant="soft">
+                            <span
+                              className="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-semibold"
+                              style={{
+                                background: "var(--mf-purple)",
+                                color: "var(--mf-white)",
+                              }}
+                            >
+                              {item}
+                            </span>
+                          </SplitterText>
                         </li>
                       ))}
                     </ul>
@@ -226,36 +239,31 @@ export default async function ProjectDetailPage({ params }: Props) {
                 )}
 
                 {externalUrl && (
-                  <a
-                    href={externalUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="projectCtaButton"
-                  >
-                    {externalUrlLabel}
-                  </a>
+                  <SplitterText variant="soft">
+                    <a
+                      href={externalUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="projectCtaButton"
+                    >
+                      {externalUrlLabel}
+                    </a>
+                  </SplitterText>
                 )}
               </section>
             </div>
           </section>
 
           {project.cover_image_url && (
-            <div className="w-full overflow-hidden rounded-[16px] mb-10 bg-white shadow-sm border border-black/5">
-              <img
-                src={project.cover_image_url}
-                alt={project.title}
-                className="w-full h-auto max-h-[640px] object-cover"
-              />
-            </div>
-          )}
-
-          {project.description && (
-            <p
-              className="max-w-4xl text-lg sm:text-[1.35rem] leading-relaxed mb-8"
-              style={{ color: "var(--mf-dark)" }}
-            >
-              {project.description}
-            </p>
+            <SplitterText variant="soft" isBlock={true}>
+              <div className="w-full overflow-hidden rounded-[16px] mb-10 bg-white shadow-sm border border-black/5 flex">
+                <img
+                  src={project.cover_image_url}
+                  alt={project.title}
+                  className="w-full h-auto max-h-[640px] object-cover"
+                />
+              </div>
+            </SplitterText>
           )}
 
           <div
@@ -276,7 +284,8 @@ export default async function ProjectDetailPage({ params }: Props) {
           )}
 
           {moreProjects && moreProjects.length > 0 && (
-            <section className="border-t border-gray-200 pt-12 mt-14">
+            <section className="relative pt-12 mt-14">
+              <AnimatedDivider className="absolute left-0 top-0 w-full h-[1px] bg-gray-200" orientation="horizontal" />
               <div className="flex items-center justify-between gap-4 mb-8">
                 <h2 className="text-2xl font-bold text-[#1d1d1f]">More Projects</h2>
                 <Link

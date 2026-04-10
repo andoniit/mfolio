@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import Header from "@/components/layout/header/header";
+import AnimatedIntroText from "@/components/home/AnimatedIntroText";
 import "./blog-post.scss";
 
 export const dynamic = "force-dynamic";
@@ -98,7 +99,9 @@ export default async function BlogPostPage({ params }: Props) {
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] mb-6">
-            {post.title}
+            <AnimatedIntroText>
+              {post.title}
+            </AnimatedIntroText>
           </h1>
 
           {post.excerpt && (
