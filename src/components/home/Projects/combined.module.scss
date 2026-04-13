@@ -18,10 +18,18 @@
   gap: 2rem;
 }
 
+@font-face {
+  font-family: 'Coolvetica';
+  src: url('/fonts/Coolvetica Rg.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 .featuredTitle {
   margin: 0;
   font-size: clamp(4rem, 6vw, 6rem);
-  font-family: var(--font-sue-ellen), var(--font-shadows), cursive;
+  font-family: 'Coolvetica', sans-serif;
+  letter-spacing: 0.05em;
   text-align: center;
   margin-bottom: 0rem;
   font-weight: inherit;

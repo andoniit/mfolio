@@ -1,314 +1,216 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+import AnimatedIntroText from "./AnimatedIntroText";
 
 // Register ScrollTrigger plugin
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
+const experiences = [
+  {
+    company: "Artversion",
+    logo: "/logo/artversion.jpeg",
+    roles: [
+      {
+        title: "Software Developer",
+        duration: "May 2025 – Jan 2026",
+        type: "Full-Time",
+        location: "Chicago IL USA",
+        bullets: [
+          "Owned the development of automated Dayforce API integrations for multiple client platforms using JavaScript, PHP, REST APIs, and cron jobs, reducing manual job-posting effort by 70% and increasing cross-platform publishing reliability.",
+          "Built secure Chrome and Safari extensions to bridge disconnected systems across multiple client environments, reducing data transfer time by 90% and improving workflow efficiency for business operations.",
+          "Drove accessibility improvements across multiple React-based client applications by implementing ADA, WCAG, and ARIA standards, increasing accessible reach by 40% and strengthening overall user engagement.",
+          "Developed and launched a high-performance web platform on WordPress VIP, engineering fluid, interactive UI components with GSAP web animations, which increased user time-on-page by 35% and significantly enhanced visual engagement."
+        ],
+        techStack: "JavaScript, PHP, React, REST APIs, Dayforce API, Chrome/Safari Extensions, WordPress VIP, GSAP, ADA/WCAG/ARIA, Cron Jobs"
+      }
+    ]
+  },
+  {
+    company: "Artarray",
+    logo: "/logo/artarray_logo.jpeg",
+    roles: [
+      {
+        title: "Software Developer",
+        duration: "Feb 2020 – Jun 2023",
+        type: "Full-Time",
+        location: "Pune MH India",
+        bullets: [
+          "Owned the development of a high-traffic course registration platform using React, Node.js, JavaScript (ES6+), and RESTful APIs, improving enrollment workflow efficiency by 35% and delivering a secure end-to-end user experience.",
+          "Architected and implemented distributed business logic for schedule conflict detection, prerequisite validation, and automated waitlist management, reducing registration errors by 40% and increasing successful enrollment processing by 30%.",
+          "Improved platform reliability and scalability by integrating Firebase Authentication, deploying Dockerized services on AWS, and building centralized monitoring with AWS OpenSearch, reducing incident resolution time by 50% and supporting 99.9% availability during peak registration cycles."
+        ],
+        techStack: "React, Node.js, JavaScript (ES6+), RESTful APIs, Firebase, Docker, AWS, AWS OpenSearch"
+      }
+    ]
+  },
+  {
+    company: "Freelance",
+    logo: "/logo/freelance.jpeg",
+    roles: [
+      {
+        title: "Freelance Web Developer",
+        duration: "Mar 2020 – Feb 2022",
+        type: "Freelance",
+        location: "Belgaum KA India",
+        bullets: [
+          "Owned end-to-end web application development for multiple freelance clients, driving requirements gathering, system design, implementation, deployment, and post-launch support for scalable, business-critical solutions.",
+          "Developed dynamic, responsive front-end systems using React, Angular, JavaScript (ES6+), HTML5/CSS3, REST APIs, and state management, improving performance by 35% and delivering consistent cross-device experiences.",
+          "Leveraged analytics integration and event tracking to analyze user behavior and conversion funnels, guiding feature enhancements that boosted engagement by 25%."
+        ],
+        techStack: "React, Angular, JavaScript (ES6+), HTML5, CSS3, REST APIs, State Management, Web Analytics"
+      }
+    ]
+  },
+  {
+    company: "IEEE Bangalore Young Professionals",
+    logo: "/logo/ieeeyp.jpeg",
+    roles: [
+      {
+        title: "Webmaster",
+        duration: "Nov 2020 – Sep 2023",
+        type: "Intern",
+        location: "Bangalore KA India",
+        bullets: [
+          "Secured this competitive internship by winning the IEEE YP Online Website Contest, showcasing strong technical and web design capabilities.",
+          "Developed and launched the official IEEE Bangalore Young Professionals website, creating a responsive and modern digital hub for organizational engagement.",
+          "Engineered the flagship event platform for the Young Professionals Global Summit 2020, delivering a high-performance web experience for global attendees."
+        ],
+        techStack: "HTML, CSS, JavaScript, Web Design, Responsive UI, Web Performance Optimization"
+      }
+    ]
+  }
+];
+
 const Experience = () => {
+  const [expandedRoles, setExpandedRoles] = useState({});
+
+  const toggleRole = (cIdx, rIdx) => {
+    const key = `${cIdx}-${rIdx}`;
+    setExpandedRoles((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
   useEffect(() => {
-    // --- 1. Original Custom Scroll Logic (Gradient Timeline Tracker) ---
-    const timelines = document.querySelectorAll(".timeline__right");
-    const trackers = document.querySelectorAll(".timeline__tracker");
-
-    const onScroll = () => {
-      timelines.forEach((timeline, i) => {
-        const content = timeline.querySelector(".timeline__content");
-        if (trackers[i] && trackers[i].offsetTop > 0) {
-          content.classList.add("animate-on-scroll");
-        } else if (content) {
-          content.classList.remove("animate-on-scroll");
-        }
-        
-        if (trackers[i]) {
-          timeline.style.background = `linear-gradient(
-            180deg, 
-            #ea3e3e 0%, 
-            #ea3e3e 0%, 
-            #ea3e3e ${trackers[i].offsetTop + 5}px, 
-            black ${trackers[i].offsetTop + 5}px, 
-            black 100%
-          )`;
-        }
-      });
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-
-    // --- 2. GSAP Scroll Entry Animations ---
-    
-    // Animate the main Experience Title
-    gsap.fromTo(
-      ".experienceTitle h2",
-      { opacity: 0, y: -50 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 1,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: ".experienceTitle",
-          start: "top 85%",
-        },
-      }
-    );
-
-    // Animate the Voluntary Roles Heading
-    gsap.fromTo(
-      ".voluntaryRoles",
-      { opacity: 0, x: -30 },
-      {
-        opacity: 1,
-        x: 0,
-        duration: 1,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: ".voluntaryRoles",
-          start: "top 85%",
-        },
-      }
-    );
-
-    // Animate each Voluntary Item individually
-    const voluntaryItems = document.querySelectorAll(".voluntary-item");
-    voluntaryItems.forEach((item) => {
+    const companies = document.querySelectorAll(".company-block");
+    companies.forEach((company, index) => {
       gsap.fromTo(
-        item,
-        { opacity: 0, y: 40 },
+        company,
+        { opacity: 0, y: 50 },
         {
           opacity: 1,
           y: 0,
           duration: 0.8,
+          delay: index * 0.1, // Stagger slightly
           ease: "power2.out",
           scrollTrigger: {
-            trigger: item,
+            trigger: company,
             start: "top 85%",
-            toggleActions: "play none none none", // Plays once when scrolled into view
+            toggleActions: "play none none reverse",
           },
         }
       );
     });
 
-    // Animate each Timeline Content box
-    const timelineContents = document.querySelectorAll(".timeline__content");
-    timelineContents.forEach((content) => {
-      gsap.fromTo(
-        content,
-        { opacity: 0, x: 50 }, // Slides in slightly from the right
-        {
-          opacity: 1,
-          x: 0,
-          duration: 0.8,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: content,
-            start: "top 85%",
-            toggleActions: "play none none none",
-          },
-        }
-      );
-    });
-
-    // Cleanup listeners and ScrollTriggers on unmount
     return () => {
-      window.removeEventListener("scroll", onScroll);
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
     };
   }, []);
 
   return (
     <section id="experience" aria-label="Experience">
-      <div style={{ height: "30vh" }} />
+      <div style={{ height: "15vh" }} />
 
-      <div className="experienceTitle">
-        <h2>Experience</h2>
-      </div>
-      <div className="experience-container">
-        {/* LEFT COLUMN: Voluntary Section */}
-        <div className="voluntary-section">
-          <div className="voluntaryRoles">Voluntary Roles</div>
-          
-          <div className="voluntary-item">
-            <h4>Javascript Developer</h4>
-            <h5>Carboncopies Foundation</h5>
-            <p>
-              The Carboncopies Foundation is a nonprofit dedicated to advancing the science and
-              development of Whole Brain Emulation. As a JavaScript Developer, I engineer their
-              interactive web application (
-              <a href="https://roadmap.carboncopies.org/" target="_blank" rel="noopener noreferrer">
-                roadmap.carboncopies.org
-              </a>
-              ) to visually track the complex research milestones required for this mission. This
-              platform successfully translates highly technical data into an accessible, engaging
-              roadmap for both the scientific community and the public.
-            </p>
-          </div>
-          
-          <div className="voluntary-item">
-            <h4>Design Head</h4>
-            <h5>Indian Student Association – Illinois Tech | Aug 2023 – Jan 2025 · 1 yr 6 mos</h5>
-            <p>
-              I served as Design Head for 3 semesters at ISA@IIT Chicago. I was also offered a 4th
-              tenure as Design Head, but as I was in the final semester of my master's, I had to
-              decline the offer. In this role, I contributed significantly to art and culture by
-              making and filming videos, managing the design team, and collaborating closely with
-              the photography team.
-            </p>
-          </div>
-
-          <div className="voluntary-item">
-            <h4>Joint Secretary</h4>
-            <h5>IEEE KLS GIT | Dec 2021 – Oct 2022 · 11 mos</h5>
-            <p>
-              As Joint Secretary at IEEE KLS GIT, I coordinated internal communications, managed
-              event logistics, and maintained documentation to ensure smooth operation of the team.
-              I played a key role in organizing events and streamlining processes, as detailed in
-              the second image.
-            </p>
-          </div>
-
-          <div className="voluntary-item">
-            <h4>Webmaster</h4>
-            <h5>IEEE KLS GIT | Jan 2020 – Nov 2021 · 1 yr 10 mos</h5>
-            <p>
-              As Webmaster at IEEE KLS GIT, I led website maintenance and development initiatives,
-              ensuring the site was both visually appealing and functionally robust. I collaborated
-              with multiple teams to manage content updates and optimize the user experience,
-              following the details provided in the first image.
-            </p>
-          </div>
+      <div className="experience-wrapper">
+        <div className="experienceTitle">
+          <h2>
+            <AnimatedIntroText text="Experience" />
+          </h2>
         </div>
 
-        {/* Work history (visual timeline) */}
-        <div className="timeline-wrapper">
-          <div className="timeline">
-            {/* TIMELINE SECTION 1 */}
-            <div className="timeline__section">
-              <div className="timeline__left">
-                <div className="timeline__date"></div>
+        <div className="experience-container">
+          {experiences.map((exp, cIdx) => (
+            <div className="company-block glass-card" key={cIdx}>
+              <div className="company-header">
+                <img src={exp.logo} alt={`${exp.company} logo`} className="company-logo" />
+                <h3 className="company-name">{exp.company}</h3>
               </div>
-              <div className="timeline__tracker">
-                <div className="tracker"></div>
-              </div>
-              <div className="timeline__middle">
-                <div className="timeline__bullet"></div>
-              </div>
-
-              <div className="timeline__right">
-                <div>
-                  <div className="timeline__content">
-                    <h4>Software Developer</h4>
-                    <h5>Artversion (Full-Time) | May 2025 – Jan 2026</h5>
-                    <ul>
-                      <li>Owned the development of automated Dayforce API integrations for multiple client platforms using JavaScript, PHP, REST APIs, and cron jobs, reducing manual job-posting effort by 70% and increasing cross-platform publishing reliability.</li>
-                      <li>Built secure Chrome and Safari extensions to bridge disconnected systems across multiple client environments, reducing data transfer time by 90% and improving workflow efficiency for business operations.</li>
-                      <li>Drove accessibility improvements across multiple React-based client applications by implementing ADA, WCAG, and ARIA standards, increasing accessible reach by 40% and strengthening overall user engagement.</li>
-                      <li>Developed and launched a high-performance web platform on WordPress VIP, engineering fluid, interactive UI components with GSAP web animations, which increased user time-on-page by 35% and significantly enhanced visual engagement.</li>
-                    </ul>
-                    <h5 className="timeline__techLabel">Tech Stack</h5>
-                    <p>JavaScript, PHP, React, REST APIs, Dayforce API, Chrome/Safari Extensions, WordPress VIP, GSAP, ADA/WCAG/ARIA, Cron Jobs</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* TIMELINE SECTION 2 */}
-            <div className="timeline__section">
-              <div className="timeline__left">
-                <div className="timeline__date"></div>
-              </div>
-              <div className="timeline__tracker">
-                <div className="tracker"></div>
-              </div>
-              <div className="timeline__middle">
-                <div className="timeline__bullet"></div>
-              </div>
-
-              <div className="timeline__right">
-                <div>
-                  <div className="timeline__content">
-                    <h4>Software Developer</h4>
-                    <h5>Artarray (Full-Time) | Feb 2020 – Jun 2023</h5>
-                    <ul>
-                      <li>Owned the development of a high-traffic course registration platform using React, Node.js, JavaScript (ES6+), and RESTful APIs, improving enrollment workflow efficiency by 35% and delivering a secure end-to-end user experience.</li>
-                      <li>Architected and implemented distributed business logic for schedule conflict detection, prerequisite validation, and automated waitlist management, reducing registration errors by 40% and increasing successful enrollment processing by 30%.</li>
-                      <li>Improved platform reliability and scalability by integrating Firebase Authentication, deploying Dockerized services on AWS, and building centralized monitoring with AWS OpenSearch, reducing incident resolution time by 50% and supporting 99.9% availability during peak registration cycles.</li>
-                    </ul>
-                    <h5 className="timeline__techLabel">Tech Stack</h5>
-                    <p>React, Node.js, JavaScript (ES6+), RESTful APIs, Firebase, Docker, AWS, AWS OpenSearch</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* TIMELINE SECTION 3 */}
-            <div className="timeline__section">
-              <div className="timeline__left">
-                <div className="timeline__date"></div>
-              </div>
-              <div className="timeline__tracker">
-                <div className="tracker"></div>
-              </div>
-              <div className="timeline__middle">
-                <div className="timeline__bullet"></div>
-              </div>
-
-              <div className="timeline__right">
-                <div>
-                  <div className="timeline__content">
-                    <h4>Freelance Web Developer</h4>
-                    <h5>Mar 2020 – Feb 2022</h5>
-                    <ul>
-                      <li>Owned end-to-end web application development for multiple freelance clients, driving requirements gathering, system design, implementation, deployment, and post-launch support for scalable, business-critical solutions.</li>
-                      <li>Developed dynamic, responsive front-end systems using React, Angular, JavaScript (ES6+), HTML5/CSS3, REST APIs, and state management, improving performance by 35% and delivering consistent cross-device experiences.</li>
-                      <li>Leveraged analytics integration and event tracking to analyze user behavior and conversion funnels, guiding feature enhancements that boosted engagement by 25%.</li>
-                    </ul>
-                    <h5 className="timeline__techLabel">Tech Stack</h5>
-                    <p>React, Angular, JavaScript (ES6+), HTML5, CSS3, REST APIs, State Management, Web Analytics</p>
-                  </div>
-                </div>
+              
+              <div className="roles-list">
+                {exp.roles.map((role, rIdx) => {
+                  const isLast = rIdx === exp.roles.length - 1;
+                  const isExpanded = expandedRoles[`${cIdx}-${rIdx}`];
+                  
+                  return (
+                    <div className="role-item" key={rIdx}>
+                      {/* Branch connector */}
+                      <div className="tree-branch"></div>
+                      
+                      {/* Vertical line continuing to next role */}
+                      {!isLast && <div className="tree-vertical-line"></div>}
+                      
+                      <div className="role-content">
+                        <div 
+                          className="role-header-clickable" 
+                          onClick={() => toggleRole(cIdx, rIdx)}
+                          aria-expanded={isExpanded}
+                        >
+                          <div>
+                            <h4 className="role-title">
+                              {role.title}
+                              <svg className="verified-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2ZM16.7071 9.70711C17.0976 9.31658 17.0976 8.68342 16.7071 8.29289C16.3166 7.90237 15.6834 7.90237 15.2929 8.29289L10.5 13.0858L8.70711 11.2929C8.31658 10.9024 7.68342 10.9024 7.29289 11.2929C6.90237 11.6834 6.90237 12.3166 7.29289 12.7071L9.79289 15.2071C10.1834 15.5976 10.8166 15.5976 11.2071 15.2071L16.7071 9.70711Z" fill="#22C55E"/>
+                              </svg>
+                            </h4>
+                            <p className="role-meta">
+                              {role.duration} · {role.location} · {role.type}
+                            </p>
+                          </div>
+                          <div className={`dropdown-icon ${isExpanded ? "open" : ""}`}>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                          </div>
+                        </div>
+                        
+                        <div className={`role-details ${isExpanded ? "expanded" : ""}`}>
+                          <div className="role-details-inner">
+                            <ul className="role-bullets">
+                              {role.bullets.map((bullet, bIdx) => (
+                                <li key={bIdx}>{bullet}</li>
+                              ))}
+                            </ul>
+                            
+                            <div className="tech-stack">
+                              <span className="tech-label">Tech Stack:</span> {role.techStack}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
-
-            {/* TIMELINE SECTION 4 */}
-            <div className="timeline__section">
-              <div className="timeline__left">
-                <div className="timeline__date"></div>
-              </div>
-              <div className="timeline__tracker">
-                <div className="tracker"></div>
-              </div>
-              <div className="timeline__middle">
-                <div className="timeline__bullet"></div>
-              </div>
-
-              <div className="timeline__right">
-                <div>
-                  <div className="timeline__content">
-                    <h4>Webmaster</h4>
-                    <h5>IEEE Bangalore Young Professionals (Intern) | Nov 2020 – Sep 2023</h5>
-                    <ul>
-                      <li>Secured this competitive internship by winning the IEEE YP Online Website Contest, showcasing strong technical and web design capabilities.</li>
-                      <li>Developed and launched the official IEEE Bangalore Young Professionals website, creating a responsive and modern digital hub for organizational engagement.</li>
-                      <li>Engineered the flagship event platform for the Young Professionals Global Summit 2020, delivering a high-performance web experience for global attendees.</li>
-                    </ul>
-                    <h5 className="timeline__techLabel">Tech Stack</h5>
-                    <p>HTML, CSS, JavaScript, Web Design, Responsive UI, Web Performance Optimization</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
+          ))}
         </div>
       </div>
 
-      {/* Global Styles */}
       <style jsx global>{`
+        @font-face {
+          font-family: 'Coolvetica';
+          src: url('/fonts/Coolvetica Rg.otf') format('opentype');
+          font-weight: normal;
+          font-style: normal;
+        }
+
         :root {
           --color-black: white;
           --color-white: black;
@@ -325,217 +227,242 @@ const Experience = () => {
         }
       `}</style>
 
-      {/* Component-Specific Styles */}
       <style jsx>{`
-        .experience-container {
-          display: grid;
-          grid-template-columns: 1fr 2fr;
-          gap: 2rem;
-          max-width: 1200px;
-          margin: 0 auto;
+        #experience {
+          padding-bottom: 100px;
         }
+
+        .experience-wrapper {
+          max-width: 900px;
+          margin: 0 auto;
+          padding: 0 2rem;
+        }
+
         .experienceTitle {
           font-size: 6em;
-          font-family: var(--font-sue-ellen), var(--font-shadows), cursive;
-          text-align: left;
-          margin-bottom: -4rem;
-          margin-left: 14rem;
+          text-align: center;
+          margin-bottom: 3rem;
         }
         .experienceTitle h2 {
           margin: 0;
-          font-family: inherit;
+          font-family: 'Coolvetica', sans-serif;
+          letter-spacing: 0.05em;
           font-size: inherit;
           font-weight: inherit;
         }
-        .voluntaryRoles {
-          font-size: 3em;
-          margin-bottom: 1rem;
-          margin-top: 7rem;
-          color: var(--color-white);
-          font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
-          font-weight: 600;
-        }
-        @media (max-width: 768px) {
-          .experienceTitle {
-            font-size: 4rem;
-            margin: 0px;
-          }
-          .experienceTitle h2 {
-            font-size: 4rem;
-            margin-left: 1rem !important;
-            margin-bottom: 0px !important;
-          }
-          .voluntaryRoles {
-            font-size: 2em;
-          }
-        }
-        .voluntary-item {
-          margin-bottom: 1rem;
-          border-bottom: 1px solid var(--color-grey);
-          padding-bottom: 1rem;
-          will-change: transform, opacity;
-        }
-        .voluntary-item h4 {
-          font-size: 2rem;
-          font-weight: 700;
-          margin: 0 0 0.5rem;
-          color: var(--color-white);
-          font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
-        }
-        .voluntary-item h5 {
-          font-size: 1rem;
-          font-weight: 500;
-          color: var(--mf-red, #ea3e3e);
-          margin: 0 0 0.5rem;
-          font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
-        }
-        .voluntary-item p {
-          font-size: 1rem;
-          color: var(--color-grey);
-          margin-top: 0.25rem;
-          font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
-        }
-        .voluntary-item a {
-          font-family: inherit;
+        
+        .experience-container {
+          display: flex;
+          flex-direction: column;
+          gap: 2.5rem;
+          font-family: 'Coolvetica', sans-serif;
+          letter-spacing: 0.05em;
         }
 
-        .timeline {
-          max-width: 1000px;
-          margin: 0 auto;
+        .company-block {
+          will-change: transform, opacity;
         }
-        .timeline__section {
-          display: grid;
-          grid-template-columns: auto 5px 50px auto;
-          align-items: start;
+
+        /* Glassmorphism Card Styles */
+        .glass-card {
+          background: rgba(120, 120, 120, 0.08);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border: 1px solid rgba(120, 120, 120, 0.2);
+          box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
+          border-radius: 20px;
+          padding: 2rem 2.5rem;
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-card:hover {
+          box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.08);
+        }
+
+        .company-header {
+          display: flex;
+          align-items: center;
+          gap: 16px;
           position: relative;
+          z-index: 2;
+          margin-bottom: 1rem;
         }
-        .timeline__left {
-          font-size: 1rem;
-          text-align: right;
-          text-transform: uppercase;
-          color: rgb(63, 63, 63);
-          font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
-        }
-        .timeline__left,
-        .timeline__middle,
-        .timeline__tracker {
-          position: sticky;
-          top: var(--sticky-top-pos);
-        }
-        .timeline__right {
-          background: linear-gradient(
-            180deg,
-            #ea3e3e 0%,
-            #ea3e3e 0%,
-            var(--color-grey) 0%,
-            var(--color-grey) 100%
-          );
-        }
-        .timeline__right > div {
-          background-color: var(--color-black);
-          padding-bottom: var(--buffer);
-          padding-left: 45px;
-          margin-left: 4px;
-        }
-        .timeline__date > div:first-child {
-          font-size: 1rem;
-        }
-        .timeline__bullet {
-          --bullet-dims: 20px;
-          background-color: var(--color-white);
-          width: var(--bullet-dims);
-          height: var(--bullet-dims);
+
+        .company-logo {
+          width: 50px;
+          height: 50px;
           border-radius: 50%;
-          transform: translateX(calc(var(--bullet-dims) / 2 + 2px));
-          float: right;
-        }
-        .timeline__content {
-          font-size: 1rem;
-          color: var(--color-grey);
-          transition: color 1s cubic-bezier(0, 0.39, 0.58, 1);
-          font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
-          will-change: transform, opacity;
-        }
-        .animate-on-scroll {
-          color: var(--color-white);
+          object-fit: cover;
+          background-color: var(--color-black);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
-        .timeline__content h4 {
-          font-size: 2rem;
-          font-weight: 700;
-          margin: 0 0 0.5rem;
-          font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
-        }
-        .timeline__content h5:first-of-type {
-          font-size: 1rem;
+        .company-name {
+          font-size: 1.3rem;
           font-weight: 500;
-          color: var(--mf-red, #ea3e3e);
-          margin: 0 0 0.5rem;
-          font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
-        }
-        .timeline__content .timeline__techLabel {
-          font-size: 1.15rem;
-          font-weight: 600;
           color: var(--color-white);
-          margin: 1rem 0 0.25rem;
-          font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
-        }
-        .timeline__content .timeline__techLabel + p {
-          font-size: 1rem;
-          color: var(--color-grey);
-          font-style: italic;
-          margin-top: 0.25rem;
-          font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
-        }
-        .timeline__content ul,
-        .timeline__content li {
-          font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
+          margin: 0;
         }
 
-        @media (max-width: 768px) {
-          .experience-container {
-            display: flex;
-            flex-direction: column;
-            padding: 0 10px;
-          }
-          .voluntary-item h4 {
-            font-size: 1.5rem;
-          }
-          .timeline__section {
-            grid-template-columns: 1fr;
-          }
-          .timeline__right > div {
-            padding-left: 10px;
-          }
-          .timeline__content h4 {
-            font-size: 1.5rem;
-          }
-          .timeline__content h5:first-of-type {
-            font-size: 1.1rem;
-          }
-          .timeline__content p,
-          .timeline__content ul {
-            font-size: 0.9rem;
-          }
-          .timeline__bullet {
-            display: none;
-          }
-          .timeline-wrapper {
-            order: 1;
-          }
-          .voluntary-section {
-            order: 2;
-          }
+        .roles-list {
+          margin-left: 24px;
+          margin-top: -8px;
+        }
+
+        .role-item {
+          position: relative;
+          padding-left: 36px;
+          padding-bottom: 1.5rem;
         }
         
-        .timeline__content ul {
-          list-style-type: disc;
-          padding-left: 20px;
-          margin: 10px 0;
+        .role-item:last-child {
+          padding-bottom: 0;
         }
-        .timeline__content li {
-          margin-bottom: 10px;
+
+        .tree-branch {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 24px;
+          height: 38px;
+          border-left: 2px solid rgba(120, 120, 120, 0.4);
+          border-bottom: 2px solid rgba(120, 120, 120, 0.4);
+          border-bottom-left-radius: 12px;
+        }
+
+        .tree-vertical-line {
+          position: absolute;
+          left: 0;
+          top: 38px;
+          bottom: 0;
+          width: 2px;
+          background-color: rgba(120, 120, 120, 0.4);
+        }
+
+        .role-content {
+          padding-top: 25px;
+        }
+
+        .role-header-clickable {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          cursor: pointer;
+          user-select: none;
+          padding: 8px 12px;
+          margin: -8px -12px;
+          border-radius: 12px;
+          transition: background-color 0.2s ease;
+        }
+
+        .role-header-clickable:hover {
+          background-color: rgba(120, 120, 120, 0.05);
+        }
+
+        .role-title {
+          font-size: 1.7rem;
+          font-weight: 700;
+          margin: 0 0 0.25rem 0;
+          color: var(--color-white);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .verified-icon {
+          flex-shrink: 0;
+        }
+
+        .role-meta {
+          font-size: 0.95rem;
+          color: var(--color-grey);
+          margin: 0;
+        }
+
+        .dropdown-icon {
+          color: var(--color-grey);
+          transition: transform 0.3s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 4px;
+          margin-top: 4px;
+        }
+
+        .dropdown-icon.open {
+          transform: rotate(180deg);
+        }
+
+        .role-details {
+          display: grid;
+          grid-template-rows: 0fr;
+          transition: grid-template-rows 0.4s ease-in-out, opacity 0.4s ease-in-out, margin-top 0.4s ease-in-out;
+          opacity: 0;
+          margin-top: 0;
+        }
+
+        .role-details.expanded {
+          grid-template-rows: 1fr;
+          opacity: 1;
+          margin-top: 1rem;
+        }
+
+        .role-details-inner {
+          overflow: hidden;
+          padding: 0 4px;
+        }
+
+        .role-bullets {
+          list-style-type: disc;
+          padding-left: 18px;
+          margin: 0 0 1rem 0;
+        }
+
+        .role-bullets li {
+          margin-bottom: 8px;
+          line-height: 1.6;
+          color: var(--color-white);
+          font-size: 1rem;
+        }
+
+        .tech-stack {
+          font-size: 0.95rem;
+          color: var(--color-grey);
+          margin-top: 1rem;
           line-height: 1.5;
+        }
+
+        .tech-label {
+          font-weight: 600;
+          color: var(--color-white);
+        }
+
+        @media (max-width: 768px) {
+          .experience-wrapper {
+            padding: 0 1.5rem;
+          }
+
+          .experienceTitle {
+            font-size: 4rem;
+            margin-bottom: 2rem;
+          }
+          
+          .glass-card {
+            padding: 1.5rem;
+          }
+
+          .company-logo {
+            width: 44px;
+            height: 44px;
+          }
+          
+          .roles-list {
+            margin-left: 21px;
+          }
+          
+          .role-title {
+            font-size: 1.4rem;
+          }
         }
       `}</style>
     </section>

@@ -3,6 +3,7 @@ import styles from './combined.module.scss'
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import ProjectGrid from '@/components/projects/ProjectGrid';
+import AnimatedIntroText from '../AnimatedIntroText';
 
 export default function Projects() {
   const [projects, setProjects] = useState([]);
@@ -44,7 +45,7 @@ export default function Projects() {
   return (
     <section id="featured-projects" aria-label="Featured projects">
       <h2 className={styles.featuredTitle}>
-        Featured Projects
+        <AnimatedIntroText text="Featured Projects" />
       </h2>
       <div className={styles.mainp}>
         <div className={styles.bodyp}>
