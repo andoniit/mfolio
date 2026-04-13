@@ -106,12 +106,12 @@ useEffect(() => {
           className={styles.landingOverlay}
         >
           <div className={styles.welcomeTextContainer}>
-            <h1 className={`${styles.welcomeLine} ${styles.top}`}>
+            <div className={`${styles.welcomeLine} ${styles.top}`}>
               <AnimatedIntroText startAnimation={preloaderFinished}><span>Welcome,</span></AnimatedIntroText>
-            </h1>
-            <p className={`${styles.welcomeLine} ${styles.bottom}`}>
+            </div>
+            <div className={`${styles.welcomeLine} ${styles.bottom}`}>
               <AnimatedIntroText startAnimation={preloaderFinished}><span>Hello There</span></AnimatedIntroText>
-            </p>
+            </div>
           </div>
           
           <motion.div 
