@@ -14,6 +14,7 @@ const HOME_SECTIONS = [
   { id: "experience", label: "Experience" },
   { id: "my-vision", label: "My Vision" },
   { id: "featured-projects", label: "Featured Projects" },
+  { id: "my-setups", label: "My Setups" },
 ] as const;
 
 type HomeSectionLabel = (typeof HOME_SECTIONS)[number]["label"];

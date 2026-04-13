@@ -11,6 +11,7 @@ import MyVision from "@/components/home/MyVision"
 import Preloader from "@/components/home/Preloader"
 import { AnimatePresence } from 'framer-motion';
 import Projects from "@/components/home/Projects/Project"
+import MySetups from "@/components/home/MySetups"
 import Slideshow from "@/components/home/SliderSection"
 import Header from "@/components/layout/header/header"
 import { motion, useScroll } from "motion/react"
@@ -74,6 +75,7 @@ export default function Home() {
       <Experience />
       <MyVision/>
       <Projects/>
+      <MySetups />
       <Slideshow/>
     </div>
     
