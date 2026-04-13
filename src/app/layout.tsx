@@ -1,10 +1,13 @@
 import { Shadows_Into_Light } from "next/font/google";
 import localFont from "next/font/local";
 import type { Metadata } from "next";
+import Script from "next/script";
+import { Suspense } from "react";
 import "./globals.css";
 import FloatingBottomNav from "@/components/layout/bottom-nav/FloatingBottomNav";
 import ConditionalFooter from "@/components/layout/footer/ConditionalFooter";
 import TabTitleWatcher from "@/components/layout/TabTitleWatcher";
+import GoogleAnalyticsTracker from "@/components/analytics/GoogleAnalyticsTracker";
 
 const shadows = Shadows_Into_Light({
   subsets: ['latin'],
@@ -38,6 +41,7 @@ const sueEllenFrancisco = localFont({
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
 const siteName = "Anirudha Kapileshwari";
+const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-1N7X8DBHKY";
 
 const globalJsonLd = {
   "@context": "https://schema.org",
@@ -137,24 +141,27 @@ export default function RootLayout({
         lang="en"
         className={`${shadows.variable} ${satoshi.variable} ${sueEllenFrancisco.variable} ${coolvetica.variable} ${coolveticaItalic.variable}`}
       >
-      <head>
-        <script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=G-1N7X8DBHKY"
+      <body className="min-h-screen flex flex-col">
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}
+          strategy="afterInteractive"
         />
-        <script
+        <Script
+          id="ga4-init"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
-              function gtag() { dataLayer.push(arguments); }
+              function gtag(){dataLayer.push(arguments);}
+              window.gtag = gtag;
               gtag('js', new Date());
-              gtag('config', 'G-1N7X8DBHKY');
+              gtag('config', '${gaMeasurementId}', { send_page_view: false });
             `,
           }}
         />
-      </head>
-      
-      <body className="min-h-screen flex flex-col">
+        <Suspense fallback={null}>
+          <GoogleAnalyticsTracker measurementId={gaMeasurementId} />
+        </Suspense>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(globalJsonLd) }}
