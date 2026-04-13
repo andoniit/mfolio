@@ -2,8 +2,24 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 import Header from "@/components/layout/header/header";
 import ProjectGrid from "@/components/projects/ProjectGrid";
 import "../blog/blog.scss";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = {
+  title: "Projects",
+  description:
+    "Browse selected software projects by Anirudha Kapileshwari, including product builds, experiments, and case studies.",
+  alternates: {
+    canonical: "/projects",
+  },
+  openGraph: {
+    title: "Projects | Anirudha Kapileshwari",
+    description:
+      "Browse selected software projects by Anirudha Kapileshwari, including product builds, experiments, and case studies.",
+    type: "website",
+    url: "/projects",
+  },
+};
 
 export default async function ProjectsPage() {
   const { data: projects, error } = await supabaseAdmin

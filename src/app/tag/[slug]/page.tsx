@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 import Header from "@/components/layout/header/header";
 import BlogPostGrid from "@/components/blog/BlogPostGrid";
 import "@/app/blog/blog.scss";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 
@@ -72,7 +73,7 @@ export default async function TagPage({ params }: Props) {
   );
 }
 
-export async function generateMetadata({ params }: Props) {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
 
   const { data: tag } = await supabaseAdmin
@@ -84,11 +85,24 @@ export async function generateMetadata({ params }: Props) {
   if (!tag) {
     return {
       title: "Tag Not Found",
+      robots: {
+        index: false,
+        follow: false,
+      },
     };
   }
 
   return {
     title: `${tag.name} Blogs`,
     description: `Read all blog posts tagged with ${tag.name}.`,
+    alternates: {
+      canonical: `/tag/${tag.slug}`,
+    },
+    openGraph: {
+      title: `${tag.name} Blogs | Anirudha Kapileshwari`,
+      description: `Read all blog posts tagged with ${tag.name}.`,
+      url: `/tag/${tag.slug}`,
+      type: "website",
+    },
   };
 }

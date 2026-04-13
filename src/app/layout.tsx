@@ -1,5 +1,6 @@
 import { Shadows_Into_Light } from "next/font/google";
 import localFont from "next/font/local";
+import type { Metadata } from "next";
 import "./globals.css";
 import FloatingBottomNav from "@/components/layout/bottom-nav/FloatingBottomNav";
 import ConditionalFooter from "@/components/layout/footer/ConditionalFooter";
@@ -35,9 +36,90 @@ const sueEllenFrancisco = localFont({
   display: "swap",
 });
 
-export const metadata = {
-  title: 'Anirudha Kapileshwari - Software Engineer',
-  description: 'Potefolio website of me ',
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
+const siteName = "Anirudha Kapileshwari";
+
+const globalJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": siteUrl ? `${siteUrl}#website` : "#website",
+      name: siteName,
+      url: siteUrl || "/",
+      inLanguage: "en",
+    },
+    {
+      "@type": "Person",
+      "@id": siteUrl ? `${siteUrl}#person` : "#person",
+      name: "Anirudha Kapileshwari",
+      jobTitle: "Software Engineer",
+      url: siteUrl || "/",
+      image: siteUrl ? `${siteUrl}/images/25.jpg` : "/images/25.jpg",
+      sameAs: [
+        "https://www.linkedin.com/in/anirudha-kapileshwari-293826202/",
+        "https://github.com/andoniit",
+        "https://www.behance.net/aniruddkapiles1",
+      ],
+      worksFor: {
+        "@type": "Organization",
+        name: "Independent",
+      },
+    },
+  ],
+};
+
+export const metadata: Metadata = {
+  metadataBase: siteUrl ? new URL(siteUrl) : undefined,
+  title: {
+    default: "Anirudha Kapileshwari - Software Engineer",
+    template: "%s | Anirudha Kapileshwari",
+  },
+  description:
+    "Portfolio of Anirudha Kapileshwari - software engineer building performant web experiences, product-focused projects, and practical engineering solutions.",
+  keywords: [
+    "Anirudha Kapileshwari",
+    "software engineer",
+    "portfolio",
+    "web developer",
+    "frontend",
+    "full stack",
+    "projects",
+    "blog",
+  ],
+  authors: [{ name: "Anirudha Kapileshwari" }],
+  creator: "Anirudha Kapileshwari",
+  publisher: "Anirudha Kapileshwari",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    siteName: "Anirudha Kapileshwari",
+    title: "Anirudha Kapileshwari - Software Engineer",
+    description:
+      "Explore projects, experience, and articles by Anirudha Kapileshwari.",
+    url: siteUrl || undefined,
+    images: [
+      {
+        url: "/images/25.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Anirudha Kapileshwari portfolio preview",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Anirudha Kapileshwari - Software Engineer",
+    description:
+      "Explore projects, experience, and articles by Anirudha Kapileshwari.",
+    images: ["/images/25.jpg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",
@@ -73,6 +155,10 @@ export default function RootLayout({
       </head>
       
       <body className="min-h-screen flex flex-col">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(globalJsonLd) }}
+        />
         <TabTitleWatcher />
         <div className="flex-1 flex flex-col min-h-0">{children}</div>
         <FloatingBottomNav />

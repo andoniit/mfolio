@@ -8,6 +8,7 @@ import AnimatedIntroText from "@/components/home/AnimatedIntroText";
 import SplitterText from "@/components/home/SplitterText";
 import AnimatedDivider from "@/components/home/AnimatedDivider";
 import "../../blog/[slug]/blog-post.scss";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 
@@ -15,8 +16,58 @@ type Props = {
   params: Promise<{ slug: string }>;
 };
 
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+
+  const { data: project } = await supabaseAdmin
+    .from("projects")
+    .select("title, slug, description, cover_image_url")
+    .eq("slug", slug)
+    .eq("published", true)
+    .is("trashed_at", null)
+    .maybeSingle();
+
+  if (!project) {
+    return {
+      title: "Project Not Found",
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
+
+  const description =
+    project.description?.trim() ||
+    `Explore the ${project.title} project by Anirudha Kapileshwari.`;
+
+  return {
+    title: project.title,
+    description,
+    alternates: {
+      canonical: `/projects/${project.slug}`,
+    },
+    openGraph: {
+      type: "article",
+      title: project.title,
+      description,
+      url: `/projects/${project.slug}`,
+      images: project.cover_image_url
+        ? [{ url: project.cover_image_url, alt: project.title }]
+        : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: project.title,
+      description,
+      images: project.cover_image_url ? [project.cover_image_url] : undefined,
+    },
+  };
+}
+
 export default async function ProjectDetailPage({ params }: Props) {
   const { slug } = await params;
+  const siteBase = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
 
   const { data: project, error } = await supabaseAdmin
     .from("projects")
@@ -99,8 +150,58 @@ export default async function ProjectDetailPage({ params }: Props) {
         })
       : "";
 
+  const creativeWorkJsonLd = {
+    "@type": "CreativeWork",
+    name: project.title,
+    description: project.description || "",
+    url: siteBase ? `${siteBase}/projects/${project.slug}` : `/projects/${project.slug}`,
+    image: project.cover_image_url || undefined,
+    creator: {
+      "@type": "Person",
+      name: "Anirudha Kapileshwari",
+      url: siteBase || "/",
+    },
+    datePublished: project.published_at || undefined,
+    dateCreated: project.project_date || undefined,
+    keywords: techStack.length > 0 ? techStack : undefined,
+    about: workplace || clientName || undefined,
+  };
+
+  const breadcrumbJsonLd = {
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: siteBase ? `${siteBase}/` : "/",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Projects",
+        item: siteBase ? `${siteBase}/projects` : "/projects",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: project.title,
+        item: siteBase ? `${siteBase}/projects/${project.slug}` : `/projects/${project.slug}`,
+      },
+    ],
+  };
+
+  const jsonLdGraph = {
+    "@context": "https://schema.org",
+    "@graph": [creativeWorkJsonLd, breadcrumbJsonLd],
+  };
+
   return (
     <div className="blog-post-wrapper">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdGraph) }}
+      />
       <Header />
 
       <article className="min-h-screen py-10 sm:py-16 font-sans" style={{ color: "var(--mf-dark)" }}>

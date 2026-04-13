@@ -58,6 +58,15 @@ export default async function AdminDashboardPage() {
       publicLabel: null as string | null,
       meta: null as string | null,
     },
+    {
+      title: "SEO Tools",
+      description: "Structured data validation, index checks, and performance tools.",
+      href: "/admin/seo",
+      cta: "Open SEO tools",
+      publicHref: "/sitemap.xml",
+      publicLabel: "View sitemap",
+      meta: "Includes rich results + page speed checks",
+    },
   ];
 
   return (

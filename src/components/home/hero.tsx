@@ -11,7 +11,6 @@ import Picture3 from '../../../public/images/4.jpg';
 import Picture5 from '../../../public/images/25.jpg';
 import Picture7 from '../../../public/images/7.jpg';
 import AnimatedIntroText from './AnimatedIntroText';
-import SplitterText from './SplitterText';
 
 
 export default function Hero() {
@@ -95,7 +94,7 @@ useEffect(() => {
             <Image
               src={Picture4}
               fill
-              alt="Center Hero Image"
+              alt="Portrait-style hero visual for Anirudha Kapileshwari portfolio"
               placeholder="blur"
             />
           </div>
@@ -110,9 +109,9 @@ useEffect(() => {
             <h1 className={`${styles.welcomeLine} ${styles.top}`}>
               <AnimatedIntroText startAnimation={preloaderFinished}><span>Welcome,</span></AnimatedIntroText>
             </h1>
-            <h1 className={`${styles.welcomeLine} ${styles.bottom}`}>
+            <p className={`${styles.welcomeLine} ${styles.bottom}`}>
               <AnimatedIntroText startAnimation={preloaderFinished}><span>Hello There</span></AnimatedIntroText>
-            </h1>
+            </p>
           </div>
           
           <motion.div 
@@ -152,7 +151,7 @@ useEffect(() => {
             <Image
               src={Picture2}
               fill
-              alt="Developer"
+              alt="Developer workspace visual"
               placeholder="blur"
             />
           </div>
@@ -167,7 +166,7 @@ useEffect(() => {
             <Image
               src={Picture1}
               fill
-              alt="United States"
+              alt="United States themed visual"
               placeholder="blur"
             />
           </div>
@@ -193,7 +192,7 @@ useEffect(() => {
             <Image
               src={Picture5}
               fill
-              alt="Chicago"
+              alt="Chicago city-themed visual"
               placeholder="blur"
             />
           </div>
@@ -208,7 +207,7 @@ useEffect(() => {
             <Image
               src={Picture3}
               fill
-              alt="IIT"
+              alt="IIT campus-inspired visual"
               placeholder="blur"
             />
           </div>
@@ -223,7 +222,7 @@ useEffect(() => {
             <Image
               src={Picture7}
               fill
-              alt="Developer"
+              alt="Software development themed visual"
               placeholder="blur"
             />
           </div>

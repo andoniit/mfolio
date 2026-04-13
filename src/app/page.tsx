@@ -24,6 +24,16 @@ export default function Home() {
   
   const { scrollYProgress } = useScroll()
   const [isLoading, setIsLoading] = useState(true);
+  const siteBase = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
+  const homePageJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: "Anirudha Kapileshwari - Portfolio",
+    url: siteBase ? `${siteBase}/` : "/",
+    description:
+      "Portfolio homepage showcasing software projects, experience, writing, and creative setups by Anirudha Kapileshwari.",
+    inLanguage: "en",
+  };
 
   useEffect( () => {
     (
@@ -41,7 +51,11 @@ export default function Home() {
   return (
     
 
-<div>
+<main>
+<script
+  type="application/ld+json"
+  dangerouslySetInnerHTML={{ __html: JSON.stringify(homePageJsonLd) }}
+/>
 <motion.div
                 id="scroll-indicator"
                 style={{
@@ -77,7 +91,7 @@ export default function Home() {
       <Projects/>
       <MySetups />
       <Slideshow/>
-    </div>
+    </main>
     
   );
 }

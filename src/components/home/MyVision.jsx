@@ -43,6 +43,7 @@ export default function MyVision() {
 
   return (
     <section id="my-vision" aria-label="My Vision" className="pitch-section">
+      <h2 className="sr-only">My Vision</h2>
       <div style={{ width: "100%", maxWidth: "1200px", display: "flex", justifyContent: "center" }}>
         <div 
           className="pitch-container" 
@@ -101,6 +102,18 @@ function Stylesheet() {
         background-position: center bottom;
         border-radius: 20px;
         box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
       }
 
       .pitch-frame {

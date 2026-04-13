@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 import Header from "@/components/layout/header/header";
 import BlogPostGrid from "@/components/blog/BlogPostGrid";
 import "@/app/blog/blog.scss";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 
@@ -50,7 +51,7 @@ export default async function CategoryPage({ params }: Props) {
   );
 }
 
-export async function generateMetadata({ params }: Props) {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
 
   const { data: category } = await supabaseAdmin
@@ -62,11 +63,24 @@ export async function generateMetadata({ params }: Props) {
   if (!category) {
     return {
       title: "Category Not Found",
+      robots: {
+        index: false,
+        follow: false,
+      },
     };
   }
 
   return {
     title: `${category.name} Blogs`,
     description: `Read all blog posts in the ${category.name} category.`,
+    alternates: {
+      canonical: `/category/${category.slug}`,
+    },
+    openGraph: {
+      title: `${category.name} Blogs | Anirudha Kapileshwari`,
+      description: `Read all blog posts in the ${category.name} category.`,
+      url: `/category/${category.slug}`,
+      type: "website",
+    },
   };
 }

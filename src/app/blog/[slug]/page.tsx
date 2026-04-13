@@ -4,6 +4,7 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 import Header from "@/components/layout/header/header";
 import AnimatedIntroText from "@/components/home/AnimatedIntroText";
 import "./blog-post.scss";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 
@@ -11,8 +12,56 @@ type Props = {
   params: Promise<{ slug: string }>;
 };
 
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+
+  const { data: post } = await supabaseAdmin
+    .from("posts")
+    .select("title, slug, excerpt, cover_image_url")
+    .eq("slug", slug)
+    .eq("published", true)
+    .is("trashed_at", null)
+    .maybeSingle();
+
+  if (!post) {
+    return {
+      title: "Post Not Found",
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
+
+  const description =
+    post.excerpt?.trim() ||
+    `Read ${post.title} by Anirudha Kapileshwari.`;
+
+  return {
+    title: post.title,
+    description,
+    alternates: {
+      canonical: `/blog/${post.slug}`,
+    },
+    openGraph: {
+      type: "article",
+      title: post.title,
+      description,
+      url: `/blog/${post.slug}`,
+      images: post.cover_image_url ? [{ url: post.cover_image_url, alt: post.title }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description,
+      images: post.cover_image_url ? [post.cover_image_url] : undefined,
+    },
+  };
+}
+
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
+  const siteBase = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
 
   // 1. Fetch current post
   const { data: post, error } = await supabaseAdmin
@@ -73,8 +122,62 @@ export default async function BlogPostPage({ params }: Props) {
   }
   const { data: relatedPosts } = await relatedQuery;
 
+  const postJsonLd = {
+    "@type": "BlogPosting",
+    mainEntityOfPage: siteBase ? `${siteBase}/blog/${post.slug}` : `/blog/${post.slug}`,
+    headline: post.title,
+    description: post.excerpt || "",
+    image: post.cover_image_url ? [post.cover_image_url] : undefined,
+    author: {
+      "@type": "Person",
+      name: "Anirudha Kapileshwari",
+      url: siteBase || "/",
+    },
+    publisher: {
+      "@type": "Person",
+      name: "Anirudha Kapileshwari",
+    },
+    datePublished: post.published_at || undefined,
+    dateModified: post.updated_at || post.published_at || undefined,
+    articleSection: post.categories?.name || undefined,
+    keywords: post.post_tags?.map((item: any) => item.tags?.name).filter(Boolean) || undefined,
+  };
+
+  const breadcrumbJsonLd = {
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: siteBase ? `${siteBase}/` : "/",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: siteBase ? `${siteBase}/blog` : "/blog",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: post.title,
+        item: siteBase ? `${siteBase}/blog/${post.slug}` : `/blog/${post.slug}`,
+      },
+    ],
+  };
+
+  const jsonLdGraph = {
+    "@context": "https://schema.org",
+    "@graph": [postJsonLd, breadcrumbJsonLd],
+  };
+
   return (
     <div className="blog-post-wrapper">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdGraph) }}
+      />
       {/* FIX: Use the Header Component properly */}
       <Header /> 
       

@@ -3,8 +3,24 @@ import Header from "@/components/layout/header/header";
 import BlogPostGrid from "@/components/blog/BlogPostGrid";
 import BlogListingFilters from "@/components/blog/BlogListingFilters";
 import "./blog.scss";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = {
+  title: "Blog",
+  description:
+    "Read engineering notes, practical guides, and development insights by Anirudha Kapileshwari.",
+  alternates: {
+    canonical: "/blog",
+  },
+  openGraph: {
+    title: "Blog | Anirudha Kapileshwari",
+    description:
+      "Read engineering notes, practical guides, and development insights by Anirudha Kapileshwari.",
+    type: "website",
+    url: "/blog",
+  },
+};
 
 type Props = {
   searchParams: Promise<{
