@@ -37,27 +37,51 @@ export default function Preloader() {
   const initialPath = `M0 0 L${dimensions.width} 0 L${dimensions.width} ${dimensions.height} Q${dimensions.width / 2} ${dimensions.height + 300} 0 ${dimensions.height} L0 0`;
   const targetPath = `M0 0 L${dimensions.width} 0 L${dimensions.width} ${dimensions.height} Q${dimensions.width / 2} ${dimensions.height} 0 ${dimensions.height} L0 0`;
 
-  // Black curve variant (moves first)
-  const curve = {
+  const ease = [0.76, 0, 0.24, 1];
+  const dur = 0.7;
+
+  // Back → front on enter; top (black) peels first on exit, then red → purple → lime
+  const curveLime = {
     initial: {
       d: initialPath,
-      transition: { duration: 0.7, ease: [0.76, 0, 0.24, 1] },
+      transition: { duration: dur, ease, delay: 0 },
     },
     exit: {
       d: targetPath,
-      transition: { duration: 0.7, ease: [0.76, 0, 0.24, 1] ,delay: 0.4 }, // no delay here
+      transition: { duration: dur, ease, delay: 0.52 },
     },
   };
 
-  // Orange curve variant (moves after black curve)
-  const curve2 = {
+  const curvePurple = {
     initial: {
       d: initialPath,
-      transition: { duration: 0.7, ease: [0.76, 0, 0.24, 1], delay: 0.2 },
+      transition: { duration: dur, ease, delay: 0.08 },
     },
     exit: {
       d: targetPath,
-      transition: { duration: 0.7, ease: [0.76, 0, 0.24, 1], delay: 0.45 },
+      transition: { duration: dur, ease, delay: 0.48 },
+    },
+  };
+
+  const curveRed = {
+    initial: {
+      d: initialPath,
+      transition: { duration: dur, ease, delay: 0.16 },
+    },
+    exit: {
+      d: targetPath,
+      transition: { duration: dur, ease, delay: 0.44 },
+    },
+  };
+
+  const curveBlack = {
+    initial: {
+      d: initialPath,
+      transition: { duration: dur, ease, delay: 0.24 },
+    },
+    exit: {
+      d: targetPath,
+      transition: { duration: dur, ease, delay: 0.38 },
     },
   };
 
@@ -68,18 +92,33 @@ export default function Preloader() {
           <motion.p variants={opacity} initial="initial" animate="enter">
             {words[index]}
           </motion.p>
-          {/* Render the orange curve first (behind) */}
+          {/* Layered color curves (back → front); black mask on top */}
           <svg style={{ position: "absolute", zIndex: 1 }}>
             <motion.path
-              variants={curve2}
+              variants={curveLime}
               initial="initial"
               exit="exit"
-              style={{ fill: "#ff3636" }}
+              style={{ fill: "var(--mf-lime)" }}
             />
           </svg>
-          {/* Then render the black curve on top */}
           <svg style={{ position: "absolute", zIndex: 2 }}>
-            <motion.path variants={curve} initial="initial" exit="exit" />
+            <motion.path
+              variants={curvePurple}
+              initial="initial"
+              exit="exit"
+              style={{ fill: "var(--mf-purple)" }}
+            />
+          </svg>
+          <svg style={{ position: "absolute", zIndex: 3 }}>
+            <motion.path
+              variants={curveRed}
+              initial="initial"
+              exit="exit"
+              style={{ fill: "var(--mf-red)" }}
+            />
+          </svg>
+          <svg style={{ position: "absolute", zIndex: 4 }}>
+            <motion.path variants={curveBlack} initial="initial" exit="exit" />
           </svg>
         </>
       )}
