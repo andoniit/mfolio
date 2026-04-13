@@ -61,7 +61,7 @@ export default function MyVision() {
       </div>
       
       <div className="poem-container mf-dark-text">
-        <SplitterText isBlock={true}>
+        <SplitterText isBlock={true} variant="fastv2">
           A barefoot dream wrapped in imagination, Lines of vision shaping inspiration. A sneaker drawn, yet never worn, A canvas of thought where ideas are born. The artist’s mind, a realm so wide, Where limits fade and dreams collide. No riches needed, no gold in hand, For design builds castles where feet can stand. A stroke of art, a future untold, Where designers craft, their dreams unfold. For they afford, through ink and air, A world designed beyond compare.
         </SplitterText>
       </div>
