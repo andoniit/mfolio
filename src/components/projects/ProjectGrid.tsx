@@ -2,7 +2,12 @@
 
 import { useLayoutEffect, useRef } from "react";
 import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ProjectCard from "./ProjectCard";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 export type Project = {
   id: string;
@@ -17,7 +22,7 @@ export type Project = {
   client_name?: string | null;
 };
 
-type ProjectGridProps = {
+export type ProjectGridProps = {
   projects: Project[];
   columns?: 1 | 2 | 3;
 };
@@ -30,18 +35,78 @@ export default function ProjectGrid({ projects, columns }: ProjectGridProps) {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        ".folder-card-link", 
-        { autoAlpha: 0, y: 42 },
-        {
+      const cards = gsap.utils.toArray(".folder-card-link");
+      if (!cards.length) return;
+
+      const mm = gsap.matchMedia();
+
+      // Set initial states
+      gsap.set(cards, { autoAlpha: 0, y: 80 });
+
+      mm.add("(min-width: 769px)", () => {
+        // Desktop Animation
+        if (cards.length === 3) {
+          // Animate center card first, then left and right together
+          const tl = gsap.timeline({
+            scrollTrigger: {
+              trigger: gridRef.current,
+              start: "top 85%",
+              toggleActions: "play none none reverse",
+            }
+          });
+
+          // Center card
+          tl.to(cards[1], {
+            autoAlpha: 1,
+            y: 0,
+            duration: 1,
+            ease: "power3.out",
+            clearProps: "opacity,transform,visibility",
+          });
+
+          // Left and right cards
+          tl.to([cards[0], cards[2]], {
+            autoAlpha: 1,
+            y: 0,
+            duration: 1,
+            ease: "power3.out",
+            clearProps: "opacity,transform,visibility",
+          }, "-=0.6"); // Overlap with previous animation by 0.6 seconds
+        } else {
+          // Standard stagger for other configurations on desktop
+          gsap.to(cards, {
+            autoAlpha: 1,
+            y: 0,
+            duration: 1,
+            stagger: 0.15,
+            ease: "power3.out",
+            clearProps: "opacity,transform,visibility",
+            scrollTrigger: {
+              trigger: gridRef.current,
+              start: "top 85%",
+              toggleActions: "play none none reverse",
+            }
+          });
+        }
+      });
+
+      mm.add("(max-width: 768px)", () => {
+        // Mobile Animation: One by one stagger
+        gsap.to(cards, {
           autoAlpha: 1,
           y: 0,
-          duration: 1.05,
-          stagger: 0.11,
-          ease: "expo.out",
+          duration: 0.8,
+          stagger: 0.2, // Noticeable one-by-one delay
+          ease: "power3.out",
           clearProps: "opacity,transform,visibility",
-        }
-      );
+          scrollTrigger: {
+            trigger: gridRef.current,
+            start: "top 90%", // Trigger slightly earlier on mobile
+            toggleActions: "play none none reverse",
+          }
+        });
+      });
+
     }, gridRef);
 
     return () => ctx.revert();
@@ -67,7 +132,6 @@ export default function ProjectGrid({ projects, columns }: ProjectGridProps) {
       }}
     >
       {projects.map((project, index) => (
-        // Added the index prop here!
         <ProjectCard key={project.id} project={project} index={index} />
       ))}
     </div>

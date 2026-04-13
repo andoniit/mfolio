@@ -7,7 +7,7 @@ import Hero from '../components/home/hero';
 import AboutMe from '../components/home/AboutMe';
 import Experience from "@/components/home/Experience";
 import Contact from "@/components/home/contact/Contact"
-import Scattertext from "@/components/home/Scattertext"
+import MyVision from "@/components/home/MyVision"
 import Preloader from "@/components/home/Preloader"
 import { AnimatePresence } from 'framer-motion';
 import Projects from "@/components/home/Projects/Project"
@@ -72,7 +72,7 @@ export default function Home() {
         <AboutMe />
       </div>
       <Experience />
-      <Scattertext/>
+      <MyVision/>
       <Projects/>
       <Slideshow/>
     </div>

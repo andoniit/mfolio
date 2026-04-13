@@ -12,8 +12,8 @@ const HOME_SECTIONS = [
   },
   { id: "about-me", label: "About Me" },
   { id: "experience", label: "Experience" },
-  { id: "featured-projects", label: "Featured Projects" },
   { id: "my-vision", label: "My Vision" },
+  { id: "featured-projects", label: "Featured Projects" },
 ] as const;
 
 type HomeSectionLabel = (typeof HOME_SECTIONS)[number]["label"];
@@ -106,39 +106,38 @@ export default function FloatingBottomNav() {
       return;
     }
 
-    const sections = HOME_SECTIONS.map(({ id }) => document.getElementById(id)).filter(
-      (section): section is HTMLElement => Boolean(section)
-    );
-
-    if (sections.length === 0) return;
-
     let ticking = false;
 
     const updateActiveSection = () => {
       const viewportCenter = window.innerHeight * 0.45;
       let nextIndex = 0;
-      let smallestDistance = Number.POSITIVE_INFINITY;
+      let maxScore = -1;
 
-      sections.forEach((section, index) => {
+      HOME_SECTIONS.forEach((homeSection, index) => {
+        const section = document.getElementById(homeSection.id);
+        if (!section) return;
+
         const rect = section.getBoundingClientRect();
+        
+        // 1. Check if the section spans across the viewport center
         const isCenterInside = rect.top <= viewportCenter && rect.bottom >= viewportCenter;
-
+        
+        // 2. Calculate how much of this section is currently visible on screen
+        const visibleTop = Math.max(0, rect.top);
+        const visibleBottom = Math.min(window.innerHeight, rect.bottom);
+        const visibleHeight = Math.max(0, visibleBottom - visibleTop);
+        
+        // Calculate a score for this section
+        let score = visibleHeight;
+        
+        // Give a massive score boost to the section covering the center of the screen
         if (isCenterInside) {
-          nextIndex = index;
-          smallestDistance = -1;
-          return;
+          score += window.innerHeight * 10; 
         }
 
-        if (smallestDistance !== -1) {
-          const distance = Math.min(
-            Math.abs(rect.top - viewportCenter),
-            Math.abs(rect.bottom - viewportCenter)
-          );
-
-          if (distance < smallestDistance) {
-            smallestDistance = distance;
-            nextIndex = index;
-          }
+        if (score > maxScore) {
+          maxScore = score;
+          nextIndex = index;
         }
       });
 

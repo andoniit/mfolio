@@ -85,32 +85,6 @@ export default function SiteFooter() {
         onMouseMove={handleMouseMove}
       >
         
-        {/* Reactive lime + red gradient flares inside the footer */}
-        <motion.div 
-          className={styles.limeGlow}
-          style={{
-            x: limeGlowX,
-            y: limeGlowOffsetY,
-            scale: glowScale
-          }}
-        />
-        <motion.div 
-          className={styles.purpleGlow}
-          style={{
-            x: purpleGlowX,
-            y: purpleGlowOffsetY,
-            scale: glowScale
-          }}
-        />
-        <motion.div 
-          className={styles.redGlow}
-          style={{
-            x: redGlowX,
-            y: redGlowOffsetY,
-            scale: glowScale
-          }}
-        />
-
         <div className={styles.inner}>
           
           {/* LEFT COLUMN */}

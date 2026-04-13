@@ -21,6 +21,8 @@ export default function Projects() {
 
         if (!cancelled && res.ok && Array.isArray(data)) {
           setProjects(data);
+          // Trigger a scroll event so floating nav re-evaluates the newly mounted section
+          setTimeout(() => window.dispatchEvent(new CustomEvent('scroll')), 100);
         }
       } catch {
         if (!cancelled) {
@@ -43,7 +45,7 @@ export default function Projects() {
   }
 
   return (
-    <section id="featured-projects" aria-label="Featured projects">
+    <section id="featured-projects" aria-label="Featured projects" style={{ paddingTop: '8rem', marginTop: '4rem' }}>
       <h2 className={styles.featuredTitle}>
         <AnimatedIntroText text="Featured Projects" />
       </h2>
