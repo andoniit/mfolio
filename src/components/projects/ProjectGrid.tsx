@@ -35,7 +35,7 @@ export default function ProjectGrid({ projects, columns }: ProjectGridProps) {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const ctx = gsap.context(() => {
-      const cards = gsap.utils.toArray(".folder-card-link");
+      const cards = gsap.utils.toArray(".folder-card-link") as HTMLElement[];
       if (!cards.length) return;
 
       const mm = gsap.matchMedia();

@@ -124,6 +124,14 @@ export default function MyDeskSetup() {
     });
   }, [currentIndex]);
 
+  // Advance every 10s; timer resets whenever the slide changes (manual or auto)
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % DESK_SETUPS.length);
+    }, 10_000);
+    return () => window.clearInterval(id);
+  }, [currentIndex]);
+
   const handleNext = () => setCurrentIndex((prev) => (prev + 1) % DESK_SETUPS.length);
   const handlePrev = () => setCurrentIndex((prev) => (prev === 0 ? DESK_SETUPS.length - 1 : prev - 1));
 
@@ -140,6 +148,18 @@ export default function MyDeskSetup() {
               My<br />Desk<br />Setup
             </h2>
             <p className="mds-subtitle">Over the years</p>
+          </div>
+          <div className="mds-controller">
+            <button type="button" className="mds-nav-btn" onClick={handlePrev} aria-label="Previous Setup">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+            <button type="button" className="mds-nav-btn" onClick={handleNext} aria-label="Next Setup">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
           </div>
         </div>
 
@@ -178,20 +198,6 @@ export default function MyDeskSetup() {
             <p className="mds-setup-desc">{currentData.description}</p>
           </div>
 
-          {/* Controller (Aligned to the right of the right-column) */}
-          <div className="mds-controller">
-            <button className="mds-nav-btn" onClick={handlePrev} aria-label="Previous Setup">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="15 18 9 12 15 6"></polyline>
-              </svg>
-            </button>
-            <button className="mds-nav-btn" onClick={handleNext} aria-label="Next Setup">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="9 18 15 12 9 6"></polyline>
-              </svg>
-            </button>
-          </div>
-
         </div>
       </div>
 
@@ -227,12 +233,16 @@ function MdsStyles() {
         gap: 4rem;
       }
 
-      /* Left Column */
+      /* Left Column — green card + controller centered below it */
       .mds-left-col {
         flex: 0 0 300px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
       }
 
       .mds-title-card {
+        width: 100%;
         background-color: #d1f366; /* Lime green */
         border-radius: 40px;
         padding: 4rem 3rem;
@@ -371,18 +381,21 @@ function MdsStyles() {
 
       .mds-controller {
         display: flex;
-        align-self: flex-end;
+        justify-content: center;
+        align-items: center;
         gap: 0.75rem;
-        margin-top: 1rem;
+        width: 100%;
+        max-width: 300px;
+        margin-top: 1.25rem;
       }
 
       .mds-nav-btn {
         width: 44px; 
         height: 44px;
         border-radius: 50%;
-        border: none;
-        background-color: #f5f5f5;
-        color: #888;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        background-color: rgba(255, 255, 255, 0.85);
+        color: #444;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -391,8 +404,8 @@ function MdsStyles() {
       }
 
       .mds-nav-btn:hover {
-        background-color: #e4e4e4;
-        color: #333;
+        background-color: #ffffff;
+        color: #111;
         transform: scale(1.05);
       }
 
@@ -458,8 +471,8 @@ function MdsStyles() {
         .mds-bottom-right-tab::after { right: 10px; top: -20px; background: radial-gradient(circle at 0% 0%, transparent 19px, white 20px); }
 
         .mds-controller {
-          align-self: center;
-          margin-top: 2rem;
+          max-width: none;
+          margin-top: 1.25rem;
         }
       }
     `}</style>

@@ -86,9 +86,9 @@ function Stylesheet() {
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding: 4rem 2rem;
+        padding: 4rem 2rem 3rem;
         margin-top: 4rem;
-        margin-bottom: 12rem;
+        margin-bottom: 2rem;
       }
 
       .pitch-container {
