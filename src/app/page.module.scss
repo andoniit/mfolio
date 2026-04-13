@@ -1,0 +1,5 @@
+/* Single canvas for Hero → About so the seam reads as one continuous scroll */
+.heroAboutFlow {
+  position: relative;
+  background-color: var(--mf-white, #ffffff);
+}

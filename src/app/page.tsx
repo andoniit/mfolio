@@ -2,6 +2,7 @@
 
 
 import { useEffect, useState } from 'react'
+import styles from "./page.module.scss";
 import Hero from '../components/home/hero';
 import AboutMe from '../components/home/AboutMe';
 import Experience from "@/components/home/Experience";
@@ -66,8 +67,10 @@ export default function Home() {
         {isLoading && <Preloader />}
       </AnimatePresence>
       <Header/>
-      <Hero />
-      <AboutMe />
+      <div className={styles.heroAboutFlow}>
+        <Hero />
+        <AboutMe />
+      </div>
       <Experience />
       <Scattertext/>
       <Projects/>

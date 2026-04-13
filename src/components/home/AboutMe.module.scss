@@ -1,143 +1,868 @@
-/* AboutMe (about-me) — typography: Sue Ellen Francisco (name), Satoshi (body) */
+/* AboutMe Bento Grid */
+
+@font-face {
+  font-family: "Coolvetica Rg";
+  src: url("/fonts/Coolvetica%20Rg.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
 .aboutMe {
+  --bento-radius: 1.5rem;
+  --about-me-font: "Coolvetica Rg", var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
   position: relative;
-  min-height: 100vh;
   width: 100%;
+  height: 100svh; /* Forces the section to be exactly screen height */
+  padding: 1rem;
+  padding-top: clamp(1.35rem, 3.8vh, 2.25rem);
   display: flex;
-  align-items: center;
   justify-content: center;
-  padding: 6rem 1.5rem;
+  align-items: stretch; /* Stretches the bento grid to fill the height */
+  box-sizing: border-box;
+  font-family: var(--about-me-font);
+  scroll-margin-top: 0.75rem;
 
-  @media (min-width: 768px) {
-    padding-left: 3rem;
-    padding-right: 3rem;
+  /* Continuation of hero’s white wash — no hard edge between sections */
+  &::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: clamp(3.5rem, 12vh, 9rem);
+    pointer-events: none;
+    z-index: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.98) 0%,
+      rgba(255, 255, 255, 0.55) 45%,
+      rgba(255, 255, 255, 0) 100%
+    );
   }
 
-  @media (min-width: 1024px) {
-    padding-left: 4rem;
-    padding-right: 4rem;
+  @media (max-width: 767.98px) {
+    height: auto;
+    min-height: 100svh;
+    align-items: flex-start;
+  }
+
+  /* Form controls don’t always inherit section font */
+  input,
+  label,
+  button,
+  select,
+  textarea {
+    font-family: inherit;
+  }
+
+  @media (min-width: 768px) {
+    --bento-radius: 2rem;
+    padding: 1.5rem;
+    padding-top: clamp(1.5rem, 3.5vh, 2.5rem);
   }
 }
 
-.inner {
+.bentoGrid {
   position: relative;
+  z-index: 1;
+
+  /* Mobile: CSS grid reorder (columns use display:contents) */
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
   width: 100%;
-  max-width: 72rem;
-  border-radius: 1.5rem;
-  padding: 1.5rem;
+  height: auto;
+  min-height: 0;
+  align-content: start;
+  grid-template-areas:
+    "pot purple"
+    "suit suit"
+    "text text"
+    "sea sea"
+    "pills pills"
+    "grad blue";
+
+  @media (min-width: 768px) {
+    display: flex;
+    flex-direction: row;
+    gap: 1.5rem;
+    height: 100%;
+    grid-template-columns: none;
+    grid-template-areas: none;
+  }
+}
+
+.column {
+  display: contents;
+
+  @media (min-width: 768px) {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    min-height: 0; /* Crucial for nested flex items to shrink below their content size if needed */
+  }
+}
+
+/* Flex proportions for the columns (Desktop) */
+.col1 {
+  flex: 1;
+}
+
+.col2 {
+  flex: 1; /* On mobile they all share the height, on desktop we change ratio */
+  @media (min-width: 768px) {
+    flex: 1.05;
+  }
+}
+
+.col3 {
+  flex: 1.5; /* Larger text means we give it more height on mobile */
+  @media (min-width: 768px) {
+    flex: 1.8;
+  }
+}
+
+/* Mobile grid placement (columns use display:contents above) */
+@media (max-width: 767.98px) {
+  .redBox1 {
+    grid-area: pot;
+    order: 1;
+    flex: none;
+    min-height: clamp(7rem, 38vw, 11rem);
+  }
+
+  .purpleBox {
+    grid-area: purple;
+    order: 2;
+    flex: none;
+    min-height: clamp(6.25rem, 36vw, 10rem);
+  }
+
+  .suitPhoto {
+    grid-area: suit;
+    order: 3;
+    flex: none;
+    min-height: min(56svh, 92vw);
+    width: 100%;
+  }
+
+  .redBoxText {
+    grid-area: text;
+    order: 4;
+    flex: none;
+  }
+
+  .yellowBox {
+    grid-area: sea;
+    order: 5;
+    flex: none;
+  }
+
+  .pillsRow {
+    grid-area: pills;
+    order: 6;
+    flex: none;
+    min-height: clamp(4.3rem, 17.2vw, 6.25rem);
+  }
+
+  .gradPhoto {
+    grid-area: grad;
+    order: 7;
+    flex: none;
+    min-height: clamp(7.5rem, 36vw, 11rem);
+  }
+
+  .blueBox2 {
+    grid-area: blue;
+    order: 8;
+    flex: none;
+    min-height: clamp(7.5rem, 36vw, 11rem);
+  }
+
+  .marqueeHalf {
+    font-size: clamp(1.15rem, 3.8vmin, 1.85rem);
+    padding-right: 1.35rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .redBox1,
+  .purpleBox,
+  .suitPhoto,
+  .redBoxText,
+  .yellowBox,
+  .pillsRow,
+  .gradPhoto,
+  .blueBox2 {
+    grid-area: unset;
+    order: unset;
+  }
+}
+
+.bentoItem {
+  border-radius: var(--bento-radius);
+  overflow: hidden;
+  font-family: inherit;
+  display: flex;
+
+  /* min-height: 0 only where flex columns need it; on mobile grid it was
+     overriding per-cell min-heights and collapsing photo cells (abs. img). */
+  @media (min-width: 768px) {
+    min-height: 0;
+  }
+}
+
+/* Col 1 — potefolio + counting year (~1.3× type, fluid vw/vh/min) */
+.redBox1 {
+  background-color: #ef3e3e;
+  flex: 0.35;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: clamp(0.845rem, 2.6vw, 1.43rem);
+  color: #fff;
+}
+
+.portfolioBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  text-align: right;
+  line-height: 1;
+  gap: 0.16em;
+}
+
+.portfolioTitle {
+  font-size: clamp(0.91rem, calc(0.35rem + 2.2vmin + 1.2vw), 1.3rem);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+}
+
+.portfolioYear {
+  font-size: clamp(1.95rem, calc(0.75rem + 6.5vmin + 3vw), 3.85rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+}
+
+@media (min-width: 768px) {
+  .portfolioTitle {
+    font-size: clamp(1rem, calc(0.4rem + 2.4vmin + 1vw), 1.45rem);
+  }
+
+  .portfolioYear {
+    font-size: clamp(2.15rem, calc(0.85rem + 7vmin + 2.5vw), 4.35rem);
+  }
+}
+
+@media (min-width: 1200px) {
+  .portfolioTitle {
+    font-size: clamp(1.05rem, calc(0.45rem + 1.8vmin + 0.8vw), 1.55rem);
+  }
+
+  .portfolioYear {
+    font-size: clamp(2.35rem, calc(0.9rem + 5vmin + 2vw), 4.65rem);
+  }
+}
+
+.gradPhoto {
+  flex: 0.65;
+  position: relative;
+
+  img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+/* Col 2 — name card (lavender + lime), toggle bottom-right */
+.purpleBox {
+  --purple-card: #7066f5;
+  --purple-lime: #d4f54c;
+  background-color: var(--purple-card);
+  color: var(--purple-lime);
+  padding: clamp(0.55rem, 1.2vh, 0.85rem) clamp(0.7rem, 1.8vw, 1.1rem);
+  flex: 0.32;
+  align-items: stretch;
+  justify-content: stretch;
+  text-align: left;
+  overflow: visible;
+}
+
+.purpleInner {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+.purpleIam {
+  margin: 0;
+  font-size: clamp(1.43rem, calc(0.715rem + 3.64vw + 1.56vh), 2.145rem);
+  font-weight: 500;
+  line-height: 1.12;
+  color: var(--purple-lime);
+  align-self: flex-start;
+}
+
+.purpleSpacer {
+  flex: 1;
+  min-height: 0.35rem;
+}
+
+.purpleBottom {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 0;
+}
+
+.purpleNameStage {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  min-height: clamp(4.875rem, calc(18.2vh + 2.6vw), 8.45rem);
+  perspective: 900px;
+}
+
+.purpleLegal {
+  position: absolute;
+  left: 0;
+  bottom: 0;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: center;
-  font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
-
-  @media (min-width: 640px) {
-    padding: 3rem;
-  }
-
-  @media (min-width: 768px) {
-    padding: 4rem;
-  }
+  gap: 0.02em;
+  transform-origin: left bottom;
+  will-change: transform, opacity;
 }
 
-.rowGreeting {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.25rem;
-  width: 100%;
-  font-size: clamp(28px, 5vw, 42px);
-  font-weight: 500;
-  color: #000;
-
-  @media (min-width: 768px) {
-    gap: 1rem;
-  }
+.purpleNameLine {
+  display: block;
+  font-size: clamp(1.625rem, calc(0.585rem + 5.85vw + 2.34vh), 3.055rem);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  color: var(--purple-lime);
 }
 
-.greetingWrapper {
-  position: relative;
-  height: 1.2em;
-  perspective: 800px;
-  flex-shrink: 0;
-  overflow: visible;
-}
-
-.greetingItem {
+.purpleAndon {
   position: absolute;
+  left: 0;
   bottom: 0;
-  left: 0;
+  font-size: clamp(2.015rem, calc(0.65rem + 7.8vw + 2.6vh), 4.095rem);
+  font-weight: 700;
   line-height: 1;
-  transform: translateZ(0);
-  will-change: transform;
-  white-space: nowrap;
-  color: #000000;
+  letter-spacing: -0.03em;
+  color: var(--purple-lime);
+  transform-origin: left bottom;
+  will-change: transform, opacity;
 }
 
-.imStatic {
-  line-height: 1;
-  color: #1a1a1a;
+/* After base purple type: mobile must win over large defaults (order in file). */
+@media (max-width: 767.98px) {
+  .purpleIam {
+    font-size: clamp(0.78rem, calc(0.28rem + 2vw + 0.55vh), 1.05rem);
+  }
+
+  .purpleNameLine {
+    font-size: clamp(0.82rem, calc(0.22rem + 3.1vw + 0.7vh), 1.2rem);
+  }
+
+  .purpleAndon {
+    font-size: clamp(0.92rem, calc(0.26rem + 3.8vw + 0.85vh), 1.35rem);
+  }
+
+  .purpleNameStage {
+    min-height: clamp(2.5rem, 11vw, 3.75rem);
+  }
+
+  .switch {
+    font-size: clamp(0.48rem, 1.1vmin, 0.72rem);
+  }
+
+  /* Beat .bentoItem when both apply; keeps suit/grad rows from collapsing */
+  .bentoItem.suitPhoto {
+    min-height: min(52svh, 88vw);
+    aspect-ratio: 4 / 5;
+  }
+
+  .bentoItem.gradPhoto {
+    min-height: clamp(7.5rem, 36vw, 11rem);
+  }
 }
 
-.rowName {
-  margin-bottom: 2rem;
+.switch {
+  font-size: clamp(0.845rem, 1.95vmin, 1.3rem);
+  --button-width: 3.5em;
+  --button-height: 2em;
+  --toggle-diameter: 1.5em;
+  --button-toggle-offset: calc((var(--button-height) - var(--toggle-diameter)) / 2);
+  --toggle-shadow-offset: 10px;
+  --toggle-wider: 3em;
+  --color-grey: #cccccc;
+  /* “On” track — same lime as name card (inherited --purple-lime from .purpleBox) */
+  --color-green: var(--purple-lime, #d4f54c);
+  flex-shrink: 0;
+  align-self: flex-end;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: bottom;
+
+  input[type="checkbox"] {
+    display: none;
+  }
+
+  input[type="checkbox"]:checked + .slider {
+    background-color: var(--color-green);
+  }
+
+  input[type="checkbox"]:checked + .slider::after {
+    transform: translateX(calc(var(--button-width) - var(--toggle-diameter) - var(--button-toggle-offset)));
+    box-shadow: calc(var(--toggle-shadow-offset) * -1) 0 calc(var(--toggle-shadow-offset) * 4) rgba(0, 0, 0, 0.1);
+  }
+
+  input[type="checkbox"]:active + .slider::after {
+    width: var(--toggle-wider);
+  }
+
+  input[type="checkbox"]:checked:active + .slider::after {
+    transform: translateX(calc(var(--button-width) - var(--toggle-wider) - var(--button-toggle-offset)));
+  }
+}
+
+.slider {
+  display: inline-block;
+  width: var(--button-width);
+  height: var(--button-height);
+  background-color: var(--color-grey);
+  border-radius: calc(var(--button-height) / 2);
   position: relative;
+  transition: 0.3s all ease-in-out;
+
+  &::after {
+    content: "";
+    display: inline-block;
+    width: var(--toggle-diameter);
+    height: var(--toggle-diameter);
+    background-color: #fff;
+    border-radius: calc(var(--toggle-diameter) / 2);
+    position: absolute;
+    top: var(--button-toggle-offset);
+    transform: translateX(var(--button-toggle-offset));
+    box-shadow: var(--toggle-shadow-offset) 0 calc(var(--toggle-shadow-offset) * 4) rgba(0, 0, 0, 0.1);
+    transition: 0.3s all ease-in-out;
+  }
+}
+
+@media (min-width: 768px) {
+  .purpleIam {
+    font-size: clamp(1.625rem, calc(0.845rem + 2.34vw + 0.78vh), 2.405rem);
+  }
+
+  .purpleNameLine {
+    font-size: clamp(1.885rem, calc(0.715rem + 4.16vw + 1.3vh), 3.575rem);
+  }
+
+  .purpleAndon {
+    font-size: clamp(2.405rem, calc(0.65rem + 5.2vw + 1.56vh), 4.55rem);
+  }
+}
+
+@media (min-width: 1200px) {
+  .purpleIam {
+    font-size: clamp(1.755rem, calc(1.82rem + 1.3vw), 2.535rem);
+  }
+
+  .purpleNameLine {
+    font-size: clamp(2.145rem, calc(1.56rem + 3.12vw), 3.835rem);
+  }
+
+  .purpleAndon {
+    font-size: clamp(2.6rem, calc(1.43rem + 4.16vw), 4.745rem);
+  }
+}
+
+.blueBox2 {
+  position: relative;
+  background-color: #343434;
+  background-image: radial-gradient(
+    circle,
+    rgba(52, 52, 52, 1) 0%,
+    rgba(0, 0, 0, 1) 100%
+  );
+  flex: 0.35;
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 0;
+}
+
+/* Fills the tile and centers the clip (entry motion = whole bento “puzzle” in TS) */
+.memojiVideoWrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  min-width: 0;
+  line-height: 0;
+}
+
+.memojiVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  /* Memoji frames are often top-heavy; nudge focal area down in the tile */
+  object-position: center 68%;
+  display: block;
+  pointer-events: none;
+}
+
+.pillsRow {
+  display: flex;
+  gap: 0.8rem;
+  flex: 0.1;
+  min-height: 1.5rem;
+}
+
+.pill {
+  /* Slot + type scaled for larger rolling text */
+  --pill-slot: clamp(3.67rem, 12.5vw, 4.92rem);
+  flex: 1;
+  border-radius: var(--bento-radius);
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  min-height: var(--pill-slot);
+  overflow: hidden;
+  font-weight: 700;
+  font-size: clamp(1.28rem, 3.74vw, 1.64rem);
+  letter-spacing: 0.06em;
+  text-transform: lowercase;
+
+  @media (min-width: 768px) {
+    --pill-slot: clamp(3.9rem, 5vh, 5.23rem);
+    font-size: clamp(1.44rem, 1.72vw, 1.79rem);
+  }
+}
+
+.pillMarquee {
+  flex: 1;
+  min-width: 0;
+  height: var(--pill-slot);
+  align-self: center;
+  overflow: hidden;
+  mask-image: linear-gradient(
+    180deg,
+    transparent,
+    #000 12%,
+    #000 88%,
+    transparent
+  );
+}
+
+.pillMarqueeTrack {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  animation: aboutMePillMarqueeY 1.75s linear infinite;
+  will-change: transform;
+}
+
+.pillMarqueeText {
+  flex: 0 0 var(--pill-slot);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+@keyframes aboutMePillMarqueeY {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pillMarqueeTrack {
+    animation: none;
+  }
+
+  .pillMarqueeText {
+    flex-basis: auto;
+    height: auto;
+    min-height: var(--pill-slot);
+
+    &[aria-hidden="true"] {
+      display: none;
+    }
+  }
+}
+
+.pillYellow {
+  background-color: #dff952;
+
+  .pillMarqueeText {
+    color: #141414;
+  }
+}
+
+.pillBlue {
+  background-color: #6c5ce7;
+
+  .pillMarqueeText {
+    color: #f4f2ff;
+  }
+}
+
+.pillRed {
+  background-color: #ef3e3e;
+
+  .pillMarqueeText {
+    color: #fff;
+  }
+}
+
+/* Seattle block: same radius as grid; hover = looping Go hawks marquee */
+.yellowBox {
+  --location-purple: #6a32e1;
+  background-color: #dfff66;
+  padding: 0.75rem 1rem 0.65rem;
+  flex: 0.18;
+  min-height: 5.75rem;
+  position: relative;
+  border-radius: var(--bento-radius);
+  cursor: pointer;
+  align-items: stretch;
+  justify-content: stretch;
+
+  &:focus-visible {
+    outline: 2px solid var(--location-purple);
+    outline-offset: 2px;
+  }
+}
+
+.locationCard {
+  position: relative;
+  width: 100%;
+  min-height: 4.75rem;
+  flex: 1;
+}
+
+.locationDefault,
+.locationHover {
+  position: absolute;
+  inset: 0;
+  padding: 0.1rem 0.15rem;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+/* Left: “I am based in”. Right: time stacked above “Seattle, WA”. */
+.locationDefault {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 0.75rem;
-  flex-wrap: nowrap;
-  width: 100%;
-
-  @media (min-width: 768px) {
-    margin-bottom: 3.5rem;
-    gap: 1.5rem;
-  }
+  justify-content: space-between;
+  gap: 0.65rem;
+  opacity: 1;
+  transform: scale(1);
 }
 
-.nameWrapper {
-  position: relative;
-  height: 1.3em;
-  font-size: clamp(32px, 8vw, 50px);
-  overflow: visible;
+.locationFrom {
+  flex: 1;
+  min-width: 0;
+  font-size: clamp(1.05rem, 3.2vh, 1.45rem);
+  font-style: italic;
+  font-weight: 600;
+  color: #0a0a0a;
+  line-height: 1.15;
+  align-self: center;
+}
+
+.locationRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.2rem;
   flex-shrink: 0;
+}
 
-  @media (min-width: 768px) {
-    font-size: clamp(32px, 6vw, 72px);
+.locationTime {
+  font-size: clamp(0.7rem, 1.8vh, 0.92rem);
+  font-weight: 500;
+  color: var(--location-purple);
+  line-height: 1.1;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.locationCity {
+  font-size: clamp(1.1rem, 3.2vh, 1.75rem);
+  font-weight: 700;
+  font-style: italic;
+  color: var(--location-purple);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.locationHover {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.99);
+}
+
+.marquee {
+  width: 100%;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+
+.marqueeTrack {
+  display: flex;
+  width: max-content;
+  animation: aboutMeMarquee 14s linear infinite;
+  animation-play-state: paused;
+  will-change: transform;
+}
+
+.marqueeHalf {
+  flex-shrink: 0;
+  padding-right: 2.5rem;
+  font-size: clamp(2.5rem, 7.6vh, 3.7rem);
+  font-weight: 700;
+  font-style: italic;
+  color: var(--location-purple);
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.yellowBox:hover .locationDefault,
+.yellowBox:focus-within .locationDefault {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.99);
+}
+
+.yellowBox:hover .locationHover,
+.yellowBox:focus-within .locationHover {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+
+.yellowBox:hover .marqueeTrack,
+.yellowBox:focus-within .marqueeTrack {
+  animation-play-state: running;
+}
+
+@keyframes aboutMeMarquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
   }
 }
 
-/* h1 + h3 share identical look (sole h1 is legal name; ANDON is h3) */
-.nameHeading {
-  position: absolute;
-  top: 0;
-  left: 0;
-  margin: 0;
-  font-family: var(--font-sue-ellen), var(--font-shadows), cursive;
-  color: var(--mf-red, #ea3e3e);
-  line-height: 1;
-  white-space: nowrap;
-  font-size: inherit;
-  font-weight: inherit;
+@media (prefers-reduced-motion: reduce) {
+  .marqueeTrack {
+    animation: none;
+  }
+
+  .yellowBox:hover .marqueeTrack,
+  .yellowBox:focus-within .marqueeTrack {
+    animation: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .yellowBox {
+    padding: 0.9rem 1.25rem 0.75rem;
+    min-height: 8.5rem;
+  }
+
+  .locationCard {
+    min-height: 7.25rem;
+  }
+
+  .locationFrom {
+    font-size: clamp(1.15rem, 2.2vw, 1.55rem);
+  }
+
+  .locationTime {
+    font-size: 0.92rem;
+  }
+
+  .locationCity {
+    font-size: clamp(1.3rem, 2vw, 1.95rem);
+  }
+
+  .marqueeHalf {
+    font-size: clamp(2.8rem, 4.8vw, 4rem);
+    padding-right: 3.3rem;
+  }
+}
+
+/* Col 3 */
+.suitPhoto {
+  flex: 0.55;
+  position: relative;
+
+  img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.redBoxText {
+  background-color: #EF3E3E;
+  color: #DFF952;
+  padding: 1.5rem;
+  flex: 0.45;
+  font-size: clamp(1rem, 3vh, 1.6rem);
+  line-height: 1.4;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  
+  @media (min-width: 768px) {
+    padding: 2.5rem;
+    font-size: clamp(1.3rem, 1.8vw, 1.8rem);
+    line-height: 1.5;
+  }
 }
 
 .paragraph {
-  font-size: clamp(18px, 4.5vw, 24px);
-  font-weight: 500;
-  letter-spacing: -0.025em;
-  line-height: 1.3;
-  color: #1a1a1a;
+  margin: 0;
+  padding: 0;
   text-align: left;
-  max-width: 95%;
-  position: relative;
-  font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
-
-  @media (min-width: 768px) {
-    font-size: clamp(20px, 2.5vw, 38px);
-    line-height: 1.2;
-  }
 }
 
 .word {
@@ -157,61 +882,4 @@
 
 .word[data-word-type="word3"] {
   padding-left: 2.4em;
-}
-
-.switch {
-  font-size: clamp(16px, 2vw, 22px);
-  position: relative;
-  display: inline-block;
-  width: 3.5em;
-  height: 2em;
-  flex-shrink: 0;
-
-  input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  transition: 0.4s;
-  border-radius: 30px;
-
-  &::before {
-    position: absolute;
-    content: "";
-    height: 1.4em;
-    width: 1.4em;
-    border-radius: 20px;
-    left: 0.3em;
-    bottom: 0.3em;
-    background-color: white;
-    transition: 0.3s cubic-bezier(0, 2.18, 0.64, 0.69);
-  }
-}
-
-.switch input:checked + .slider {
-  background-color: #3bd826;
-}
-
-.switch input:focus + .slider {
-  box-shadow: 0 0 1px #3bd826;
-}
-
-.switch input:checked + .slider::before {
-  transform: translateX(1.5em);
-}
-
-@media screen and (max-width: 768px) {
-  .switch {
-    font-size: clamp(12px, 3.5vw, 15px);
-  }
 }
