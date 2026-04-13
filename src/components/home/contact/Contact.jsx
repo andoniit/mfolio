@@ -68,7 +68,7 @@ export default function Contact() {
     >
       <img
         className={styles.icon}
-        src="/2.png"
+        src="/icons/2.png"
         alt="LinkedIn Icon"
       />
       
@@ -82,7 +82,7 @@ export default function Contact() {
     >
       <img
         className={styles.icon}
-        src="/3.png"
+        src="/icons/3.png"
         alt="GitHub Icon"
       />
       
@@ -96,7 +96,7 @@ export default function Contact() {
     >
       <img
         className={styles.icon}
-        src="/1.png"
+        src="/icons/1.png"
         alt="Behance Icon"
       />
       

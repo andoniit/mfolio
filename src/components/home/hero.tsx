@@ -120,7 +120,7 @@ useEffect(() => {
             animate={preloaderFinished ? { opacity: 1, x: 0, rotate: 0 } : { opacity: 0, x: 100, rotate: 90 }}
             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
           >
-            <Image src="/star.png" alt="Star graphic" fill style={{ objectFit: 'contain' }} />
+            <Image src="/icons/star.png" alt="Star graphic" fill style={{ objectFit: 'contain' }} />
           </motion.div>
 
           <div className={styles.bottomLeftInfo}>

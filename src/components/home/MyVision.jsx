@@ -97,7 +97,7 @@ function Stylesheet() {
         width: 100%;
         max-width: 1200px;
         aspect-ratio: 16 / 9; /* Changed to horizontal layout */
-        background-image: url('/4.PNG');
+        background-image: url('/icons/4.PNG');
         background-size: cover;
         background-position: center bottom;
         border-radius: 20px;

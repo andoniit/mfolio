@@ -38,17 +38,17 @@ const linkVariants = {
 const SOCIAL_LINKS = [
   {
     href: "https://www.linkedin.com/in/anirudha-kapileshwari-293826202/",
-    icon: "/3.png",
+    icon: "/icons/3.png",
     label: "LinkedIn",
   },
   {
     href: "https://github.com/andoniit",
-    icon: "/2.png",
+    icon: "/icons/2.png",
     label: "GitHub",
   },
   {
     href: "https://www.behance.net/aniruddkapiles1",
-    icon: "/1.png",
+    icon: "/icons/1.png",
     label: "Behance",
   },
 ];

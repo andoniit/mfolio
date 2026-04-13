@@ -156,7 +156,7 @@ export default function SiteFooter() {
                     rel="noopener noreferrer" 
                     className={styles.socialBtn}
                   >
-                    <img src="/3.png" alt="LinkedIn" className={styles.socialIconImg} />
+                    <img src="/icons/3.png" alt="LinkedIn" className={styles.socialIconImg} />
                   </a>
                   <a 
                     href="https://github.com/andoniit" 
@@ -164,7 +164,7 @@ export default function SiteFooter() {
                     rel="noopener noreferrer" 
                     className={styles.socialBtn}
                   >
-                    <img src="/2.png" alt="GitHub" className={styles.socialIconImg} />
+                    <img src="/icons/2.png" alt="GitHub" className={styles.socialIconImg} />
                   </a>
                   <a 
                     href="https://www.behance.net/aniruddkapiles1" 
@@ -172,7 +172,7 @@ export default function SiteFooter() {
                     rel="noopener noreferrer" 
                     className={styles.socialBtn}
                   >
-                    <img src="/1.png" alt="Behance" className={styles.socialIconImg} />
+                    <img src="/icons/1.png" alt="Behance" className={styles.socialIconImg} />
                   </a>
                 </div>
               </div>
