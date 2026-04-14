@@ -145,6 +145,15 @@
   }
 }
 
+/* Projects page (/projects): 2 columns on phone, 3 from iPad width up */
+.blog-grid.blog-grid--projects-listing {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 /* --- The Main Card Styles --- */
 .blog-card {
   display: flex;

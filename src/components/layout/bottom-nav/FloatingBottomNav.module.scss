@@ -1,33 +1,47 @@
+/* Center without `transform` on an ancestor — WebKit/Safari otherwise
+   often fails to blur the page behind `backdrop-filter` on the pill. */
 .wrapper {
   position: fixed;
-  left: 50%;
+  inset-inline: 0;
   bottom: 24px;
-  width: min(30vw, 360px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   z-index: 950;
-  transform: translateX(-50%);
-  transition: transform 0.32s ease;
+  pointer-events: none;
 }
 
 .hidden {
   pointer-events: none;
-  transform: translateX(-50%) translateY(110px);
+}
+
+.hidden .pill {
+  transform: translateY(110px);
 }
 
 .pill {
   display: flex;
   align-items: center;
   gap: 8px;
-  min-width: 100%;
-  max-width: 100%;
+  width: min(30vw, 360px);
+  max-width: calc(100% - 24px);
+  min-width: 0;
   padding: 11px 15px;
   border-radius: 999px;
-  background: rgba(228, 228, 228, 0.68);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  pointer-events: auto;
+  transition: transform 0.32s ease;
+  /* Same glass recipe as the flyout menu (blur 8px + light border) */
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow:
-    0 14px 30px rgba(52, 52, 52, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.34);
-  backdrop-filter: blur(18px) saturate(145%);
-  -webkit-backdrop-filter: blur(18px) saturate(145%);
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .locationSection {
@@ -191,11 +205,15 @@
   min-width: 140px;
   padding: 10px;
   border-radius: 18px;
-  background: rgba(238, 238, 238, 0.92);
+  /* Whiter / less see-through so page color doesn’t tint the menu */
+  background: rgba(255, 255, 255, 0.86);
   border: 1px solid rgba(255, 255, 255, 0.65);
-  box-shadow: 0 14px 30px rgba(52, 52, 52, 0.14);
-  backdrop-filter: blur(18px) saturate(145%);
-  -webkit-backdrop-filter: blur(18px) saturate(145%);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   opacity: 0;
   pointer-events: none;
   transform: translateY(10px) scale(0.96);
@@ -301,15 +319,15 @@
 @media screen and (max-width: 768px) {
   .wrapper {
     bottom: 18px;
-    width: min(68vw, 262px);
+    padding-inline: clamp(10px, 3vw, 16px);
   }
 
   .pill {
-    min-width: 100%;
+    width: min(88vw, 320px);
     max-width: 100%;
-    gap: 8px;
-    padding: 12px 14px;
-    background: rgba(228, 228, 228, 0.68);
+    gap: 10px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.4);
   }
 
   .locationSection {
@@ -337,15 +355,30 @@
   }
 
   .menuButton {
-    width: 38px;
-    height: 38px;
-    background: var(--mf-white);
-    box-shadow: 0 6px 14px rgba(52, 52, 52, 0.12);
+    /* ~48px minimum touch target — same glass as .pill */
+    width: 48px;
+    height: 48px;
+    gap: 5px;
+    background: rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5);
   }
 
   .menuButton span {
-    width: 14px;
+    width: 18px;
     height: 2px;
+  }
+
+  .menuButtonActive span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+
+  .menuButtonActive span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
   }
 
   .mobileMenuPanel {
@@ -353,18 +386,22 @@
     bottom: calc(100% + 8px);
     width: 100%;
     min-width: 0;
-    padding: 14px 18px;
-    border: 0;
+    padding: 16px 14px;
     border-radius: 24px;
-    background: rgba(228, 228, 228, 0.92);
-    box-shadow: none;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+    background: rgba(255, 255, 255, 0.86);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     opacity: 0;
     pointer-events: none;
     transform: translateY(12px);
     display: flex;
-    gap: 0;
+    flex-direction: column;
+    gap: 4px;
     transform-origin: bottom center;
     transition: opacity 0.22s ease, transform 0.22s ease;
   }
@@ -376,18 +413,32 @@
   }
 
   .mobileMenuLink {
-    font-size: 0.82rem;
-    padding: 0 0 8px;
-    border-radius: 0;
-    margin-bottom: 8px;
-    border-bottom: 1px solid rgba(17, 17, 17, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+    padding: 14px 16px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    border-radius: 16px;
+    margin-bottom: 0;
+    border-bottom: none;
+    /* Let the panel’s glass read through; same feel as the bar */
+    background: transparent;
+    color: #111111;
   }
 
   .mobileMenuLink:last-child {
     margin-bottom: 0;
   }
 
+  .mobileMenuLink:active {
+    background: rgba(255, 255, 255, 0.35);
+    color: var(--mf-purple);
+  }
+
   .mobileMenuLink:hover {
-    background: transparent;
+    background: rgba(255, 255, 255, 0.28);
+    color: var(--mf-purple);
   }
 }

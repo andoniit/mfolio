@@ -47,7 +47,7 @@ export default function Projects() {
   return (
     <section id="featured-projects" aria-label="Featured projects" style={{ paddingTop: '2.5rem', marginTop: '1rem' }}>
       <h2 className={styles.featuredTitle}>
-        <AnimatedIntroText text="Featured Projects" />
+        <AnimatedIntroText text={["Featured Projects"]} />
       </h2>
       <div className={styles.mainp}>
         <div className={styles.bodyp}>

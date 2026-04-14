@@ -27,7 +27,8 @@
 
 .featuredTitle {
   margin: 0;
-  font-size: clamp(4rem, 6vw, 6rem);
+  /* Match Experience section: desktop 6em → 6rem at default root */
+  font-size: 6rem;
   font-family: 'Coolvetica', sans-serif;
   letter-spacing: 0.05em;
   text-align: center;
@@ -130,8 +131,20 @@
     padding: 0 1rem;
   }
   .featuredTitle {
-    font-size: 3rem;
+    /* Match Experience mobile: .experienceTitle { font-size: 4rem } */
+    font-size: 4rem;
+    letter-spacing: 0.05em;
+    line-height: 0.92;
     margin-bottom: 0;
+    max-width: 100%;
+    padding-inline: 0.25rem;
+    box-sizing: border-box;
+  }
+
+  /* AnimatedIntroText adds inline padding-bottom on wrappers */
+  .featuredTitle :global(> div > span) {
+    padding-bottom: 0 !important;
+    margin-right: 0 !important;
   }
 
   .button2 {
