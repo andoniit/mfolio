@@ -251,12 +251,20 @@ export default function AboutMe() {
 
       wordsRef.current.forEach((wordElement) => {
         if (!wordElement) return;
+        const isTabletOrSmaller =
+          typeof window !== "undefined" &&
+          window.matchMedia("(max-width: 1180px)").matches;
         const wordType = wordElement.dataset.wordType;
         let xTarget = "0em";
 
         if (wordType === "word1") xTarget = "-0.8em";
         if (wordType === "word2") xTarget = "1.6em";
         if (wordType === "word3") xTarget = "-2.4em";
+
+        if (isTabletOrSmaller) {
+          gsap.set(wordElement, { x: 0 });
+          return;
+        }
 
         if (wordType !== "word0") {
           gsap.to(wordElement, {

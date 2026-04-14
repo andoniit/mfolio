@@ -265,7 +265,7 @@
 }
 
 .newsletterHeading {
-  font-size: 2rem;
+  font-size: clamp(1.45rem, 3.2vw, 2rem);
   font-weight: 800;
   margin: 0;
   color: var(--mf-dark);
@@ -273,7 +273,7 @@
 
 .newsletterSubtext {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: clamp(0.86rem, 1.4vw, 0.95rem);
   font-weight: 500;
   color: #333;
   line-height: 1.45;
@@ -386,10 +386,10 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   color: var(--mf-dark);
-  height: 140px; 
+  height: clamp(106px, 15vw, 140px);
   width: 100%;
   border-radius: 20px;
-  padding: 0 30px;
+  padding: 0 clamp(16px, 3vw, 30px);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
   cursor: pointer;
   text-decoration: none;
@@ -403,18 +403,19 @@
   }
 
   .contactLabel {
-    font-size: 1.1rem;
+    font-size: clamp(0.92rem, 1.9vw, 1.1rem);
     font-weight: 500;
     color: #444;
   }
 
   .contactEmail {
-    font-size: 2rem;
+    font-size: clamp(1.2rem, 3.1vw, 2rem);
     font-weight: 600;
     color: var(--mf-red);
-    white-space: nowrap;
-    word-break: normal;
-    overflow-wrap: normal;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    line-height: 1.1;
   }
 
   &:hover .contactLabel {
@@ -440,7 +441,7 @@
 
 .copyrightText {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: clamp(0.88rem, 1.5vw, 1.1rem);
   color: #555;
   font-weight: 500;
 }
@@ -453,8 +454,8 @@
 .socialBtn {
   background: rgba(233, 233, 233, 0.8);
   backdrop-filter: blur(4px);
-  width: 65px;
-  height: 65px;
+  width: clamp(46px, 6vw, 65px);
+  height: clamp(46px, 6vw, 65px);
   border-radius: 14px;
   display: flex;
   align-items: center;
@@ -464,8 +465,8 @@
   @include sweep-hover(var(--mf-lime), var(--mf-dark));
   
   .socialIconImg {
-    width: 36px;
-    height: 36px;
+    width: clamp(24px, 3.5vw, 36px);
+    height: clamp(24px, 3.5vw, 36px);
     object-fit: contain;
     position: relative; 
     z-index: 2;
@@ -474,6 +475,54 @@
 
   &:hover .socialIconImg {
     filter: brightness(0.2);
+  }
+}
+
+/* Tablet and small laptop: keep footer typography/components compact */
+@media (min-width: 1024px) and (max-width: 1279.98px) {
+  .footer {
+    padding: 4.5rem 1.4rem 2.8rem;
+  }
+
+  .leftCol {
+    gap: 26px;
+  }
+
+  .arrowBox {
+    height: 110px;
+    width: calc(100% - 46px);
+    margin-right: 46px;
+    padding-left: 20px;
+  }
+
+  .arrowText {
+    font-size: clamp(2.7rem, 5.4vw, 3.7rem);
+  }
+
+  .navPill {
+    font-size: 0.95rem;
+    padding: 10px 18px;
+  }
+
+  .contactWrapper {
+    max-width: 420px;
+  }
+
+  .contactButton {
+    height: 118px;
+    gap: 6px;
+  }
+
+  .contactButton .contactLabel {
+    font-size: 0.96rem;
+  }
+
+  .contactButton .contactEmail {
+    font-size: clamp(1.35rem, 2.4vw, 1.75rem);
+  }
+
+  .socialIcons {
+    gap: 10px;
   }
 }
 
