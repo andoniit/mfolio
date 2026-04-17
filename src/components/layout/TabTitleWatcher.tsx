@@ -3,12 +3,12 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
-const DEFAULT_TITLE = "home-Andon poteflio";
+const DEFAULT_TITLE = "home-Andon portfolio";
 const HIDDEN_TITLE = "hey!! click here";
 
 const getVisibleTitle = (pathname: string | null) => {
   if (!pathname || pathname === "/") {
-    return "home-Andon poteflio";
+    return "home-Andon portfolio";
   }
 
   if (pathname === "/projects") {

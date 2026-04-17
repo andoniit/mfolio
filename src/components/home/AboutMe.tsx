@@ -292,7 +292,7 @@ export default function AboutMe() {
         <div className={`${styles.column} ${styles.col1}`}>
           <div className={`${styles.bentoItem} ${styles.redBox1} bento-anim`}>
             <div className={styles.portfolioBlock}>
-              <span className={styles.portfolioTitle}>potefolio</span>
+              <span className={styles.portfolioTitle}>portfolio</span>
               <span className={styles.portfolioYear} aria-live="polite">
                 {portfolioYear}
               </span>
