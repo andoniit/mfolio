@@ -133,7 +133,7 @@ export default async function ProjectDetailPage({ params }: Props) {
   const externalUrlLabel =
     externalUrl && /github\.com/i.test(externalUrl) ? "View on GitHub" : "Visit Live Site";
   const detailsGridClassName = hasContext
-    ? "grid grid-cols-1 lg:grid-cols-[max-content_minmax(240px,340px)] gap-[50px] items-start"
+    ? "grid grid-cols-1 lg:grid-cols-[max-content_1fr] gap-[50px] items-start"
     : "grid grid-cols-1 gap-5 items-start";
 
   const displayDate = project.project_date
@@ -207,7 +207,7 @@ export default async function ProjectDetailPage({ params }: Props) {
       <article className="min-h-screen py-10 sm:py-16 font-sans" style={{ color: "var(--mf-dark)" }}>
         <div className="max-w-6xl mx-auto px-6 sm:px-8">
           <section className="mb-10 lg:mb-14">
-            <div className="grid grid-cols-1 lg:grid-cols-[max-content_minmax(280px,420px)] gap-2 lg:gap-5 items-start lg:items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-[max-content_1fr] gap-2 lg:gap-5 items-start lg:items-center">
               <div className="min-w-0 max-w-max">
                 <h1
                   className="text-[2.3rem] sm:text-[4.1rem] lg:text-[4.7rem] font-bold tracking-[-0.065em] leading-[0.92] m-0 whitespace-normal break-words lg:whitespace-nowrap"
@@ -240,7 +240,7 @@ export default async function ProjectDetailPage({ params }: Props) {
               </div>
 
               {project.description ? (
-                <div className="relative max-w-[420px] lg:pl-4 lg:self-center flex items-center min-h-full text-lg sm:text-xl leading-relaxed m-0" style={{ color: "var(--mf-purple)" }}>
+                <div className="relative w-full lg:pl-4 lg:self-center flex items-center min-h-full text-lg sm:text-xl leading-relaxed m-0" style={{ color: "var(--mf-purple)" }}>
                   <AnimatedDivider className="hidden lg:block absolute left-0 top-0 bottom-0 w-[1px] bg-black/10" orientation="vertical" />
                   <SplitterText variant="fast">
                     {project.description}
@@ -306,7 +306,7 @@ export default async function ProjectDetailPage({ params }: Props) {
 
               <section
                 aria-labelledby="project-tech-stack-heading"
-                className="w-full max-w-[340px] justify-self-start text-left"
+                className="w-full justify-self-start text-left"
               >
                 {techStack.length > 0 && (
                   <>
