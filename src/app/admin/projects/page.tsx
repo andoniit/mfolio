@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import ProjectListTrashButton from "@/components/admin/ProjectListTrashButton";
+import ProjectHomeOrderSelect from "@/components/admin/ProjectHomeOrderSelect";
 
 export const dynamic = "force-dynamic";
 
@@ -89,6 +90,10 @@ export default async function AdminProjectsPage() {
                 </div>
 
                 <div className="flex items-center gap-2 sm:gap-4 flex-wrap justify-end">
+                  <ProjectHomeOrderSelect
+                    projectId={project.id}
+                    initialValue={project.home_feature_order ?? null}
+                  />
                   {project.home_feature_order ? (
                     <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border bg-blue-50 text-blue-700 border-blue-200">
                       Home #{project.home_feature_order}

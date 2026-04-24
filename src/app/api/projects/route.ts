@@ -39,8 +39,8 @@ function normalizeExternalUrl(value: unknown): string | null {
 function normalizeHomeFeatureOrder(value: unknown): number | null {
   if (value === null || value === undefined || value === "") return null;
   const parsed = Number.parseInt(String(value), 10);
-  if (!Number.isFinite(parsed) || parsed < 1 || parsed > 3) {
-    throw new Error("Home feature order must be 1, 2, 3, or empty");
+  if (!Number.isFinite(parsed) || parsed < 1 || parsed > 4) {
+    throw new Error("Home feature order must be 1, 2, 3, 4, or empty");
   }
   return parsed;
 }

@@ -24,7 +24,7 @@ export type Project = {
 
 export type ProjectGridProps = {
   projects: Project[];
-  columns?: 1 | 2 | 3;
+  columns?: 1 | 2 | 3 | 4;
 };
 
 export default function ProjectGrid({ projects, columns }: ProjectGridProps) {
@@ -123,8 +123,10 @@ export default function ProjectGrid({ projects, columns }: ProjectGridProps) {
       style={{
         display: "grid",
         gridTemplateColumns:
-          columns === 3
-            ? "repeat(auto-fit, minmax(min(100%, 280px), 1fr))"
+          columns === 4
+            ? "repeat(4, minmax(0, 1fr))"
+            : columns === 3
+              ? "repeat(auto-fit, minmax(min(100%, 280px), 1fr))"
             : columns === 2
               ? "repeat(2, minmax(0, 1fr))"
               : "repeat(auto-fill, minmax(280px, 1fr))",

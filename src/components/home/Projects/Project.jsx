@@ -14,7 +14,7 @@ export default function Projects() {
 
     (async () => {
       try {
-        const res = await fetch('/api/projects?featured=home&limit=3', {
+        const res = await fetch('/api/projects?featured=home&limit=4', {
           cache: 'no-store',
         });
         const data = await res.json().catch(() => []);
@@ -51,7 +51,7 @@ export default function Projects() {
       </h2>
       <div className={styles.mainp}>
         <div className={styles.bodyp}>
-          <ProjectGrid projects={projects} columns={3} />
+          <ProjectGrid projects={projects} columns={4} />
           <div className={styles.buttonContainer}>
             <Link href="/projects" style={{ textDecoration: 'none' }}>
               <div className={styles.button2}>View More Projects</div>

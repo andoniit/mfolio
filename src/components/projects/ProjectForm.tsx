@@ -497,7 +497,7 @@ export default function ProjectForm({ initialData, projectId }: ProjectFormProps
               Home feature order
             </label>
             <p className="text-xs text-gray-500 mb-3">
-              Optional: choose `1`, `2`, or `3` to show this project on the home page. Leave empty to hide it there.
+              Optional: choose `1`, `2`, `3`, or `4` to show this project on the home page. Leave empty to hide it there.
             </p>
             <select
               value={homeFeatureOrder}
@@ -508,6 +508,7 @@ export default function ProjectForm({ initialData, projectId }: ProjectFormProps
               <option value="1">Home slot 1</option>
               <option value="2">Home slot 2</option>
               <option value="3">Home slot 3</option>
+              <option value="4">Home slot 4</option>
             </select>
           </div>
         </div>
