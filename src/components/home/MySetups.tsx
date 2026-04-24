@@ -65,7 +65,6 @@ const DESK_SETUPS = [
     brTab: "2026",
     description: "This is my current setup after moving to Seattle, a city I had always imagined living in because of its strong connection to tech and creativity. This space feels like the result of everything I learned from my previous setups. The pegboard on the wall holds the items I use every day, along with my DJI drone, making the setup not just functional but also a reflection of my interests, habits, and journey so far."
   }
-  
 ];
 
 export default function MyDeskSetup() {
@@ -91,14 +90,11 @@ export default function MyDeskSetup() {
       }
     });
 
-    // Left box slides up and fades in
     tl.fromTo(
       leftBox,
       { opacity: 0, y: 60 },
       { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }
-    )
-    // Right box follows shortly after
-    .fromTo(
+    ).fromTo(
       rightBox,
       { opacity: 0, y: 60 },
       { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" },
@@ -149,24 +145,12 @@ export default function MyDeskSetup() {
             </h2>
             <p className="mds-subtitle">Over the years</p>
           </div>
-          <div className="mds-controller">
-            <button type="button" className="mds-nav-btn" onClick={handlePrev} aria-label="Previous Setup">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="15 18 9 12 15 6"></polyline>
-              </svg>
-            </button>
-            <button type="button" className="mds-nav-btn" onClick={handleNext} aria-label="Next Setup">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="9 18 15 12 9 6"></polyline>
-              </svg>
-            </button>
-          </div>
         </div>
 
         {/* Right Column: Image Slider & Content */}
         <div className="mds-right-col" ref={rightBoxRef}>
           
-          {/* Pitch Container carrying the frame logic */}
+          {/* Pitch Container carrying the image logic */}
           <div className="mds-pitch-container">
             {/* Absolute Stacked Images Track */}
             <div className="mds-images-track">
@@ -193,9 +177,44 @@ export default function MyDeskSetup() {
             </div>
           </div>
 
-          {/* Text for Each Image (Title removed) */}
-          <div className="mds-text-container">
-            <p className="mds-setup-desc">{currentData.description}</p>
+          {/* Info Bar: Text and Controls */}
+          <div className="mds-info-bar">
+            {/* Description Text */}
+            <div className="mds-text-container">
+              <p className="mds-setup-desc">{currentData.description}</p>
+            </div>
+
+            {/* Controls */}
+            <div className="mds-controls-group">
+              <div className="mds-controller">
+                <button type="button" className="mds-nav-btn" onClick={handlePrev} aria-label="Previous Setup">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                  </svg>
+                </button>
+                
+                <span className="mds-counter">
+                  {String(currentIndex + 1).padStart(2, '0')} / {String(DESK_SETUPS.length).padStart(2, '0')}
+                </span>
+
+                <button type="button" className="mds-nav-btn" onClick={handleNext} aria-label="Next Setup">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="mds-dots">
+                {DESK_SETUPS.map((_, idx) => (
+                  <button 
+                    key={idx} 
+                    className={`mds-dot ${idx === currentIndex ? 'active' : ''}`}
+                    onClick={() => setCurrentIndex(idx)}
+                    aria-label={`Go to slide ${idx + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
 
         </div>
@@ -233,7 +252,7 @@ function MdsStyles() {
         gap: 4rem;
       }
 
-      /* Left Column — green card + controller centered below it */
+      /* Left Column */
       .mds-left-col {
         flex: 0 0 300px;
         display: flex;
@@ -243,12 +262,27 @@ function MdsStyles() {
 
       .mds-title-card {
         width: 100%;
-        background-color: #d1f366; /* Lime green */
-        border-radius: 40px;
+        background: linear-gradient(135deg, #d1f366 0%, #b8e038 100%);
+        border-radius: 32px;
         padding: 4rem 3rem;
         display: flex;
         flex-direction: column;
         justify-content: center;
+        box-shadow: 0 16px 32px rgba(209, 243, 102, 0.25);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .mds-title-card::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 60%);
+        border-radius: 50%;
+        pointer-events: none;
       }
 
       .mds-main-title {
@@ -258,13 +292,17 @@ function MdsStyles() {
         letter-spacing: -0.03em;
         color: #000000;
         margin: 0 0 1rem 0;
+        position: relative;
+        z-index: 2;
       }
 
       .mds-subtitle {
         font-size: 1.1rem;
         color: #333333;
         margin: 0;
-        font-weight: 400;
+        font-weight: 500;
+        position: relative;
+        z-index: 2;
       }
 
       /* Right Column */
@@ -273,22 +311,23 @@ function MdsStyles() {
         min-width: 0;
         display: flex;
         flex-direction: column;
-        gap: 2rem;
+        gap: 1.5rem;
       }
 
       .mds-pitch-container {
         position: relative;
         width: 100%;
         aspect-ratio: 16 / 9;
-        border-radius: 20px;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        border-radius: 24px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.08);
         background-color: #f5f5f5;
+        overflow: hidden;
       }
 
       .mds-images-track {
         position: absolute;
         top: 0; left: 0; right: 0; bottom: 0;
-        border-radius: 20px;
+        border-radius: 24px;
         overflow: hidden;
       }
 
@@ -364,12 +403,22 @@ function MdsStyles() {
         background: radial-gradient(circle at 0% 0%, transparent 39px, white 40px);
       }
 
-      .mds-text-red { color: #ea3e3e; }
-      .mds-text-purple { color: #6b63f7; }
+      .mds-text-red { color: #ea3e3e; font-weight: 600; }
+      .mds-text-purple { color: #6b63f7; font-weight: 600; }
+
+      /* Info Bar */
+      .mds-info-bar {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 2rem;
+      }
 
       .mds-text-container {
-        padding: 0 0.5rem;
-        max-width: 800px;
+        flex: 1;
+        max-width: 750px;
+        padding-top: 0.5rem;
       }
 
       .mds-setup-desc {
@@ -379,41 +428,79 @@ function MdsStyles() {
         margin: 0;
       }
 
+      .mds-controls-group {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 1rem;
+        flex-shrink: 0;
+      }
+
       .mds-controller {
         display: flex;
-        justify-content: center;
         align-items: center;
-        gap: 0.75rem;
-        width: 100%;
-        max-width: 300px;
-        margin-top: 1.25rem;
+        gap: 1rem;
+        background: #f0f0f0;
+        padding: 8px 16px;
+        border-radius: 99px;
       }
 
       .mds-nav-btn {
-        width: 44px; 
-        height: 44px;
+        width: 36px; 
+        height: 36px;
         border-radius: 50%;
-        border: 1px solid rgba(0, 0, 0, 0.08);
-        background-color: rgba(255, 255, 255, 0.85);
-        color: #444;
+        border: none;
+        background-color: #ffffff;
+        color: #111;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
         transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
       }
 
       .mds-nav-btn:hover {
-        background-color: #ffffff;
-        color: #111;
-        transform: scale(1.05);
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       }
 
+      .mds-counter {
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: #333;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.05em;
+      }
+
+      .mds-dots {
+        display: flex;
+        gap: 6px;
+        padding-right: 12px;
+      }
+
+      .mds-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #ddd;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .mds-dot.active {
+        background-color: #b8e038;
+        transform: scale(1.3);
+      }
+
+      /* Responsive */
       @media (max-width: 968px) {
         .mds-inner {
           flex-direction: column;
           align-items: center;
-          gap: 3rem;
+          gap: 2rem;
         }
 
         .mds-left-col {
@@ -470,9 +557,26 @@ function MdsStyles() {
         .mds-bottom-right-tab::before { left: -20px; bottom: 10px; background: radial-gradient(circle at 0% 0%, transparent 19px, white 20px); }
         .mds-bottom-right-tab::after { right: 10px; top: -20px; background: radial-gradient(circle at 0% 0%, transparent 19px, white 20px); }
 
-        .mds-controller {
-          max-width: none;
-          margin-top: 1.25rem;
+        .mds-info-bar {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+        }
+
+        .mds-controls-group {
+          order: 1; /* Move controls above description text */
+          width: 100%;
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
+        }
+        
+        .mds-text-container {
+          order: 2; /* Move description text below controls */
+        }
+
+        .mds-dots {
+          padding-right: 0;
         }
       }
     `}</style>
