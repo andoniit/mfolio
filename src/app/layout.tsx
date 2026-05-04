@@ -4,11 +4,9 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Suspense } from "react";
 import "./globals.css";
-import FloatingBottomNav from "@/components/layout/bottom-nav/FloatingBottomNav";
-import ConditionalFooter from "@/components/layout/footer/ConditionalFooter";
+import SiteChrome from "@/components/layout/SiteChrome";
 import TabTitleWatcher from "@/components/layout/TabTitleWatcher";
 import GoogleAnalyticsTracker from "@/components/analytics/GoogleAnalyticsTracker";
-
 const shadows = Shadows_Into_Light({
   subsets: ['latin'],
   weight: ['400'],
@@ -168,8 +166,7 @@ export default function RootLayout({
         />
         <TabTitleWatcher />
         <div className="flex-1 flex flex-col min-h-0">{children}</div>
-        <FloatingBottomNav />
-        <ConditionalFooter />
+        <SiteChrome />
       </body>
       
     </html>

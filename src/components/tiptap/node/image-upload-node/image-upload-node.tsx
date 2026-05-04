@@ -7,6 +7,7 @@ import { Button } from "@/components/tiptap/ui-primitive/button"
 import { CloseIcon } from "@/components/tiptap/icons/close-icon"
 import "@/components/tiptap/node/image-upload-node/image-upload-node.scss"
 import { focusNextNode, isValidPosition } from "@/lib/tiptap-utils"
+import { randomUUID } from "@/lib/random-id"
 
 export interface FileItem {
   /**
@@ -95,7 +96,7 @@ function useFileUpload(options: UploadOptions) {
     }
 
     const abortController = new AbortController()
-    const fileId = crypto.randomUUID()
+    const fileId = randomUUID()
 
     const newFileItem: FileItem = {
       id: fileId,

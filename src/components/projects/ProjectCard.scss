@@ -1,3 +1,9 @@
+.folder-card-link.copilot-card-highlight .folder-card {
+  outline: 3px solid rgba(255, 54, 54, 0.95);
+  outline-offset: 6px;
+  border-radius: 12px;
+}
+
 .folder-card-link {
   text-decoration: none;
   display: block;

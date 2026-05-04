@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import styles from "./FloatingBottomNav.module.scss";
 
@@ -55,6 +55,7 @@ const getLocationLabel = (pathname: string) => {
 
 export default function FloatingBottomNav() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const viewportRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLSpanElement>(null);
   const flipResetRef = useRef<number | null>(null);
@@ -227,7 +228,12 @@ export default function FloatingBottomNav() {
     return () => resizeObserver.disconnect();
   }, [locationLabel]);
 
-  if (!pathname || pathname.startsWith("/admin")) {
+  /** Portfolio preview iframe (`/?mfEmbed=1`) — hide floating nav so it is not duplicated. */
+  if (searchParams.get("mfEmbed") === "1") {
+    return null;
+  }
+
+  if (!pathname || pathname.startsWith("/admin") || pathname === "/andon-copilot") {
     return null;
   }
 

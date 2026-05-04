@@ -76,7 +76,7 @@ export async function GET(req: Request) {
   let query = supabaseAdmin
     .from("projects")
     .select(
-      "id, title, slug, description, cover_image_url, project_date, workplace, client_name, home_feature_order"
+      "id, title, slug, description, cover_image_url, project_date, workplace, client_name, home_feature_order, tech_stack"
     )
     .eq("published", true)
     .is("trashed_at", null);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useMemo, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ProjectCard from "./ProjectCard";
@@ -25,13 +25,45 @@ export type Project = {
 export type ProjectGridProps = {
   projects: Project[];
   columns?: 1 | 2 | 3 | 4;
+  /** Optional filters driven by the portfolio copilot (AG-UI shared state). */
+  copilot?: {
+    query: string | null;
+    tech: string | null;
+    highlightedIds: string[];
+  };
 };
 
-export default function ProjectGrid({ projects, columns }: ProjectGridProps) {
+export default function ProjectGrid({ projects, columns, copilot }: ProjectGridProps) {
   const gridRef = useRef<HTMLDivElement | null>(null);
 
+  const visibleProjects = useMemo(() => {
+    let list = projects;
+    const tech = copilot?.tech?.trim();
+    if (tech) {
+      const needle = tech.toLowerCase();
+      list = list.filter((p) =>
+        (p.tech_stack ?? []).some((t) => typeof t === "string" && t.toLowerCase().includes(needle))
+      );
+    }
+    const q = copilot?.query?.trim();
+    if (q) {
+      const needle = q.toLowerCase();
+      list = list.filter((p) => {
+        const techBlob = (p.tech_stack ?? []).join(" ").toLowerCase();
+        const blob = `${p.title} ${p.description ?? ""} ${p.slug} ${techBlob}`.toLowerCase();
+        return blob.includes(needle);
+      });
+    }
+    return list;
+  }, [projects, copilot?.query, copilot?.tech]);
+
+  const highlightSet = useMemo(() => {
+    const ids = copilot?.highlightedIds ?? [];
+    return new Set(ids);
+  }, [copilot?.highlightedIds]);
+
   useLayoutEffect(() => {
-    if (!gridRef.current || projects.length === 0) return;
+    if (!gridRef.current || visibleProjects.length === 0) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const ctx = gsap.context(() => {
@@ -110,10 +142,14 @@ export default function ProjectGrid({ projects, columns }: ProjectGridProps) {
     }, gridRef);
 
     return () => ctx.revert();
-  }, [projects]);
+  }, [visibleProjects]);
 
   if (!projects.length) {
     return <div className="empty-state">No projects yet.</div>;
+  }
+
+  if (!visibleProjects.length) {
+    return <div className="empty-state">No projects match the copilot filter.</div>;
   }
 
   return (
@@ -133,8 +169,13 @@ export default function ProjectGrid({ projects, columns }: ProjectGridProps) {
         gap: "32px",
       }}
     >
-      {projects.map((project, index) => (
-        <ProjectCard key={project.id} project={project} index={index} />
+      {visibleProjects.map((project, index) => (
+        <ProjectCard
+          key={project.id}
+          project={project}
+          index={index}
+          copilotHighlighted={highlightSet.has(project.id)}
+        />
       ))}
     </div>
   );

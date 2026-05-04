@@ -2,7 +2,7 @@
 import styles from './combined.module.scss'
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import ProjectGrid from '@/components/projects/ProjectGrid';
+import CopilotProjectGridBridge from '@/components/projects/CopilotProjectGridBridge';
 import AnimatedIntroText from '../AnimatedIntroText';
 
 export default function Projects() {
@@ -51,7 +51,7 @@ export default function Projects() {
       </h2>
       <div className={styles.mainp}>
         <div className={styles.bodyp}>
-          <ProjectGrid projects={projects} columns={4} />
+          <CopilotProjectGridBridge projects={projects} columns={4} />
           <div className={styles.buttonContainer}>
             <Link href="/projects" style={{ textDecoration: 'none' }}>
               <div className={styles.button2}>View More Projects</div>

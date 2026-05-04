@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useLayoutEffect, useRef } from "react";
+import clsx from "clsx";
+import { useLayoutEffect, useMemo, useRef } from "react";
 import { gsap } from "gsap";
 
 type Post = {
@@ -17,14 +18,33 @@ type Post = {
 export default function BlogPostGrid({
   posts,
   showCategoryBadge = true,
+  copilot,
 }: {
   posts: Post[];
   showCategoryBadge?: boolean;
+  /** Optional filters driven by the portfolio copilot (AG-UI shared state). */
+  copilot?: {
+    filteredPostIds: string[] | null;
+    highlightedBlogPostIds: string[];
+  };
 }) {
   const gridRef = useRef<HTMLDivElement | null>(null);
 
+  const visiblePosts = useMemo(() => {
+    const ids = copilot?.filteredPostIds;
+    if (!ids) return posts;
+    if (ids.length === 0) return [];
+    const set = new Set(ids);
+    return posts.filter((p) => set.has(p.id));
+  }, [posts, copilot?.filteredPostIds]);
+
+  const highlightSet = useMemo(
+    () => new Set(copilot?.highlightedBlogPostIds ?? []),
+    [copilot?.highlightedBlogPostIds]
+  );
+
   useLayoutEffect(() => {
-    if (!gridRef.current || posts.length === 0) return;
+    if (!gridRef.current || visiblePosts.length === 0) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const ctx = gsap.context(() => {
@@ -43,16 +63,25 @@ export default function BlogPostGrid({
     }, gridRef);
 
     return () => ctx.revert();
-  }, [posts]);
+  }, [visiblePosts]);
 
   if (!posts.length) {
     return <div className="empty-state">No blog posts found.</div>;
   }
 
+  if (!visiblePosts.length) {
+    return <div className="empty-state">No blog posts match the copilot filter.</div>;
+  }
+
   return (
     <div ref={gridRef} className="blog-grid">
-      {posts.map((post) => (
-        <Link key={post.id} href={`/blog/${post.slug}`} className="blog-card">
+      {visiblePosts.map((post) => (
+        <Link
+          key={post.id}
+          href={`/blog/${post.slug}`}
+          data-post-id={post.id}
+          className={clsx("blog-card", highlightSet.has(post.id) && "copilot-card-highlight")}
+        >
           <div className="card-image-wrapper">
             <div className="image-inner">
               {post.cover_image_url ? (

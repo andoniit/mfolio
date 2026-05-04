@@ -1,6 +1,7 @@
+import { Suspense } from "react";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import Header from "@/components/layout/header/header";
-import ProjectGrid from "@/components/projects/ProjectGrid";
+import CopilotProjectGridBridge from "@/components/projects/CopilotProjectGridBridge";
 import "../blog/blog.scss";
 import type { Metadata } from "next";
 
@@ -41,7 +42,11 @@ export default async function ProjectsPage() {
       <main className="blog-page-container">
         <div className="blog-content-max">
           <h1 className="blog-page-title">Projects & Selected Work</h1>
-          <ProjectGrid projects={projects || []} />
+          <Suspense
+            fallback={<p className="blog-page-title text-base font-normal text-neutral-500">Loading projects…</p>}
+          >
+            <CopilotProjectGridBridge projects={projects || []} />
+          </Suspense>
         </div>
       </main>
     </div>

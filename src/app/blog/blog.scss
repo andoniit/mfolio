@@ -185,6 +185,11 @@
   }
 }
 
+.blog-card.copilot-card-highlight {
+  outline: 3px solid rgba(255, 54, 54, 0.95);
+  outline-offset: 4px;
+}
+
 /* --- The Image & Smooth Cutout Magic --- */
 .card-image-wrapper {
   position: relative;

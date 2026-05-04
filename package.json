@@ -9,6 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ag-ui/client": "^0.0.53",
+    "@ag-ui/core": "^0.0.53",
+    "@ag-ui/encoder": "^0.0.53",
     "@floating-ui/react": "^0.27.19",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-popover": "^1.1.15",
@@ -38,6 +41,7 @@
     "motion": "^12.6.3",
     "motion-plus": "^0.1.6",
     "next": "^16.1.1",
+    "openai": "^6.35.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-hotkeys-hook": "^5.2.4",

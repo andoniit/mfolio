@@ -1,7 +1,7 @@
 "use client";
 
-
-import { useEffect, useState } from 'react'
+import { Suspense, useLayoutEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import styles from "./page.module.scss";
 import Hero from '../components/home/hero';
 import AboutMe from '../components/home/AboutMe';
@@ -14,16 +14,47 @@ import Projects from "@/components/home/Projects/Project"
 import MySetups from "@/components/home/MySetups"
 import Slideshow from "@/components/home/SliderSection"
 import Header from "@/components/layout/header/header"
-import { motion, useScroll } from "motion/react"
-  
+import { motion, useScroll } from "motion/react";
 
+/**
+ * `useSearchParams` needs Suspense. When `mfEmbed=1` (copilot iframe), never mount
+ * Preloader — mounting then instantly unmounting left a fixed full-viewport shell
+ * mid–exit animation (“half stuck”).
+ */
+function PreloaderGate() {
+  const searchParams = useSearchParams();
+  const skipIntro = searchParams.get("mfEmbed") === "1";
+  const [introDone, setIntroDone] = useState(skipIntro);
 
+  useLayoutEffect(() => {
+    if (skipIntro) {
+      setIntroDone(true);
+      return;
+    }
+    const t = window.setTimeout(() => {
+      setIntroDone(true);
+      document.body.style.cursor = "default";
+      window.scrollTo(0, 0);
+    }, 2000);
+    return () => window.clearTimeout(t);
+  }, [skipIntro]);
 
+  return (
+    <AnimatePresence
+      mode="wait"
+      onExitComplete={() => {
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("mf:preloader-exited"));
+        }
+      }}
+    >
+      {!introDone && <Preloader />}
+    </AnimatePresence>
+  );
+}
 
 export default function Home() {
-  
-  const { scrollYProgress } = useScroll()
-  const [isLoading, setIsLoading] = useState(true);
+  const { scrollYProgress } = useScroll();
   const siteBase = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
   const homePageJsonLd = {
     "@context": "https://schema.org",
@@ -35,19 +66,6 @@ export default function Home() {
     inLanguage: "en",
   };
 
-  useEffect( () => {
-    (
-      async () => {
-          
-
-          setTimeout( () => {
-            setIsLoading(false);
-            document.body.style.cursor = 'default'
-            window.scrollTo(0,0);
-          }, 2000)
-      }
-    )()
-  }, [])
   return (
     
 
@@ -71,16 +89,9 @@ export default function Home() {
                     
                 }}
             />
-<AnimatePresence
-        mode="wait"
-        onExitComplete={() => {
-          if (typeof window !== "undefined") {
-            window.dispatchEvent(new CustomEvent("mf:preloader-exited"));
-          }
-        }}
-      >
-        {isLoading && <Preloader />}
-      </AnimatePresence>
+<Suspense fallback={null}>
+        <PreloaderGate />
+      </Suspense>
       <Header/>
       <div className={styles.heroAboutFlow}>
         <Hero />

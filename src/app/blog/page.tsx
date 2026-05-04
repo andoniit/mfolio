@@ -1,6 +1,7 @@
+import { Suspense } from "react";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import Header from "@/components/layout/header/header";
-import BlogPostGrid from "@/components/blog/BlogPostGrid";
+import CopilotBlogGridBridge from "@/components/blog/CopilotBlogGridBridge";
 import BlogListingFilters from "@/components/blog/BlogListingFilters";
 import "./blog.scss";
 import type { Metadata } from "next";
@@ -95,7 +96,11 @@ export default async function BlogPage({ searchParams }: Props) {
             showTags={false}
           />
 
-          <BlogPostGrid posts={filteredPosts} />
+          <Suspense
+            fallback={<p className="blog-page-title text-base font-normal text-neutral-500">Loading posts…</p>}
+          >
+            <CopilotBlogGridBridge posts={filteredPosts} />
+          </Suspense>
         </div>
       </main>
     </div>

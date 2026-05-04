@@ -1,6 +1,7 @@
 import Link from "next/link";
+import clsx from "clsx";
 import "./ProjectCard.scss";
-import type { Project } from "./ProjectGrid"; 
+import type { Project } from "./ProjectGrid";
 
 // A palette of beautiful folder colors
 const FOLDER_THEMES = [
@@ -11,7 +12,16 @@ const FOLDER_THEMES = [
   { back: "#219EBC", front: "rgba(61, 188, 219, 0.45)",  shadow: "rgba(33, 158, 188, 0.25)" }, // Blue
 ];
 
-export default function ProjectCard({ project, index = 0 }: { project: Project; index?: number }) {
+export default function ProjectCard({
+  project,
+  index = 0,
+  copilotHighlighted = false,
+}: {
+  project: Project;
+  index?: number;
+  /** Portfolio copilot: emphasize this card when it matches a tool-driven highlight. */
+  copilotHighlighted?: boolean;
+}) {
   const formattedDate = project.project_date
     ? new Date(project.project_date + "T12:00:00").toLocaleDateString("en-US", {
         month: "short",
@@ -24,7 +34,11 @@ export default function ProjectCard({ project, index = 0 }: { project: Project; 
   const theme = FOLDER_THEMES[index % FOLDER_THEMES.length];
 
   return (
-    <Link href={`/projects/${project.slug}`} className="folder-card-link">
+    <Link
+      href={`/projects/${project.slug}`}
+      data-project-id={project.id}
+      className={clsx("folder-card-link", copilotHighlighted && "copilot-card-highlight")}
+    >
       <div 
         className="folder-card"
         style={{
