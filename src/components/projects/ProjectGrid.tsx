@@ -141,6 +141,12 @@ export default function ProjectGrid({ projects, columns, copilot }: ProjectGridP
 
     }, gridRef);
 
+    // When the grid is already in view on first paint (or images change layout),
+    // ScrollTrigger can miss the initial "enter" until the user scrolls.
+    // A refresh here ensures the start/end positions are recalculated immediately.
+    ScrollTrigger.refresh();
+    requestAnimationFrame(() => ScrollTrigger.refresh());
+
     return () => ctx.revert();
   }, [visibleProjects]);
 
