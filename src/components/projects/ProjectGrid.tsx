@@ -166,7 +166,7 @@ export default function ProjectGrid({ projects, columns, copilot }: ProjectGridP
         display: "grid",
         gridTemplateColumns:
           columns === 4
-            ? "repeat(4, minmax(0, 1fr))"
+            ? "repeat(auto-fit, minmax(min(100%, 280px), 1fr))"
             : columns === 3
               ? "repeat(auto-fit, minmax(min(100%, 280px), 1fr))"
             : columns === 2
