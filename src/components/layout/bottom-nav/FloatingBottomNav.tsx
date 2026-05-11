@@ -2,8 +2,39 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import gsap from "gsap";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import styles from "./FloatingBottomNav.module.scss";
+
+const SNAP_THRESHOLD_PX = 70;
+const SNAP_ZONE_PAD_PX = 14;
+
+type DraggableInst = {
+  kill: () => void;
+  update: () => void;
+  x: number;
+  y: number;
+  applyBounds: (b: { minX: number; maxX: number; minY: number; maxY: number }) => void;
+};
+
+function useWindowSize() {
+  const [size, setSize] = useState({ w: 0, h: 0 });
+  useLayoutEffect(() => {
+    const read = () =>
+      setSize({ w: window.innerWidth, h: window.innerHeight });
+    read();
+    window.addEventListener("resize", read, { passive: true });
+    return () => window.removeEventListener("resize", read);
+  }, []);
+  return size;
+}
 
 const HOME_SECTIONS = [
   {
@@ -59,6 +90,13 @@ export default function FloatingBottomNav() {
   const viewportRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLSpanElement>(null);
   const flipResetRef = useRef<number | null>(null);
+  const pillRef = useRef<HTMLElement>(null);
+  const dragHandleRef = useRef<HTMLDivElement>(null);
+  const snapZoneRef = useRef<HTMLDivElement>(null);
+  const draggableInstanceRef = useRef<DraggableInst | null>(null);
+  const { w: winW, h: winH } = useWindowSize();
+  const [snapBox, setSnapBox] = useState({ w: 360, h: 52 });
+  const [isDesktop, setIsDesktop] = useState(false);
   const [shouldMarquee, setShouldMarquee] = useState(false);
   const [marqueeDuration, setMarqueeDuration] = useState(14);
   const [isNearFooter, setIsNearFooter] = useState(false);
@@ -77,6 +115,14 @@ export default function FloatingBottomNav() {
     [activeHomeLabel, pathname]
   );
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 769px)");
+    const sync = () => setIsDesktop(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   useEffect(() => {
     if (!pathname || pathname.startsWith("/admin")) {
@@ -99,6 +145,22 @@ export default function FloatingBottomNav() {
 
     return () => observer.disconnect();
   }, [pathname]);
+
+  useEffect(() => {
+    if (!isNearFooter) return;
+    const pill = pillRef.current;
+    if (!pill || typeof window === "undefined") return;
+    gsap.to(pill, {
+      x: 0,
+      y: 0,
+      duration: 0.28,
+      ease: "power2.out",
+      overwrite: "auto",
+      onComplete: () => {
+        draggableInstanceRef.current?.update();
+      },
+    });
+  }, [isNearFooter]);
 
   useEffect(() => {
     if (pathname !== "/") {
@@ -228,6 +290,139 @@ export default function FloatingBottomNav() {
     return () => resizeObserver.disconnect();
   }, [locationLabel]);
 
+  useLayoutEffect(() => {
+    if (!isDesktop) return;
+    const pill = pillRef.current;
+    if (!pill || typeof window === "undefined") return;
+    const r = pill.getBoundingClientRect();
+    setSnapBox({
+      w: Math.ceil(r.width) + SNAP_ZONE_PAD_PX * 2,
+      h: Math.ceil(r.height) + SNAP_ZONE_PAD_PX * 2,
+    });
+  }, [isDesktop, locationLabel, shouldMarquee, winW, winH, isMobileMenuOpen]);
+
+  useLayoutEffect(() => {
+    if (!isDesktop) return;
+    void requestAnimationFrame(() => draggableInstanceRef.current?.update());
+  }, [isDesktop, snapBox.w, snapBox.h]);
+
+  useEffect(() => {
+    const pill = pillRef.current;
+    const handle = dragHandleRef.current;
+    const snapZone = snapZoneRef.current;
+    if (
+      !isDesktop ||
+      !pill ||
+      !handle ||
+      !snapZone ||
+      typeof window === "undefined"
+    ) {
+      if (pill) gsap.set(pill, { clearProps: "x,y" });
+      if (draggableInstanceRef.current) {
+        draggableInstanceRef.current.kill();
+        draggableInstanceRef.current = null;
+      }
+      return;
+    }
+
+    gsap.set(pill, { x: 0, y: 0 });
+    gsap.set(snapZone, { opacity: 0, scale: 0.96 });
+
+    let dInst: DraggableInst | null = null;
+
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { Draggable } = require("gsap/Draggable") as {
+      Draggable: {
+        create: (
+          target: HTMLElement,
+          vars: Record<string, unknown>
+        ) => DraggableInst[];
+      };
+    };
+    gsap.registerPlugin(Draggable);
+
+    const applyBounds = () => {
+      if (!dInst) return;
+      const pad = 10;
+      const rect = pill.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+      const dx = dInst.x;
+      const dy = dInst.y;
+      const baseLeft = rect.left - dx;
+      const baseTop = rect.top - dy;
+      let minX = pad - baseLeft;
+      let maxX = window.innerWidth - pad - w - baseLeft;
+      let minY = pad - baseTop;
+      let maxY = window.innerHeight - pad - h - baseTop;
+      if (minX > maxX) [minX, maxX] = [maxX, minX];
+      if (minY > maxY) [minY, maxY] = [maxY, minY];
+      dInst.applyBounds({ minX, maxX, minY, maxY });
+    };
+
+    const draggable = Draggable.create(pill, {
+      type: "x,y",
+      trigger: handle,
+      cursor: "grab",
+      activeCursor: "grabbing",
+      dragClickables: false,
+      minimumMovement: 4,
+      zIndexBoost: false,
+      onPress() {
+        applyBounds();
+        gsap.set(handle, { cursor: "grabbing" });
+      },
+      onRelease() {
+        gsap.set(handle, { cursor: "grab" });
+      },
+      onDrag() {
+        const dx = Number((this as { x: number }).x);
+        const dy = Number((this as { y: number }).y);
+        const dist = Math.hypot(dx, dy);
+        const near = dist < SNAP_THRESHOLD_PX;
+        gsap.to(snapZone, {
+          opacity: near ? 1 : 0,
+          scale: near ? 1 : 0.96,
+          duration: 0.2,
+          ease: "power2.out",
+        });
+      },
+      onDragEnd() {
+        gsap.to(snapZone, {
+          opacity: 0,
+          scale: 0.96,
+          duration: 0.25,
+          ease: "power2.out",
+        });
+        const dx = Number((this as { x: number }).x);
+        const dy = Number((this as { y: number }).y);
+        const dist = Math.hypot(dx, dy);
+        if (dist < SNAP_THRESHOLD_PX) {
+          gsap.to(pill, {
+            x: 0,
+            y: 0,
+            duration: 0.85,
+            ease: "elastic.out(1, 0.55)",
+            onUpdate: () => dInst?.update(),
+            onComplete: () => dInst?.update(),
+          });
+        }
+      },
+    })[0];
+
+    dInst = draggable;
+    draggableInstanceRef.current = draggable;
+    applyBounds();
+    window.addEventListener("resize", applyBounds, { passive: true });
+
+    return () => {
+      window.removeEventListener("resize", applyBounds);
+      draggable.kill();
+      draggableInstanceRef.current = null;
+      gsap.set(pill, { clearProps: "x,y" });
+    };
+  }, [isDesktop, pathname, winW, winH]);
+
   /** Portfolio preview iframe (`/?mfEmbed=1`) — hide floating nav so it is not duplicated. */
   if (searchParams.get("mfEmbed") === "1") {
     return null;
@@ -242,7 +437,18 @@ export default function FloatingBottomNav() {
       className={`${styles.wrapper} ${isNearFooter ? styles.hidden : ""}`}
       aria-hidden={isNearFooter}
     >
+      {isDesktop ? (
+        <div className={styles.snapZoneWrap} aria-hidden>
+          <div
+            ref={snapZoneRef}
+            className={styles.snapZone}
+            style={{ width: snapBox.w, height: snapBox.h }}
+          />
+        </div>
+      ) : null}
+
       <nav
+        ref={pillRef}
         className={styles.pill}
         aria-label="Floating site navigation"
       >
@@ -263,7 +469,10 @@ export default function FloatingBottomNav() {
           </Link>
         </div>
 
-        <div className={styles.locationSection}>
+        <div
+          ref={dragHandleRef}
+          className={`${styles.locationSection} ${isDesktop ? styles.dragHandle : ""}`}
+        >
           <div className={styles.locationViewport} ref={viewportRef}>
             {pathname === "/" && shouldMarquee ? (
               <div

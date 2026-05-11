@@ -12,17 +12,43 @@
   box-sizing: border-box;
   z-index: 950;
   pointer-events: none;
+  opacity: 1;
+  transition:
+    transform 0.4s cubic-bezier(0.32, 0.72, 0.2, 1),
+    opacity 0.32s ease;
 }
 
 .hidden {
   pointer-events: none;
+  opacity: 0;
+  transform: translateY(clamp(140px, 32vh, 260px));
 }
 
-.hidden .pill {
-  transform: translateY(110px);
+.snapZoneWrap {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.snapZone {
+  position: relative;
+  flex-shrink: 0;
+  border-radius: 22px;
+  border: 1px dashed rgba(17, 17, 17, 0.35);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  transform-origin: center center;
+  box-sizing: border-box;
 }
 
 .pill {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -32,7 +58,6 @@
   padding: 11px 15px;
   border-radius: 999px;
   pointer-events: auto;
-  transition: transform 0.32s ease;
   /* Same glass recipe as the flyout menu (blur 8px + light border) */
   background: rgba(255, 255, 255, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -42,6 +67,45 @@
     inset 0 -1px 0 rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  transition:
+    padding 0.32s cubic-bezier(0.25, 0.85, 0.25, 1),
+    box-shadow 0.32s ease,
+    border-color 0.32s ease,
+    background-color 0.32s ease;
+}
+
+@media (hover: hover) {
+  .pill:hover {
+    padding: 15px 19px;
+    background: rgba(255, 255, 255, 0.52);
+    border-color: rgba(255, 255, 255, 0.45);
+    box-shadow:
+      0 14px 44px rgba(0, 0, 0, 0.14),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.12);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pill {
+    transition-duration: 0.01ms;
+  }
+
+  .wrapper {
+    transition-duration: 0.01ms;
+  }
+}
+
+@media screen and (min-width: 769px) {
+  .dragHandle {
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+  }
+
+  .dragHandle:active {
+    cursor: grabbing;
+  }
 }
 
 .locationSection {
@@ -328,6 +392,18 @@
     gap: 10px;
     padding: 10px 12px;
     background: rgba(255, 255, 255, 0.4);
+  }
+
+  @media (hover: hover) {
+    .pill:hover {
+      padding: 13px 15px;
+      background: rgba(255, 255, 255, 0.52);
+      border-color: rgba(255, 255, 255, 0.45);
+      box-shadow:
+        0 12px 36px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.58),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.12);
+    }
   }
 
   .locationSection {
