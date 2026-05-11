@@ -14,7 +14,6 @@ import Projects from "@/components/home/Projects/Project"
 import MySetups from "@/components/home/MySetups"
 import Slideshow from "@/components/home/SliderSection"
 import Header from "@/components/layout/header/header"
-import { motion, useScroll } from "motion/react";
 
 /**
  * `useSearchParams` needs Suspense. When `mfEmbed=1` (copilot iframe), never mount
@@ -54,7 +53,6 @@ function PreloaderGate() {
 }
 
 export default function Home() {
-  const { scrollYProgress } = useScroll();
   const siteBase = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
   const homePageJsonLd = {
     "@context": "https://schema.org",
@@ -74,21 +72,6 @@ export default function Home() {
   type="application/ld+json"
   dangerouslySetInnerHTML={{ __html: JSON.stringify(homePageJsonLd) }}
 />
-<motion.div
-                id="scroll-indicator"
-                style={{
-                    scaleX: scrollYProgress,
-                    position: "fixed",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: 4,
-                    originX: 0,
-                    backgroundColor: "#ff3636",
-                    zIndex:50,
-                    
-                }}
-            />
 <Suspense fallback={null}>
         <PreloaderGate />
       </Suspense>

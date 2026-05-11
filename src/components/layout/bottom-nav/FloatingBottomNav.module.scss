@@ -211,7 +211,39 @@
   flex: 0 0 auto;
 }
 
+.menuButtonWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+}
+
+.scrollProgressRing {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.scrollProgressTrack {
+  stroke: rgba(255, 54, 54, 0.22);
+  stroke-width: 6.2;
+}
+
+.scrollProgressFill {
+  stroke: #ff3636;
+  stroke-width: 6.9;
+}
+
 .menuButton {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   flex-direction: column;
   justify-content: center;
@@ -430,6 +462,11 @@
     margin-left: auto;
   }
 
+  .menuButtonWrap {
+    width: 56px;
+    height: 56px;
+  }
+
   .menuButton {
     width: 48px;
     height: 48px;
@@ -458,6 +495,14 @@
 
   .menuButtonActive span:nth-child(2) {
     transform: translateY(-4px) rotate(-45deg);
+  }
+
+  .scrollProgressTrack {
+    stroke-width: 6.7;
+  }
+
+  .scrollProgressFill {
+    stroke-width: 7.4;
   }
 
   .mobileMenuPanel {
@@ -547,6 +592,11 @@
     margin-left: auto;
   }
 
+  .menuButtonWrap {
+    width: 56px;
+    height: 56px;
+  }
+
   .menuButton {
     width: 48px;
     height: 48px;
@@ -575,6 +625,14 @@
 
   .menuButtonActive span:nth-child(2) {
     transform: translateY(-4px) rotate(-45deg);
+  }
+
+  .scrollProgressTrack {
+    stroke-width: 6.7;
+  }
+
+  .scrollProgressFill {
+    stroke-width: 7.4;
   }
 
   .mobileMenuPanel {

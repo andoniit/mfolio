@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import { motion, useScroll, useTransform } from "motion/react";
 import gsap from "gsap";
 import {
   useEffect,
@@ -15,6 +16,10 @@ import styles from "./FloatingBottomNav.module.scss";
 
 const SNAP_THRESHOLD_PX = 70;
 const SNAP_ZONE_PAD_PX = 14;
+
+/** Burger ring: radius in SVG user units (viewBox 0 0 56 56, center 28). */
+const MENU_PROGRESS_RING_R = 23;
+const MENU_PROGRESS_CIRCUMFERENCE = 2 * Math.PI * MENU_PROGRESS_RING_R;
 
 type DraggableInst = {
   kill: () => void;
@@ -109,6 +114,13 @@ export default function FloatingBottomNav() {
   );
   const [previousLabel, setPreviousLabel] = useState<HomeSectionLabel | null>(null);
   const [isFlipping, setIsFlipping] = useState(false);
+
+  const { scrollYProgress } = useScroll();
+  const scrollRingDashoffset = useTransform(
+    scrollYProgress,
+    [0, 1],
+    [MENU_PROGRESS_CIRCUMFERENCE, 0]
+  );
 
   const locationLabel = useMemo(
     () => (pathname === "/" ? activeHomeLabel : getLocationLabel(pathname || "/")),
@@ -541,17 +553,45 @@ export default function FloatingBottomNav() {
         <span className={styles.divider} aria-hidden="true" />
 
         <div className={styles.mobileMenu}>
-          <button
-            type="button"
-            className={`${styles.menuButton} ${isMobileMenuOpen ? styles.menuButtonActive : ""}`}
-            aria-label="Toggle navigation menu"
-            aria-expanded={isMobileMenuOpen}
-            aria-controls="floating-bottom-nav-mobile-menu"
-            onClick={() => setIsMobileMenuOpen((open) => !open)}
-          >
-            <span aria-hidden="true" />
-            <span aria-hidden="true" />
-          </button>
+          <div className={styles.menuButtonWrap}>
+            <svg
+              className={styles.scrollProgressRing}
+              viewBox="0 0 56 56"
+              width="56"
+              height="56"
+              aria-hidden
+            >
+              <circle
+                className={styles.scrollProgressTrack}
+                cx="28"
+                cy="28"
+                r={MENU_PROGRESS_RING_R}
+                fill="none"
+              />
+              <motion.circle
+                className={styles.scrollProgressFill}
+                cx="28"
+                cy="28"
+                r={MENU_PROGRESS_RING_R}
+                fill="none"
+                strokeLinecap="round"
+                strokeDasharray={MENU_PROGRESS_CIRCUMFERENCE}
+                style={{ strokeDashoffset: scrollRingDashoffset }}
+                transform="rotate(-90 28 28)"
+              />
+            </svg>
+            <button
+              type="button"
+              className={`${styles.menuButton} ${isMobileMenuOpen ? styles.menuButtonActive : ""}`}
+              aria-label="Toggle navigation menu"
+              aria-expanded={isMobileMenuOpen}
+              aria-controls="floating-bottom-nav-mobile-menu"
+              onClick={() => setIsMobileMenuOpen((open) => !open)}
+            >
+              <span aria-hidden="true" />
+              <span aria-hidden="true" />
+            </button>
+          </div>
         </div>
       </nav>
     </div>
