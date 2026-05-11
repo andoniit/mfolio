@@ -1,0 +1,23 @@
+.fractalGlassMount {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.fractalGlassMount canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.hiddenTexture {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}

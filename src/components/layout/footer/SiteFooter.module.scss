@@ -101,22 +101,22 @@
     pointer-events: none;
   }
 
-  /* Frosted glass over the image (blur samples the layer below) */
+  /* Frosted glass over the image (lighter so the photo reads clearer) */
   &::after {
     content: "";
     position: absolute;
     inset: 0;
-    z-index: 1;
+    z-index: 2;
     border-radius: inherit;
     background: linear-gradient(
       165deg,
-      rgba(255, 255, 255, 0.42) 0%,
-      rgba(255, 255, 255, 0.12) 45%,
-      rgba(255, 255, 255, 0.22) 100%
+      rgba(255, 255, 255, 0.22) 0%,
+      rgba(255, 255, 255, 0.06) 45%,
+      rgba(255, 255, 255, 0.12) 100%
     );
-    backdrop-filter: blur(8px) saturate(1.2);
-    -webkit-backdrop-filter: blur(8px) saturate(1.2);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(4px) saturate(1.15);
+    -webkit-backdrop-filter: blur(4px) saturate(1.15);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
     pointer-events: none;
   }
 
@@ -268,16 +268,18 @@
   font-size: clamp(1.45rem, 3.2vw, 2rem);
   font-weight: 800;
   margin: 0;
-  color: var(--mf-dark);
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
 .newsletterSubtext {
   margin: 0;
   font-size: clamp(0.86rem, 1.4vw, 0.95rem);
   font-weight: 500;
-  color: #333;
+  color: rgba(255, 255, 255, 0.92);
   line-height: 1.45;
   max-width: 28rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .arrowBox {
@@ -442,8 +444,9 @@
 .copyrightText {
   margin: 0;
   font-size: clamp(0.88rem, 1.5vw, 1.1rem);
-  color: #555;
+  color: #fff;
   font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
 .socialIcons {

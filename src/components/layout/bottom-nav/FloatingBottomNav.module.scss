@@ -96,18 +96,6 @@
   }
 }
 
-@media screen and (min-width: 769px) {
-  .dragHandle {
-    cursor: grab;
-    touch-action: none;
-    user-select: none;
-  }
-
-  .dragHandle:active {
-    cursor: grabbing;
-  }
-}
-
 .locationSection {
   flex: 1 1 auto;
   min-width: 0;
@@ -228,14 +216,28 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   width: 34px;
   height: 34px;
   padding: 0;
   border: 0;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.42);
+  background: #111111;
   cursor: pointer;
+  transition: gap 0.22s ease;
+}
+
+.menuButton:hover:not(.menuButtonActive) {
+  gap: 11px;
+}
+
+.menuButton:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.85);
+  outline-offset: 2px;
+}
+
+.menuButtonActive {
+  gap: 5px;
 }
 
 .menuButton span {
@@ -243,20 +245,18 @@
   width: 14px;
   height: 1.5px;
   border-radius: 999px;
-  background: #111111;
-  transition: transform 0.24s ease, opacity 0.24s ease;
+  background: rgba(255, 255, 255, 0.92);
+  transform-origin: center;
+  transition: transform 0.24s ease;
 }
 
+/* Two bars → X: offset = (gap + bar thickness) / 2 for default closed gap */
 .menuButtonActive span:nth-child(1) {
-  transform: translateY(5.5px) rotate(45deg);
+  transform: translateY(3.25px) rotate(45deg);
 }
 
 .menuButtonActive span:nth-child(2) {
-  opacity: 0;
-}
-
-.menuButtonActive span:nth-child(3) {
-  transform: translateY(-5.5px) rotate(-45deg);
+  transform: translateY(-3.25px) rotate(-45deg);
 }
 
 .mobileMenuPanel {
@@ -431,17 +431,20 @@
   }
 
   .menuButton {
-    /* ~48px minimum touch target — same glass as .pill */
     width: 48px;
     height: 48px;
-    gap: 5px;
-    background: rgba(255, 255, 255, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(18px) saturate(140%);
-    -webkit-backdrop-filter: blur(18px) saturate(140%);
-    box-shadow:
-      0 8px 32px rgba(0, 0, 0, 0.08),
-      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    gap: 6px;
+    background: #111111;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  }
+
+  .menuButton:hover:not(.menuButtonActive) {
+    gap: 13px;
+  }
+
+  .menuButtonActive {
+    gap: 6px;
   }
 
   .menuButton span {
@@ -450,11 +453,11 @@
   }
 
   .menuButtonActive span:nth-child(1) {
-    transform: translateY(7px) rotate(45deg);
+    transform: translateY(4px) rotate(45deg);
   }
 
-  .menuButtonActive span:nth-child(3) {
-    transform: translateY(-7px) rotate(-45deg);
+  .menuButtonActive span:nth-child(2) {
+    transform: translateY(-4px) rotate(-45deg);
   }
 
   .mobileMenuPanel {
@@ -500,6 +503,122 @@
     margin-bottom: 0;
     border-bottom: none;
     /* Let the panel’s glass read through; same feel as the bar */
+    background: transparent;
+    color: #111111;
+  }
+
+  .mobileMenuLink:last-child {
+    margin-bottom: 0;
+  }
+
+  .mobileMenuLink:active {
+    background: rgba(255, 255, 255, 0.35);
+    color: var(--mf-purple);
+  }
+
+  .mobileMenuLink:hover {
+    background: rgba(255, 255, 255, 0.28);
+    color: var(--mf-purple);
+  }
+}
+
+/* Placed after base + mobile rules so desktop overrides win (burger matches small viewports). */
+@media screen and (min-width: 769px) {
+  .dragHandle {
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+  }
+
+  .dragHandle:active {
+    cursor: grabbing;
+  }
+
+  .divider {
+    display: none;
+  }
+
+  .links {
+    display: none;
+  }
+
+  .mobileMenu {
+    display: block;
+    margin-left: auto;
+  }
+
+  .menuButton {
+    width: 48px;
+    height: 48px;
+    gap: 6px;
+    background: #111111;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  }
+
+  .menuButton:hover:not(.menuButtonActive) {
+    gap: 13px;
+  }
+
+  .menuButtonActive {
+    gap: 6px;
+  }
+
+  .menuButton span {
+    width: 18px;
+    height: 2px;
+  }
+
+  .menuButtonActive span:nth-child(1) {
+    transform: translateY(4px) rotate(45deg);
+  }
+
+  .menuButtonActive span:nth-child(2) {
+    transform: translateY(-4px) rotate(-45deg);
+  }
+
+  .mobileMenuPanel {
+    right: 0;
+    bottom: calc(100% + 8px);
+    width: 100%;
+    min-width: 0;
+    padding: 16px 14px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.86);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(12px);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transform-origin: bottom center;
+    transition: opacity 0.22s ease, transform 0.22s ease;
+  }
+
+  .mobileMenuPanelOpen {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .mobileMenuLink {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+    padding: 14px 16px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    border-radius: 16px;
+    margin-bottom: 0;
+    border-bottom: none;
     background: transparent;
     color: #111111;
   }

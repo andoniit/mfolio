@@ -1,0 +1,43 @@
+.visionPoemScroll {
+  width: 100%;
+  min-width: 0;
+}
+
+.visionPoemText {
+  width: 100%;
+}
+
+.visionParagraph {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-wrap: break-word;
+  hyphens: auto;
+  font-size: inherit;
+  line-height: inherit;
+  letter-spacing: -0.01em;
+}
+
+.visionWord {
+  display: inline-block;
+  position: relative;
+  margin-right: 0.14em;
+  margin-bottom: 0.12em;
+  padding: 0.02em 0;
+  border-radius: 0.2em;
+  vertical-align: baseline;
+  opacity: 0;
+  will-change: opacity, background-color;
+}
+
+.visionWordSpan {
+  position: relative;
+  display: inline-block;
+  opacity: 0;
+  will-change: opacity;
+}

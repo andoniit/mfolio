@@ -540,18 +540,6 @@ export default function FloatingBottomNav() {
 
         <span className={styles.divider} aria-hidden="true" />
 
-        <div className={styles.links}>
-          <Link href="/" className={styles.link}>
-            Home
-          </Link>
-          <Link href="/projects" className={styles.link}>
-            Projects
-          </Link>
-          <Link href="/blog" className={styles.link}>
-            Blog
-          </Link>
-        </div>
-
         <div className={styles.mobileMenu}>
           <button
             type="button"
@@ -561,9 +549,8 @@ export default function FloatingBottomNav() {
             aria-controls="floating-bottom-nav-mobile-menu"
             onClick={() => setIsMobileMenuOpen((open) => !open)}
           >
-            <span />
-            <span />
-            <span />
+            <span aria-hidden="true" />
+            <span aria-hidden="true" />
           </button>
         </div>
       </nav>

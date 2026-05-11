@@ -557,13 +557,66 @@ const MobileContactButton = ({ compactMode = false, onCollapseRequest = null }) 
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [headerHidden, setHeaderHidden] = useState(false);
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() =>
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+  const headerRef = useRef(null);
+  const lastScrollY = useRef(0);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [resumeUrl, setResumeUrl] = useState(null);
 
+  useLayoutEffect(() => {
+    const el = headerRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() => {
+      const h = Math.ceil(el.getBoundingClientRect().height);
+      setHeaderHeight((prev) => (prev !== h ? h : prev));
+    });
+    ro.observe(el);
+    setHeaderHeight(Math.ceil(el.getBoundingClientRect().height));
+    return () => ro.disconnect();
+  }, []);
+
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 50);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(mq.matches);
+    const onMq = () => setPrefersReducedMotion(mq.matches);
+    mq.addEventListener("change", onMq);
+
+    lastScrollY.current = typeof window !== "undefined" ? window.scrollY : 0;
+    const topRevealPx = 12;
+    const directionDeltaPx = 10;
+
+    const handleScroll = () => {
+      const y = window.scrollY;
+      setIsScrolled(y > 50);
+
+      if (mq.matches) {
+        setHeaderHidden(false);
+        lastScrollY.current = y;
+        return;
+      }
+
+      if (y <= topRevealPx) {
+        setHeaderHidden(false);
+      } else if (y > lastScrollY.current + directionDeltaPx) {
+        setHeaderHidden(true);
+      } else if (y < lastScrollY.current - directionDeltaPx) {
+        setHeaderHidden(false);
+      }
+      lastScrollY.current = y;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+
+    return () => {
+      mq.removeEventListener("change", onMq);
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   useEffect(() => {
@@ -638,22 +691,35 @@ export default function Header() {
     </>
   );
 
-  return (
-    <motion.header className={styles.header} variants={containerVariants}>
-      <div className={styles.container}>
-        
-        {/* Logo */}
-        <Link href="/" className={styles.logoLink}>
-          <AnimatedSvgLogo isScrolled={isScrolled} />
-        </Link>
-        
-        {/* Desktop Navigation */}
-        <motion.nav className={styles.desktopNav} variants={navVariants}>
-          <NavItems isMobile={false} />
-        </motion.nav>
+  const spacerH = headerHeight > 0 ? headerHeight : 80;
 
-        <MobileHeaderActions resumeUrl={resumeUrl} isScrolled={isScrolled} />
-      </div>
-    </motion.header>
+  return (
+    <>
+      <motion.header
+        ref={headerRef}
+        className={styles.header}
+        variants={containerVariants}
+        data-header-hidden={headerHidden && !prefersReducedMotion ? "true" : undefined}
+      >
+        <div className={styles.container}>
+          {/* Logo */}
+          <Link href="/" className={styles.logoLink}>
+            <AnimatedSvgLogo isScrolled={isScrolled} />
+          </Link>
+
+          {/* Desktop Navigation */}
+          <motion.nav className={styles.desktopNav} variants={navVariants}>
+            <NavItems isMobile={false} />
+          </motion.nav>
+
+          <MobileHeaderActions resumeUrl={resumeUrl} isScrolled={isScrolled} />
+        </div>
+      </motion.header>
+      <div
+        className={styles.headerSpacer}
+        style={{ height: spacerH }}
+        aria-hidden
+      />
+    </>
   );
 }

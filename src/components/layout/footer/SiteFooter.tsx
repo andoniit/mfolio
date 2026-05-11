@@ -9,6 +9,7 @@ import {
   useSpring 
 } from "framer-motion";
 import styles from "./SiteFooter.module.scss";
+import FooterFractalGlass from "./FooterFractalGlass";
 import NewsletterSubscribeForm from "./NewsletterSubscribeForm";
 
 export default function SiteFooter() {
@@ -84,7 +85,8 @@ export default function SiteFooter() {
         role="contentinfo"
         onMouseMove={handleMouseMove}
       >
-        
+        <FooterFractalGlass />
+
         <div className={styles.inner}>
           
           {/* LEFT COLUMN */}

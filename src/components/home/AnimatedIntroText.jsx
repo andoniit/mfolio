@@ -3,7 +3,16 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 
-export default function AnimatedIntroText({ children, text = "", className = "", startAnimation = true }) {
+export default function AnimatedIntroText({
+  children,
+  text = "",
+  className = "",
+  startAnimation = true,
+  /** Stagger when multiple lines/words (default matches previous site feel). */
+  staggerDelay = 0.07,
+  /** Per-line motion length (seconds). */
+  motionDuration = 1.2,
+}) {
   const ref = useRef(null);
   // Trigger animation when the element is somewhat in view
   const isInView = useInView(ref, { once: true, margin: "-10% 0px" });
@@ -25,11 +34,12 @@ export default function AnimatedIntroText({ children, text = "", className = "",
     hidden: {},
     visible: {
       transition: {
-        staggerChildren: 0.07, // stagger the lines exactly like the code (0.07)
+        staggerChildren: staggerDelay,
       },
     },
   };
 
+  const lineEase = [0.16, 1, 0.3, 1];
   const lineVariants = {
     hidden: { 
       y: "100%",
@@ -48,14 +58,12 @@ export default function AnimatedIntroText({ children, text = "", className = "",
       // Color transition: grey -> lime -> purple -> black
       color: ["#dddddd", "#a3e635", "#8b5cf6", "#111111"], 
       transition: {
-        // "power4.out" equivalent cubic-bezier
-        y: { duration: 1.2, ease: [0.16, 1, 0.3, 1] },
-        rotateX: { duration: 1.2, ease: [0.16, 1, 0.3, 1] },
-        skewY: { duration: 1.2, ease: [0.16, 1, 0.3, 1] },
-        scale: { duration: 1.2, ease: [0.16, 1, 0.3, 1] },
-        opacity: { duration: 1.2, ease: [0.16, 1, 0.3, 1] },
-        // Color transition
-        color: { duration: 1.2, ease: "easeInOut", times: [0, 0.4, 0.7, 1] }
+        y: { duration: motionDuration, ease: lineEase },
+        rotateX: { duration: motionDuration, ease: lineEase },
+        skewY: { duration: motionDuration, ease: lineEase },
+        scale: { duration: motionDuration, ease: lineEase },
+        opacity: { duration: motionDuration, ease: lineEase },
+        color: { duration: motionDuration, ease: "easeInOut", times: [0, 0.4, 0.7, 1] }
       },
     },
   };

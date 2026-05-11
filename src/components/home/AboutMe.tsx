@@ -3,12 +3,26 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
+import {
+  splitTextIntoWordNodes,
+  updateScrollWordReveal,
+  setScrollWordsFullyVisible,
+} from "@/lib/scrollWordReveal";
 import styles from "./AboutMe.module.scss";
 
 gsap.registerPlugin(ScrollTrigger);
 
+/** Subtle word chip behind copy (adapted from cg-navigate-scroll-animated-text). */
+const BIO_WORD_HIGHLIGHT_RGB = "28, 28, 28";
+
 const paragraphText =
-  `"a software engineer with an artist’s eye, combining strong design thinking with production-minded engineering to build polished, user-first products. I focus on interaction quality, performance, and reliability, and I also create motion graphics, animation, and video edits to bring visual storytelling and high-craft UI to life."`;
+  "a software engineer with an artist's eye, combining strong design thinking with production-minded engineering to build polished, user-first products. I focus on interaction quality, performance, and reliability, and I also create motion graphics, animation, and video edits to bring visual storytelling and high-craft UI to life.";
+
+/** Red bio scroll-reveal (tuned separately from MyVision poem). */
+const BIO_SCROLL_REVEAL_VH = 1.1;
+const BIO_SCROLL_REVEAL_MAX_PX = 580;
+const BIO_SCROLL_SCRUB = 0.34;
+const BIO_WORD_OVERLAP = 17;
 
 const seahawksMarqueeChunk = "Go hawks !!   ";
 
@@ -47,10 +61,8 @@ export default function AboutMe() {
   const nameTogglePrev = useRef<boolean | null>(null);
   const memojiBoxRef = useRef<HTMLDivElement>(null);
   const memojiVideoRef = useRef<HTMLVideoElement>(null);
-
-  const wordsRef = useRef<(HTMLSpanElement | null)[]>([]);
-  const allWordsRef = useRef<(HTMLSpanElement | null)[]>([]);
-  const words = paragraphText.split(" ");
+  const bioParagraphRef = useRef<HTMLParagraphElement>(null);
+  const bioAnimeContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const updateTime = () => {
@@ -238,47 +250,38 @@ export default function AboutMe() {
         });
       }
 
-      gsap.set(allWordsRef.current, { y: 20, opacity: 0 });
+      const bioEl = bioParagraphRef.current;
+      const bioScrollRoot = bioAnimeContainerRef.current;
+      if (bioEl && bioScrollRoot) {
+        splitTextIntoWordNodes(bioEl, paragraphText, styles.bioWord, styles.bioWordSpan);
 
-      gsap.to(allWordsRef.current, {
-        y: 0,
-        opacity: 1,
-        duration: 0.8,
-        stagger: 0.015,
-        ease: "power3.out",
-        scrollTrigger: { trigger: sectionRef.current, start: "top 75%" },
-      });
-
-      wordsRef.current.forEach((wordElement) => {
-        if (!wordElement) return;
-        const isTabletOrSmaller =
-          typeof window !== "undefined" &&
-          window.matchMedia("(max-width: 1180px)").matches;
-        const wordType = wordElement.dataset.wordType;
-        let xTarget = "0em";
-
-        if (wordType === "word1") xTarget = "-0.8em";
-        if (wordType === "word2") xTarget = "1.6em";
-        if (wordType === "word3") xTarget = "-2.4em";
-
-        if (isTabletOrSmaller) {
-          gsap.set(wordElement, { x: 0 });
-          return;
-        }
-
-        if (wordType !== "word0") {
-          gsap.to(wordElement, {
-            x: xTarget,
-            ease: "none",
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top 80%",
-              end: "bottom 30%",
-              scrub: 0.2,
-            },
+        if (reducedMotion) {
+          setScrollWordsFullyVisible(bioScrollRoot);
+        } else {
+          const rgb = BIO_WORD_HIGHLIGHT_RGB;
+          updateScrollWordReveal(0, bioScrollRoot, rgb);
+          ScrollTrigger.create({
+            trigger: bioScrollRoot,
+            start: "top 86%",
+            end: () =>
+              `+=${Math.min(
+                typeof window !== "undefined"
+                  ? window.innerHeight * BIO_SCROLL_REVEAL_VH
+                  : 560,
+                BIO_SCROLL_REVEAL_MAX_PX
+              )}`,
+            scrub: BIO_SCROLL_SCRUB,
+            invalidateOnRefresh: true,
+            onUpdate: (self) =>
+              updateScrollWordReveal(
+                self.progress,
+                bioScrollRoot,
+                rgb,
+                BIO_WORD_OVERLAP
+              ),
           });
         }
-      });
+      }
 
     }, sectionRef);
 
@@ -286,7 +289,13 @@ export default function AboutMe() {
   }, []);
 
   return (
-    <section ref={sectionRef} id="about-me" className={styles.aboutMe} aria-label="About me">
+    <section
+      ref={sectionRef}
+      id="about-me"
+      className={styles.aboutMe}
+      aria-label="About me"
+      lang="en"
+    >
       <div className={styles.bentoGrid}>
         {/* Column 1 */}
         <div className={`${styles.column} ${styles.col1}`}>
@@ -410,28 +419,26 @@ export default function AboutMe() {
             <img src="/images/25.jpg" alt="Suit" />
           </div>
           <div className={`${styles.bentoItem} ${styles.redBoxText} bento-anim`}>
-            <p className={styles.paragraph}>
-              {words.map((word, i) => {
-                const typeIndex = (i * 7 + 3) % 4;
-                const wordType = `word${typeIndex}`;
-
-                return (
-                  <span
-                    key={i}
-                    ref={(el) => {
-                      if (el) {
-                        allWordsRef.current[i] = el;
-                        wordsRef.current[i] = el;
-                      }
-                    }}
-                    data-word-type={wordType}
-                    className={styles.word}
-                  >
-                    {word}
-                  </span>
-                );
-              })}
-            </p>
+            <div
+              className={styles.redBoxTextInner}
+              aria-labelledby="about-bio-a11y"
+            >
+              <span id="about-bio-a11y" className={styles.bioAssistive}>
+                {paragraphText}
+              </span>
+              <div ref={bioAnimeContainerRef} className={styles.bioAnimeScroll}>
+                <div className={styles.bioAnimeText}>
+                  <p
+                    ref={bioParagraphRef}
+                    className={styles.paragraph}
+                    aria-hidden="true"
+                  />
+                </div>
+              </div>
+              <noscript>
+                <p className={styles.paragraph}>{paragraphText}</p>
+              </noscript>
+            </div>
           </div>
         </div>
       </div>

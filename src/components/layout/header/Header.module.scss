@@ -1,13 +1,46 @@
 .header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   background-color: transparent;
   z-index: 700;
-  transition: all 0.9s ease;
   overflow-x: clip;
   overflow-y: visible;
   width: 100%;
   box-sizing: border-box;
+  transform: translate3d(0, 0, 0);
+  transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.header[data-header-hidden="true"] {
+  transform: translate3d(0, -100%, 0);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header {
+    transform: none !important;
+    transition: none;
+  }
+
+  .header[data-header-hidden="true"] {
+    pointer-events: auto;
+  }
+}
+
+/* Reserves layout height while the bar is `position: fixed` (collapses when header is hidden). */
+.headerSpacer {
+  flex-shrink: 0;
+  width: 100%;
+  overflow: hidden;
+  transition: height 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .headerSpacer {
+    transition: none;
+  }
 }
 
 .container {

@@ -1,16 +1,35 @@
 "use client";
 import React, { useRef, useEffect } from "react";
 import AnimatedIntroText from "./AnimatedIntroText";
-import SplitterText from "./SplitterText";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import {
+  splitTextIntoWordNodes,
+  updateScrollWordReveal,
+  setScrollWordsFullyVisible,
+} from "@/lib/scrollWordReveal";
+import styles from "./MyVision.module.scss";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
+const VISION_POEM_TEXT =
+  "A barefoot dream wrapped in imagination, Lines of vision shaping inspiration. A sneaker drawn, yet never worn, A canvas of thought where ideas are born. The artist’s mind, a realm so wide, Where limits fade and dreams collide. No riches needed, no gold in hand, For design builds castles where feet can stand. A stroke of art, a future untold, Where designers craft, their dreams unfold. For they afford, through ink and air, A world designed beyond compare.";
+
+const VISION_WORD_HIGHLIGHT_RGB = "72, 72, 72";
+const VISION_CHIP_ALPHA = 0.2;
+
+/** Poem scroll-reveal: tuned separately from AboutMe red bio (`BIO_*` in AboutMe.tsx). */
+const VISION_POEM_SCROLL_VH = 1.02;
+const VISION_POEM_SCROLL_MAX_PX = 520;
+const VISION_POEM_SCRUB = 0.3;
+const VISION_POEM_WORD_OVERLAP = 14;
+
 export default function MyVision() {
   const containerRef = useRef(null);
+  const poemParagraphRef = useRef(null);
+  const poemAnimeRootRef = useRef(null);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -24,11 +43,11 @@ export default function MyVision() {
         opacity: 1,
         y: 0,
         scale: 1,
-        duration: 1.2,
+        duration: 1.65,
         ease: "power3.out",
         scrollTrigger: {
           trigger: container,
-          start: "top 85%",
+          start: "top 82%",
           toggleActions: "play none none reverse",
         },
       }
@@ -41,8 +60,52 @@ export default function MyVision() {
     };
   }, []);
 
+  useEffect(() => {
+    const root = poemAnimeRootRef.current;
+    const p = poemParagraphRef.current;
+    if (!root || !p) return;
+
+    const ctx = gsap.context(() => {
+      const reducedMotion =
+        typeof window !== "undefined" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      splitTextIntoWordNodes(p, VISION_POEM_TEXT, styles.visionWord, styles.visionWordSpan);
+
+      if (reducedMotion) {
+        setScrollWordsFullyVisible(root);
+      } else {
+        const rgb = VISION_WORD_HIGHLIGHT_RGB;
+        updateScrollWordReveal(0, root, rgb, VISION_POEM_WORD_OVERLAP, VISION_CHIP_ALPHA);
+        ScrollTrigger.create({
+          trigger: root,
+          start: "top 90%",
+          end: () =>
+            `+=${Math.min(
+              typeof window !== "undefined"
+                ? window.innerHeight * VISION_POEM_SCROLL_VH
+                : 440,
+              VISION_POEM_SCROLL_MAX_PX
+            )}`,
+          scrub: VISION_POEM_SCRUB,
+          invalidateOnRefresh: true,
+          onUpdate: (self) =>
+            updateScrollWordReveal(
+              self.progress,
+              root,
+              rgb,
+              VISION_POEM_WORD_OVERLAP,
+              VISION_CHIP_ALPHA
+            ),
+        });
+      }
+    }, root);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section id="my-vision" aria-label="My Vision" className="pitch-section">
+    <section id="my-vision" aria-label="My Vision" className="pitch-section" lang="en">
       <h2 className="sr-only">My Vision</h2>
       <div style={{ width: "100%", maxWidth: "1200px", display: "flex", justifyContent: "center" }}>
         <div 
@@ -51,20 +114,32 @@ export default function MyVision() {
         >
           <div className="pitch-frame">
             <div className="top-left-tab mf-red-text">
-              <AnimatedIntroText>Imagine extraordinary</AnimatedIntroText>
+              <AnimatedIntroText staggerDelay={0.1} motionDuration={1.55}>
+                Imagine extraordinary
+              </AnimatedIntroText>
             </div>
-            
+
             <div className="bottom-right-tab mf-purple-text">
-              <AnimatedIntroText>In the ordinary</AnimatedIntroText>
+              <AnimatedIntroText staggerDelay={0.1} motionDuration={1.55}>
+                In the ordinary
+              </AnimatedIntroText>
             </div>
           </div>
         </div>
       </div>
       
       <div className="poem-container mf-dark-text">
-        <SplitterText isBlock={true} variant="fastv2">
-          A barefoot dream wrapped in imagination, Lines of vision shaping inspiration. A sneaker drawn, yet never worn, A canvas of thought where ideas are born. The artist’s mind, a realm so wide, Where limits fade and dreams collide. No riches needed, no gold in hand, For design builds castles where feet can stand. A stroke of art, a future untold, Where designers craft, their dreams unfold. For they afford, through ink and air, A world designed beyond compare.
-        </SplitterText>
+        <span id="my-vision-poem-a11y" className="sr-only">
+          {VISION_POEM_TEXT}
+        </span>
+        <div ref={poemAnimeRootRef} className={styles.visionPoemScroll} aria-labelledby="my-vision-poem-a11y">
+          <div className={styles.visionPoemText}>
+            <p ref={poemParagraphRef} className={styles.visionParagraph} aria-hidden="true" />
+          </div>
+        </div>
+        <noscript>
+          <p className={styles.visionParagraph}>{VISION_POEM_TEXT}</p>
+        </noscript>
       </div>
 
       <Stylesheet />
@@ -226,15 +301,17 @@ function Stylesheet() {
       .poem-container {
         margin-top: 5rem;
         max-width: 900px;
+        width: 100%;
+        padding-inline: clamp(0.75rem, 4vw, 1.5rem);
+        box-sizing: border-box;
         text-align: center;
         font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
-        font-size: clamp(0.9rem, 1.5vw, 1.1rem); /* Made the text smaller as requested */
-        line-height: 1.8;
+        font-size: clamp(0.95rem, 0.88rem + 1.35vmin + 0.35vw, 1.38rem);
+        line-height: 1.72;
       }
 
       .poem-container p {
         margin: 0;
-        /* Let SplitterText handle the display */
       }
 
       @media (max-width: 768px) {
@@ -298,8 +375,9 @@ function Stylesheet() {
 
         .poem-container {
           margin-top: 4rem;
-          font-size: 1rem;
-          padding: 0 1rem;
+          font-size: clamp(0.9rem, 0.82rem + 1.1vmin, 1.14rem);
+          line-height: 1.68;
+          padding-inline: clamp(0.65rem, 3.5vw, 1rem);
         }
       }
     `}</style>
