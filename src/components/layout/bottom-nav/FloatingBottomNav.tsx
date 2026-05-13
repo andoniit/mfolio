@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { motion, useScroll, useTransform } from "motion/react";
+import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import gsap from "gsap";
 import {
   useEffect,
@@ -114,7 +114,9 @@ export default function FloatingBottomNav() {
   );
   const [previousLabel, setPreviousLabel] = useState<HomeSectionLabel | null>(null);
   const [isFlipping, setIsFlipping] = useState(false);
+  const [navIntroReady, setNavIntroReady] = useState(false);
 
+  const prefersReducedMotion = useReducedMotion();
   const { scrollYProgress } = useScroll();
   const scrollRingDashoffset = useTransform(
     scrollYProgress,
@@ -127,6 +129,47 @@ export default function FloatingBottomNav() {
     [activeHomeLabel, pathname]
   );
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
+
+  const pillExpandedWidthPx = useMemo(() => {
+    if (winW <= 0) return 360;
+    return winW < 769 ? Math.min(winW * 0.88, 320) : Math.min(winW * 0.3, 360);
+  }, [winW]);
+
+  const pillCollapsedWidthPx = useMemo(() => {
+    const base = winW < 769 ? 90 : 94;
+    if (winW <= 0) return base;
+    return Math.min(base, pillExpandedWidthPx);
+  }, [winW, pillExpandedWidthPx]);
+
+  useEffect(() => {
+    if (navIntroReady) return;
+    if (prefersReducedMotion) {
+      setNavIntroReady(true);
+      return;
+    }
+    if (!pathname || pathname.startsWith("/admin") || pathname === "/andon-copilot") {
+      return;
+    }
+    if (pathname !== "/") {
+      const id = requestAnimationFrame(() => setNavIntroReady(true));
+      return () => cancelAnimationFrame(id);
+    }
+    const onPreloaderExited = () => setNavIntroReady(true);
+    window.addEventListener("mf:preloader-exited", onPreloaderExited);
+    const fallback = window.setTimeout(onPreloaderExited, 3600);
+    return () => {
+      window.removeEventListener("mf:preloader-exited", onPreloaderExited);
+      window.clearTimeout(fallback);
+    };
+  }, [pathname, navIntroReady, prefersReducedMotion]);
+
+  useEffect(() => {
+    if (!navIntroReady) return;
+    const t = window.setTimeout(() => {
+      draggableInstanceRef.current?.update();
+    }, 800);
+    return () => window.clearTimeout(t);
+  }, [navIntroReady]);
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 769px)");
@@ -311,7 +354,7 @@ export default function FloatingBottomNav() {
       w: Math.ceil(r.width) + SNAP_ZONE_PAD_PX * 2,
       h: Math.ceil(r.height) + SNAP_ZONE_PAD_PX * 2,
     });
-  }, [isDesktop, locationLabel, shouldMarquee, winW, winH, isMobileMenuOpen]);
+  }, [isDesktop, locationLabel, shouldMarquee, winW, winH, isMobileMenuOpen, navIntroReady]);
 
   useLayoutEffect(() => {
     if (!isDesktop) return;
@@ -459,10 +502,23 @@ export default function FloatingBottomNav() {
         </div>
       ) : null}
 
-      <nav
+      <motion.nav
         ref={pillRef}
-        className={styles.pill}
+        className={`${styles.pill} ${
+          !navIntroReady && !prefersReducedMotion ? styles.pillIntroCollapsed : ""
+        }`}
         aria-label="Floating site navigation"
+        initial={false}
+        animate={{
+          width:
+            prefersReducedMotion || navIntroReady
+              ? pillExpandedWidthPx
+              : pillCollapsedWidthPx,
+        }}
+        transition={{
+          duration: prefersReducedMotion ? 0.01 : 0.72,
+          ease: [0.16, 1, 0.3, 1],
+        }}
       >
         <div
           id="floating-bottom-nav-mobile-menu"
@@ -593,7 +649,7 @@ export default function FloatingBottomNav() {
             </button>
           </div>
         </div>
-      </nav>
+      </motion.nav>
     </div>
   );
 }

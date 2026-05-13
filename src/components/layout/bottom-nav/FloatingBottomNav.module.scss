@@ -74,6 +74,12 @@
     background-color 0.32s ease;
 }
 
+/* Intro: narrow strip, pack row to the end so only the burger column shows. */
+.pillIntroCollapsed {
+  justify-content: flex-end;
+  overflow: hidden;
+}
+
 @media (hover: hover) {
   .pill:hover {
     padding: 15px 19px;
@@ -110,7 +116,7 @@
   min-width: 0;
   color: var(--mf-purple);
   font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
-  font-size: 1rem;
+  font-size: 1.22rem;
   font-weight: 500;
   line-height: 1;
   white-space: nowrap;
@@ -446,7 +452,7 @@
   .locationViewport {
     justify-content: center;
     text-align: center;
-    font-size: 0.8rem;
+    font-size: 1.1rem;
   }
 
   .divider {
