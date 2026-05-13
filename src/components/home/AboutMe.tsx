@@ -9,6 +9,7 @@ import {
   setScrollWordsFullyVisible,
 } from "@/lib/scrollWordReveal";
 import styles from "./AboutMe.module.scss";
+import PortfolioMonthTray from "./PortfolioMonthTray";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -63,6 +64,7 @@ export default function AboutMe() {
   const memojiVideoRef = useRef<HTMLVideoElement>(null);
   const bioParagraphRef = useRef<HTMLParagraphElement>(null);
   const bioAnimeContainerRef = useRef<HTMLDivElement>(null);
+  const portfolioBlockRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const updateTime = () => {
@@ -300,7 +302,8 @@ export default function AboutMe() {
         {/* Column 1 */}
         <div className={`${styles.column} ${styles.col1}`}>
           <div className={`${styles.bentoItem} ${styles.redBox1} bento-anim`}>
-            <div className={styles.portfolioBlock}>
+            <PortfolioMonthTray portfolioBlockRef={portfolioBlockRef} />
+            <div ref={portfolioBlockRef} className={styles.portfolioBlock}>
               <span className={styles.portfolioTitle}>portfolio</span>
               <span className={styles.portfolioYear} aria-live="polite">
                 {portfolioYear}

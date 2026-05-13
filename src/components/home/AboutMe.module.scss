@@ -320,6 +320,7 @@
 
 /* Col 1 — portfolio + counting year (~1.3× type, fluid vw/vh/min) */
 .redBox1 {
+  position: relative;
   background-color: #ef3e3e;
   flex: 0.35;
   align-items: flex-end;
@@ -329,6 +330,9 @@
 }
 
 .portfolioBlock {
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
