@@ -112,17 +112,17 @@ function buildWorld(
   width: number,
   height: number,
   rng: () => number,
-  obstacle: Obstacle | null,
+  _obstacle: Obstacle | null,
   monthLabels: string[]
 ) {
   World.clear(engine.world, false);
 
   const n = monthLabels.length;
-  const { pillW, pillH, gap, fontSize } = computeResponsivePillSize(width, height, n);
+  const { pillW, pillH, fontSize } = computeResponsivePillSize(width, height, n);
 
   /** Room below pill centers so rotated/chamfered hull stays inside the tile (overflow hidden). */
   const halfDiag = Math.hypot(pillW * 0.5, pillH * 0.5) * 1.12;
-  const bottomPad = clamp(halfDiag + 14, 26, height * 0.22);
+  const bottomPad = clamp(halfDiag + 8, 14, height * 0.075);
   const floorTop = height - bottomPad;
 
   const wallOpts = {
@@ -132,55 +132,71 @@ function buildWorld(
   };
 
   const hw = WALL_THICK / 2;
-  const bottom = Bodies.rectangle(
-    width / 2,
-    floorTop + hw,
-    width + WALL_THICK * 2,
-    WALL_THICK,
-    wallOpts
-  );
   const top = Bodies.rectangle(width / 2, -hw + 1, width * 2, WALL_THICK, wallOpts);
   const left = Bodies.rectangle(-hw + 1, height / 2, WALL_THICK, height * 3, wallOpts);
   const right = Bodies.rectangle(width + hw - 1, height / 2, WALL_THICK, height * 3, wallOpts);
 
-  const statics: Matter.Body[] = [bottom, top, left, right];
+  const statics: Matter.Body[] = [top, left, right];
 
-  if (obstacle) {
-    const cx = obstacle.x + obstacle.w / 2;
-    const cy = obstacle.y + obstacle.h / 2;
-    const chamferR = Math.min(12, obstacle.w, obstacle.h) * 0.12;
-    const block = Bodies.rectangle(cx, cy, obstacle.w, obstacle.h, {
-      isStatic: true,
-      friction: 0.2,
-      restitution: 0.45,
-      label: "portfolio-block",
-      chamfer: { radius: chamferR },
-    });
-    statics.push(block);
+  const segN = 16;
+  const totalW = width + WALL_THICK * 2;
+  const segW = totalW / segN;
+  for (let i = 0; i < segN; i++) {
+    const cx = segW * (i + 0.5);
+    const wave =
+      Math.sin(i * 0.62 + (rng() - 0.5) * 1.1) * 5 +
+      Math.sin(i * 0.31) * 2.5 +
+      (rng() - 0.5) * 2.5;
+    const cy = floorTop + hw + wave;
+    statics.push(
+      Bodies.rectangle(cx, cy, segW * 1.035, WALL_THICK, {
+        ...wallOpts,
+        friction: 0.12 + rng() * 0.08,
+        restitution: 0.1 + rng() * 0.12,
+      })
+    );
   }
 
+  /* Portfolio/year is DOM above the canvas — no static shelf or pills stack on the “2026” line. */
   World.add(engine.world, statics);
+
+  const padX = halfDiag + 10;
+  const minX = padX;
+  const maxX = width - padX;
+  const minY = pillH * 0.4 + 6;
+  const maxY = Math.max(minY + 24, floorTop - halfDiag - 10);
+  const minSep = Math.min(pillW, pillH) * 0.68;
+
+  const spawnCenters: { x: number; y: number }[] = [];
+
+  const pickSpawn = (): { x: number; y: number } => {
+    for (let attempt = 0; attempt < 70; attempt++) {
+      const x = minX + rng() * Math.max(0.001, maxX - minX);
+      const y = minY + rng() * Math.max(0.001, maxY - minY);
+      if (spawnCenters.every((p) => Math.hypot(p.x - x, p.y - y) >= minSep * (0.85 + rng() * 0.25))) {
+        spawnCenters.push({ x, y });
+        return { x, y };
+      }
+    }
+    const t = rng();
+    const x = minX + (0.2 + t * 0.6) * (maxX - minX) + (rng() - 0.5) * pillW * 0.35;
+    const y = minY + rng() * (maxY - minY);
+    spawnCenters.push({ x, y });
+    return { x, y };
+  };
 
   const pills: Matter.Body[] = [];
   for (let i = 0; i < n; i++) {
-    const spread = Math.max(0.12, (width - (pillW * n + gap * (n - 1))) / 2);
-    const x =
-      spread +
-      pillW / 2 +
-      i * (pillW + gap) +
-      (rng() - 0.5) * Math.min(10, width * 0.03);
-    const yLo = pillH * 0.55 + 8;
-    const yHi = Math.max(yLo + 10, floorTop - halfDiag - 16);
-    const y = yLo + rng() * Math.max(0, yHi - yLo);
+    const { x, y } = pickSpawn();
     const pill = Bodies.rectangle(x, y, pillW, pillH, {
-      friction: 0.08,
-      frictionAir: 0.028,
-      restitution: 0.32,
-      density: 0.0034,
+      friction: 0.055 + rng() * 0.09,
+      frictionAir: 0.022 + rng() * 0.014,
+      restitution: 0.22 + rng() * 0.2,
+      density: 0.0026 + rng() * 0.0014,
       label: "pill",
       chamfer: { radius: pillH * 0.42 },
-      angle: (rng() - 0.5) * 0.35,
-      angularVelocity: (rng() - 0.5) * 0.04,
+      angle: (rng() - 0.5) * Math.PI * 0.95,
+      angularVelocity: (rng() - 0.5) * 0.14,
     }) as PillBody;
     pill.monthLabel = monthLabels[i] ?? MONTH_SHORT[i % 12];
     pill.pillW = pillW;
@@ -189,6 +205,13 @@ function buildWorld(
     pills.push(pill);
   }
   World.add(engine.world, pills);
+
+  for (const pill of pills) {
+    Body.setVelocity(pill, {
+      x: (rng() - 0.5) * 4.2,
+      y: (rng() - 0.5) * 2.8,
+    });
+  }
 }
 
 type Props = {
@@ -225,27 +248,33 @@ export default function PortfolioMonthTray({ portfolioBlockRef }: Props) {
         canvas.style.height = `${height}px`;
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         ctx.clearRect(0, 0, width, height);
-        const { pillW, pillH, gap, fontSize } = computeResponsivePillSize(
+        const { pillW, pillH, fontSize } = computeResponsivePillSize(
           width,
           height,
           monthLabels.length
         );
-        const totalW = monthLabels.length * pillW + (monthLabels.length - 1) * gap;
-        let x = (width - totalW) / 2 + pillW / 2;
         const bottomPad = clamp(
-          Math.hypot(pillW * 0.5, pillH * 0.5) * 1.12 + 14,
-          26,
-          height * 0.22
+          Math.hypot(pillW * 0.5, pillH * 0.5) * 1.12 + 8,
+          14,
+          height * 0.075
         );
-        const y = height - bottomPad - pillH / 2;
+        const yBase = height - bottomPad - pillH / 2;
+        const padX = Math.hypot(pillW * 0.5, pillH * 0.5) * 1.12 + 10;
+        let rngS = 712003;
+        const nextR = () => {
+          rngS = (rngS * 16807) % 2147483647;
+          return (rngS - 1) / 2147483646;
+        };
         ctx.font = `600 ${fontSize}px var(--font-satoshi, ui-sans-serif, system-ui)`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        for (const label of monthLabels) {
-          ctx.beginPath();
+        monthLabels.forEach((label, i) => {
+          const x = padX + nextR() * Math.max(0.001, width - 2 * padX);
+          const y = yBase + nextR() * 14 - 7 + Math.sin(i * 1.4) * 3;
           const r = pillH * 0.45;
           const px = x - pillW / 2;
           const py = y - pillH / 2;
+          ctx.beginPath();
           if (typeof ctx.roundRect === "function") {
             ctx.roundRect(px, py, pillW, pillH, r);
           } else {
@@ -258,8 +287,7 @@ export default function PortfolioMonthTray({ portfolioBlockRef }: Props) {
           ctx.stroke();
           ctx.fillStyle = "#1a1a1a";
           ctx.fillText(label, x, y);
-          x += pillW + gap;
-        }
+        });
       };
       drawStatic();
       const ro = new ResizeObserver(drawStatic);
