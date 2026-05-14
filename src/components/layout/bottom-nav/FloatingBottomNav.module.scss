@@ -114,12 +114,22 @@
   justify-content: center;
   text-align: center;
   min-width: 0;
-  color: var(--mf-purple);
+  color: #111111;
   font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
   font-size: 1.22rem;
   font-weight: 500;
   line-height: 1;
   white-space: nowrap;
+  transition: color 0.22s ease, text-shadow 0.22s ease;
+}
+
+.pill[data-label-contrast="light"] .locationViewport {
+  color: #fafafa;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.pill[data-label-contrast="light"] .divider {
+  background: rgba(255, 255, 255, 0.78);
 }
 
 .locationFlipStage {

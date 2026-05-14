@@ -21,6 +21,58 @@ const SNAP_ZONE_PAD_PX = 14;
 const MENU_PROGRESS_RING_R = 23;
 const MENU_PROGRESS_CIRCUMFERENCE = 2 * Math.PI * MENU_PROGRESS_RING_R;
 
+function clampn(v: number, lo: number, hi: number) {
+  return Math.max(lo, Math.min(hi, v));
+}
+
+/** WCAG relative luminance for sRGB 0–255 channels. */
+function relLuminance255(r: number, g: number, b: number): number {
+  const lin = (c: number) => {
+    const v = c / 255;
+    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+  };
+  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+}
+
+function parseCssBackgroundRgba(
+  css: string
+): { r: number; g: number; b: number; a: number } | null {
+  const t = css.trim().toLowerCase();
+  if (
+    t === "transparent" ||
+    t === "rgba(0, 0, 0, 0)" ||
+    t === "rgba(0,0,0,0)" ||
+    t === ""
+  ) {
+    return null;
+  }
+  const m = t.match(/rgba?\s*\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)/);
+  if (!m) return null;
+  const a = m[4] !== undefined ? Number(m[4]) : 1;
+  return { r: Number(m[1]), g: Number(m[2]), b: Number(m[3]), a };
+}
+
+/** Approximate page luminance behind the glass (skip the pill in the hit-test stack). */
+function samplePageLuminanceBehindPill(pill: HTMLElement): number | null {
+  const r = pill.getBoundingClientRect();
+  const cx = clampn(r.left + r.width * 0.36, r.left + 14, r.right - 18);
+  const cy = clampn(r.top + r.height * 0.5, r.top + 2, r.bottom - 2);
+  const stack = document.elementsFromPoint(cx, cy);
+  for (const el of stack) {
+    if (!(el instanceof Element)) continue;
+    if (el === pill || pill.contains(el)) continue;
+    const st = getComputedStyle(el as HTMLElement);
+    const parsed = parseCssBackgroundRgba(st.backgroundColor);
+    if (!parsed || parsed.a < 0.04) continue;
+    const { r: R, g: G, b: B, a: A } = parsed;
+    const Rb = R * A + 255 * (1 - A);
+    const Gb = G * A + 255 * (1 - A);
+    const Bb = B * A + 255 * (1 - A);
+    return relLuminance255(Rb, Gb, Bb);
+  }
+  return null;
+}
+
 type DraggableInst = {
   kill: () => void;
   update: () => void;
@@ -115,6 +167,8 @@ export default function FloatingBottomNav() {
   const [previousLabel, setPreviousLabel] = useState<HomeSectionLabel | null>(null);
   const [isFlipping, setIsFlipping] = useState(false);
   const [navIntroReady, setNavIntroReady] = useState(false);
+  const [labelLightOnDarkBg, setLabelLightOnDarkBg] = useState(false);
+  const labelContrastBucketRef = useRef<"light" | "dark" | null>(null);
 
   const prefersReducedMotion = useReducedMotion();
   const { scrollYProgress } = useScroll();
@@ -170,6 +224,53 @@ export default function FloatingBottomNav() {
     }, 800);
     return () => window.clearTimeout(t);
   }, [navIntroReady]);
+
+  useEffect(() => {
+    if (!navIntroReady || isNearFooter) return;
+    const pill = pillRef.current;
+    if (!pill) return;
+
+    let raf = 0;
+    const tick = () => {
+      const el = pillRef.current;
+      if (!el) return;
+      const L = samplePageLuminanceBehindPill(el);
+      if (L === null) return;
+      const prev = labelContrastBucketRef.current;
+      let next: "light" | "dark";
+      if (L < 0.34) next = "light";
+      else if (L > 0.5) next = "dark";
+      else if (prev === "light" || prev === "dark") next = prev;
+      else next = L < 0.42 ? "light" : "dark";
+
+      if (next !== prev) {
+        labelContrastBucketRef.current = next;
+        setLabelLightOnDarkBg(next === "light");
+      }
+    };
+
+    const schedule = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(tick);
+    };
+
+    tick();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    document.addEventListener("pointerup", schedule, true);
+    const ro = new ResizeObserver(schedule);
+    ro.observe(pill);
+    const iv = window.setInterval(schedule, 900);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      document.removeEventListener("pointerup", schedule, true);
+      ro.disconnect();
+      window.clearInterval(iv);
+    };
+  }, [navIntroReady, isNearFooter, pathname, locationLabel, winW, winH]);
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 769px)");
@@ -504,6 +605,7 @@ export default function FloatingBottomNav() {
 
       <motion.nav
         ref={pillRef}
+        data-label-contrast={labelLightOnDarkBg ? "light" : "dark"}
         className={`${styles.pill} ${
           !navIntroReady && !prefersReducedMotion ? styles.pillIntroCollapsed : ""
         }`}
