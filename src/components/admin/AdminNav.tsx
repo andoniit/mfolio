@@ -24,6 +24,18 @@ const projectSubItems = [
   { href: "/admin/projects/trash", label: "Trash", icon: "trash" as const },
 ];
 
+const experienceSubItems = [
+  { href: "/admin/experience", label: "All experience", icon: "notes" as const },
+  { href: "/admin/experience/new", label: "New experience", icon: "plus" as const },
+  { href: "/admin/experience/trash", label: "Trash", icon: "trash" as const },
+];
+
+const volunteerSubItems = [
+  { href: "/admin/volunteer", label: "All roles", icon: "notes" as const },
+  { href: "/admin/volunteer/new", label: "New role", icon: "plus" as const },
+  { href: "/admin/volunteer/trash", label: "Trash", icon: "trash" as const },
+];
+
 function NavIcon({
   kind,
 }: {
@@ -34,7 +46,9 @@ function NavIcon({
     | "resume"
     | "grid"
     | "home"
-    | "mail";
+    | "mail"
+    | "briefcase"
+    | "heart";
 }) {
   const common = { width: 18, height: 18, viewBox: "0 0 24 24" };
   switch (kind) {
@@ -119,6 +133,27 @@ function NavIcon({
           <path d="M22 6l-10 7L2 6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       );
+    case "briefcase":
+      return (
+        <svg {...common} fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="3" y="7" width="18" height="13" rx="2" strokeLinejoin="round" />
+          <path
+            d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2M3 12h18"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      );
+    case "heart":
+      return (
+        <svg {...common} fill="none" stroke="currentColor" strokeWidth="2">
+          <path
+            d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      );
   }
 }
 
@@ -129,12 +164,16 @@ export default function AdminNav({ collapsed = false }: Props) {
   // State to handle the dropdown tab
   const [isBlogsOpen, setIsBlogsOpen] = useState(false);
   const [isProjectsOpen, setIsProjectsOpen] = useState(false);
+  const [isExperienceOpen, setIsExperienceOpen] = useState(false);
+  const [isVolunteerOpen, setIsVolunteerOpen] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
 
   useEffect(() => {
     if (pathname === "/admin") {
       setIsBlogsOpen(false);
       setIsProjectsOpen(false);
+      setIsExperienceOpen(false);
+      setIsVolunteerOpen(false);
       return;
     }
     const isInsideBlogs = blogSubItems.some(
@@ -148,6 +187,18 @@ export default function AdminNav({ collapsed = false }: Props) {
     );
     if (isInsideProjects) {
       setIsProjectsOpen(true);
+    }
+    const isInsideExperience = experienceSubItems.some(
+      (item) => pathname === item.href || pathname.startsWith(item.href + "/")
+    );
+    if (isInsideExperience) {
+      setIsExperienceOpen(true);
+    }
+    const isInsideVolunteer = volunteerSubItems.some(
+      (item) => pathname === item.href || pathname.startsWith(item.href + "/")
+    );
+    if (isInsideVolunteer) {
+      setIsVolunteerOpen(true);
     }
   }, [pathname]);
 
@@ -375,6 +426,172 @@ export default function AdminNav({ collapsed = false }: Props) {
                     const isActive =
                       pathname === item.href ||
                       (item.href !== "/admin/projects" && pathname.startsWith(item.href + "/"));
+
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={`group flex items-center gap-3 py-2 px-3 transition-all duration-200 rounded-lg ${
+                          isActive
+                            ? "bg-white/50 text-black shadow-sm border border-white/40"
+                            : "text-gray-500 border border-transparent hover:bg-white/30 hover:text-gray-900"
+                        }`}
+                      >
+                        <span
+                          className={`inline-flex items-center justify-center transition-transform duration-200 ${
+                            isActive ? "text-black scale-105" : "text-gray-400 group-hover:text-gray-700"
+                          } scale-90`}
+                        >
+                          <NavIcon kind={item.icon} />
+                        </span>
+                        <span
+                          className={`text-[13px] tracking-wide ${
+                            isActive ? "font-semibold" : "font-medium"
+                          }`}
+                        >
+                          {item.label}
+                        </span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Experience */}
+          <div className="flex flex-col">
+            <button
+              type="button"
+              onClick={() => setIsExperienceOpen(!isExperienceOpen)}
+              className={`group flex items-center justify-between py-2.5 transition-all duration-200 rounded-xl ${
+                isExperienceOpen
+                  ? "bg-white/60 text-black shadow-[0_4px_16px_rgba(0,0,0,0.03)] border border-white/60"
+                  : "text-gray-500 border border-transparent hover:bg-white/40 hover:text-gray-900"
+              } ${collapsed ? "justify-center px-0 w-11 h-11 mx-auto" : "px-3"}`}
+            >
+              <div className="flex items-center gap-3">
+                <span
+                  className={`inline-flex items-center justify-center transition-transform duration-200 ${
+                    isExperienceOpen ? "text-black scale-105" : "text-gray-400 group-hover:text-gray-700"
+                  }`}
+                >
+                  <NavIcon kind="briefcase" />
+                </span>
+                {!collapsed && (
+                  <span
+                    className={`text-[14px] tracking-wide ${isExperienceOpen ? "font-semibold" : "font-medium"}`}
+                  >
+                    Experience
+                  </span>
+                )}
+              </div>
+
+              {!collapsed && (
+                <span
+                  className={`transition-transform duration-300 text-gray-400 ${
+                    isExperienceOpen ? "rotate-180 text-black" : ""
+                  }`}
+                >
+                  <NavIcon kind="chevron" />
+                </span>
+              )}
+            </button>
+
+            <div
+              className={`grid transition-all duration-300 ease-in-out ${
+                isExperienceOpen && !collapsed ? "grid-rows-[1fr] opacity-100 mt-1" : "grid-rows-[0fr] opacity-0"
+              }`}
+            >
+              <div className="overflow-hidden flex flex-col gap-1 pl-4">
+                <div className="border-l border-white/60 pl-2 py-1 space-y-1">
+                  {experienceSubItems.map((item) => {
+                    const isActive =
+                      pathname === item.href ||
+                      (item.href !== "/admin/experience" && pathname.startsWith(item.href + "/"));
+
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={`group flex items-center gap-3 py-2 px-3 transition-all duration-200 rounded-lg ${
+                          isActive
+                            ? "bg-white/50 text-black shadow-sm border border-white/40"
+                            : "text-gray-500 border border-transparent hover:bg-white/30 hover:text-gray-900"
+                        }`}
+                      >
+                        <span
+                          className={`inline-flex items-center justify-center transition-transform duration-200 ${
+                            isActive ? "text-black scale-105" : "text-gray-400 group-hover:text-gray-700"
+                          } scale-90`}
+                        >
+                          <NavIcon kind={item.icon} />
+                        </span>
+                        <span
+                          className={`text-[13px] tracking-wide ${
+                            isActive ? "font-semibold" : "font-medium"
+                          }`}
+                        >
+                          {item.label}
+                        </span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Voluntary Roles */}
+          <div className="flex flex-col">
+            <button
+              type="button"
+              onClick={() => setIsVolunteerOpen(!isVolunteerOpen)}
+              className={`group flex items-center justify-between py-2.5 transition-all duration-200 rounded-xl ${
+                isVolunteerOpen
+                  ? "bg-white/60 text-black shadow-[0_4px_16px_rgba(0,0,0,0.03)] border border-white/60"
+                  : "text-gray-500 border border-transparent hover:bg-white/40 hover:text-gray-900"
+              } ${collapsed ? "justify-center px-0 w-11 h-11 mx-auto" : "px-3"}`}
+            >
+              <div className="flex items-center gap-3">
+                <span
+                  className={`inline-flex items-center justify-center transition-transform duration-200 ${
+                    isVolunteerOpen ? "text-black scale-105" : "text-gray-400 group-hover:text-gray-700"
+                  }`}
+                >
+                  <NavIcon kind="heart" />
+                </span>
+                {!collapsed && (
+                  <span
+                    className={`text-[14px] tracking-wide ${isVolunteerOpen ? "font-semibold" : "font-medium"}`}
+                  >
+                    Voluntary Roles
+                  </span>
+                )}
+              </div>
+
+              {!collapsed && (
+                <span
+                  className={`transition-transform duration-300 text-gray-400 ${
+                    isVolunteerOpen ? "rotate-180 text-black" : ""
+                  }`}
+                >
+                  <NavIcon kind="chevron" />
+                </span>
+              )}
+            </button>
+
+            <div
+              className={`grid transition-all duration-300 ease-in-out ${
+                isVolunteerOpen && !collapsed ? "grid-rows-[1fr] opacity-100 mt-1" : "grid-rows-[0fr] opacity-0"
+              }`}
+            >
+              <div className="overflow-hidden flex flex-col gap-1 pl-4">
+                <div className="border-l border-white/60 pl-2 py-1 space-y-1">
+                  {volunteerSubItems.map((item) => {
+                    const isActive =
+                      pathname === item.href ||
+                      (item.href !== "/admin/volunteer" && pathname.startsWith(item.href + "/"));
 
                     return (
                       <Link

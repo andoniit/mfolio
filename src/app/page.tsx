@@ -6,6 +6,7 @@ import styles from "./page.module.scss";
 import Hero from '../components/home/hero';
 import AboutMe from '../components/home/AboutMe';
 import Experience from "@/components/home/Experience";
+import VoluntaryRoles from "@/components/home/VoluntaryRoles";
 import Contact from "@/components/home/contact/Contact"
 import MyVision from "@/components/home/MyVision"
 import Preloader from "@/components/home/Preloader"
@@ -81,6 +82,7 @@ export default function Home() {
         <AboutMe />
       </div>
       <Experience />
+      <VoluntaryRoles />
       <MyVision/>
       <Projects/>
       <MySetups />

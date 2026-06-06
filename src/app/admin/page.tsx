@@ -9,12 +9,20 @@ export default async function AdminDashboardPage() {
     { count: postsTrashCount },
     { count: projectsCount },
     { count: projectsTrashCount },
+    { count: experiencesCount },
+    { count: experiencesTrashCount },
+    { count: volunteerCount },
+    { count: volunteerTrashCount },
     { count: newsletterActiveCount },
   ] = await Promise.all([
     supabaseAdmin.from("posts").select("*", { count: "exact", head: true }).is("trashed_at", null),
     supabaseAdmin.from("posts").select("*", { count: "exact", head: true }).not("trashed_at", "is", null),
     supabaseAdmin.from("projects").select("*", { count: "exact", head: true }).is("trashed_at", null),
     supabaseAdmin.from("projects").select("*", { count: "exact", head: true }).not("trashed_at", "is", null),
+    supabaseAdmin.from("experiences").select("*", { count: "exact", head: true }).eq("category", "work").is("trashed_at", null),
+    supabaseAdmin.from("experiences").select("*", { count: "exact", head: true }).eq("category", "work").not("trashed_at", "is", null),
+    supabaseAdmin.from("experiences").select("*", { count: "exact", head: true }).eq("category", "volunteer").is("trashed_at", null),
+    supabaseAdmin.from("experiences").select("*", { count: "exact", head: true }).eq("category", "volunteer").not("trashed_at", "is", null),
     supabaseAdmin
       .from("newsletter_subscribers")
       .select("*", { count: "exact", head: true })
@@ -39,6 +47,24 @@ export default async function AdminDashboardPage() {
       publicHref: "/projects",
       publicLabel: "View projects",
       meta: `${projectsCount ?? 0} active${projectsTrashCount ? ` · ${projectsTrashCount} in trash` : ""}`,
+    },
+    {
+      title: "Experience",
+      description: "Work history, roles, dates, and skills.",
+      href: "/admin/experience",
+      cta: "Manage experience",
+      publicHref: null as string | null,
+      publicLabel: null as string | null,
+      meta: `${experiencesCount ?? 0} active${experiencesTrashCount ? ` · ${experiencesTrashCount} in trash` : ""}`,
+    },
+    {
+      title: "Voluntary Roles",
+      description: "Volunteer and community roles, dates, and details.",
+      href: "/admin/volunteer",
+      cta: "Manage voluntary roles",
+      publicHref: null as string | null,
+      publicLabel: null as string | null,
+      meta: `${volunteerCount ?? 0} active${volunteerTrashCount ? ` · ${volunteerTrashCount} in trash` : ""}`,
     },
     {
       title: "Newsletter",

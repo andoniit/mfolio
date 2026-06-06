@@ -17,7 +17,7 @@ const formatDuration = (start, end, isCurrent) => {
   return startLabel || endLabel || "";
 };
 
-const Experience = () => {
+const VoluntaryRoles = () => {
   const [items, setItems] = useState([]);
 
   useEffect(() => {
@@ -25,30 +25,30 @@ const Experience = () => {
 
     const load = async () => {
       try {
-        const res = await fetch("/api/experiences?category=work");
+        const res = await fetch("/api/experiences?category=volunteer");
         if (!res.ok) return;
         const data = await res.json();
         if (!active || !Array.isArray(data)) return;
 
-        // Respect the backend order (sort_order → newest first); de-dupe by id.
+        // Respect the backend order (sort_order); de-dupe by id.
         const seen = new Set();
-        const ordered = data.filter((exp) => {
-          if (!exp?.id || seen.has(exp.id)) return false;
-          seen.add(exp.id);
+        const ordered = data.filter((role) => {
+          if (!role?.id || seen.has(role.id)) return false;
+          seen.add(role.id);
           return true;
         });
 
         setItems(
-          ordered.map((exp) => ({
-            id: exp.id,
-            company: exp.company,
-            companyUrl: exp.company_url,
-            role: exp.title,
-            dateLabel: formatDuration(exp.start_date, exp.end_date, exp.is_current),
-            location: exp.location,
-            type: exp.employment_type,
-            bullets: Array.isArray(exp.highlights) ? exp.highlights : [],
-            skills: Array.isArray(exp.skills) ? exp.skills : [],
+          ordered.map((role) => ({
+            id: role.id,
+            company: role.company,
+            companyUrl: role.company_url,
+            role: role.title,
+            dateLabel: formatDuration(role.start_date, role.end_date, role.is_current),
+            location: role.location,
+            type: role.employment_type,
+            description: role.description,
+            skills: Array.isArray(role.skills) ? role.skills : [],
           }))
         );
       } catch {
@@ -62,7 +62,16 @@ const Experience = () => {
     };
   }, []);
 
-  return <TimelineSection id="experience" title="Experience" bigTitle items={items} />;
+  return (
+    <TimelineSection
+      id="voluntary-roles"
+      title="Voluntary Roles"
+      eyebrow="Beyond work"
+      subtitle="Community and volunteer contributions alongside my professional experience."
+      items={items}
+      variant="grid"
+    />
+  );
 };
 
-export default Experience;
+export default VoluntaryRoles;
