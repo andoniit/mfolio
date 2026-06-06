@@ -57,6 +57,7 @@ export default function AboutMe() {
   const [time, setTime] = useState("8:55am");
   const [portfolioYear, setPortfolioYear] = useState(PORTFOLIO_YEAR_START);
   const [isAndon, setIsAndon] = useState(false);
+  const [introComplete, setIntroComplete] = useState(false);
   const legalNameRef = useRef<HTMLDivElement>(null);
   const andonNameRef = useRef<HTMLDivElement>(null);
   const nameTogglePrev = useRef<boolean | null>(null);
@@ -228,6 +229,8 @@ export default function AboutMe() {
         once: true,
       } as const;
 
+      const markIntroComplete = () => setIntroComplete(true);
+
       if (reducedMotion) {
         gsap.from(".bento-anim", {
           opacity: 0,
@@ -236,6 +239,7 @@ export default function AboutMe() {
           stagger: { each: 0.045, from: "start" },
           ease: "power2.out",
           scrollTrigger: scrollOpts,
+          onComplete: markIntroComplete,
         });
       } else {
         gsap.from(".bento-anim", {
@@ -249,6 +253,7 @@ export default function AboutMe() {
           stagger: { each: 0.068, from: "random" },
           transformOrigin: "50% 50%",
           scrollTrigger: scrollOpts,
+          onComplete: markIntroComplete,
         });
       }
 
@@ -302,7 +307,9 @@ export default function AboutMe() {
         {/* Column 1 */}
         <div className={`${styles.column} ${styles.col1}`}>
           <div className={`${styles.bentoItem} ${styles.redBox1} bento-anim`}>
-            <PortfolioMonthTray portfolioBlockRef={portfolioBlockRef} />
+            {introComplete ? (
+              <PortfolioMonthTray portfolioBlockRef={portfolioBlockRef} />
+            ) : null}
             <div ref={portfolioBlockRef} className={styles.portfolioBlock}>
               <span className={styles.portfolioTitle}>portfolio</span>
               <span className={styles.portfolioYear} aria-live="polite">
