@@ -8,7 +8,7 @@ import {
   type PublicRecommendation,
 } from "@/lib/recommendations";
 
-const PUBLIC_COLUMNS = "id, name, role, message, color, created_at";
+const PUBLIC_COLUMNS = "id, name, role, message, avatar_url, color, created_at";
 
 function missingConfig() {
   return (
@@ -70,6 +70,7 @@ export async function POST(req: Request) {
       name: parsed.value.name,
       role: parsed.value.role,
       message: parsed.value.message,
+      avatar_url: parsed.value.avatar_url,
       color: normalizeColor(DEFAULT_NOTE_COLOR),
       status: "pending",
     })

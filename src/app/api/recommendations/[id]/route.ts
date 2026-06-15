@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-import { isValidColor } from "@/lib/recommendations";
+import { isValidColor, isValidAvatarValue, AVATAR_URL_MAX_CHARS } from "@/lib/recommendations";
 
 type Patch = {
   status?: string;
   color?: string;
   sort_order?: number;
+  avatar_url?: string | null;
 };
 
 // Admin: approve / reject, recolor, or reorder a recommendation.
@@ -42,6 +43,19 @@ export async function PATCH(
 
   if (typeof body.sort_order === "number" && Number.isFinite(body.sort_order)) {
     update.sort_order = Math.trunc(body.sort_order);
+  }
+
+  if ("avatar_url" in body) {
+    const raw = typeof body.avatar_url === "string" ? body.avatar_url.trim() : "";
+    if (!raw) {
+      update.avatar_url = null; // clear it
+    } else if (!isValidAvatarValue(raw)) {
+      return NextResponse.json({ error: "Invalid image URL." }, { status: 400 });
+    } else if (raw.length > AVATAR_URL_MAX_CHARS) {
+      return NextResponse.json({ error: "Image is too large." }, { status: 400 });
+    } else {
+      update.avatar_url = raw;
+    }
   }
 
   if (Object.keys(update).length === 0) {

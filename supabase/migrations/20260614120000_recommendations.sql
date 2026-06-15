@@ -9,6 +9,7 @@ create table if not exists public.recommendations (
   name text not null,
   role text,
   message text not null,
+  avatar_url text,
   color text not null default 'yellow',
   status text not null default 'pending'
     check (status in ('pending', 'approved', 'rejected')),

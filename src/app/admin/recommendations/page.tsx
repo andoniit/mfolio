@@ -35,10 +35,15 @@ function NoteCard({ rec }: { rec: Recommendation }) {
         </p>
         <div className="flex items-center gap-2 pt-2 mt-auto border-t border-dashed" style={{ borderColor: palette.edge }}>
           <span
-            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-extrabold"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-extrabold overflow-hidden"
             style={{ background: palette.avatarBg }}
           >
-            {initialsFromName(rec.name)}
+            {rec.avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={rec.avatar_url} alt={rec.name} className="w-full h-full object-cover" />
+            ) : (
+              initialsFromName(rec.name)
+            )}
           </span>
           <span className="flex flex-col leading-tight min-w-0">
             <span className="font-bold text-sm truncate">{rec.name}</span>
@@ -53,7 +58,7 @@ function NoteCard({ rec }: { rec: Recommendation }) {
           <p>Submitted {formatDate(rec.created_at)}</p>
           {rec.approved_at && <p>Approved {formatDate(rec.approved_at)}</p>}
         </div>
-        <RecommendationActions id={rec.id} status={rec.status} color={rec.color} />
+        <RecommendationActions id={rec.id} status={rec.status} color={rec.color} avatarUrl={rec.avatar_url} />
       </div>
     </div>
   );
@@ -83,7 +88,7 @@ function Section({ title, hint, recs }: { title: string; hint: string; recs: Rec
 export default async function AdminRecommendationsPage() {
   const { data, error } = await supabaseAdmin
     .from("recommendations")
-    .select("id, name, role, message, color, status, sort_order, created_at, approved_at")
+    .select("id, name, role, message, avatar_url, color, status, sort_order, created_at, approved_at")
     .order("created_at", { ascending: false });
 
   if (error) {

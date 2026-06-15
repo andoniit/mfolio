@@ -9,6 +9,7 @@ import React, {
   useState,
 } from "react";
 import { AnimatePresence, motion, useAnimationControls } from "framer-motion";
+import AnimatedIntroText from "./AnimatedIntroText";
 import {
   NOTE_COLORS,
   initialsFromName,
@@ -17,6 +18,7 @@ import {
   NAME_MAX,
   ROLE_MAX,
   MESSAGE_MAX,
+  AVATAR_MAX_BYTES,
   type PublicRecommendation,
 } from "@/lib/recommendations";
 
@@ -53,6 +55,33 @@ function truncate(text: string, max: number): string {
   const slice = text.slice(0, max);
   const lastSpace = slice.lastIndexOf(" ");
   return slice.slice(0, lastSpace > 80 ? lastSpace : max).trimEnd() + "…";
+}
+
+/** Downscale + cover-crop a chosen photo into a small square JPEG data URL. */
+async function fileToAvatarDataUrl(file: File): Promise<string> {
+  const SIZE = 256;
+  const dataUrl = await new Promise<string>((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onload = () => resolve(fr.result as string);
+    fr.onerror = () => reject(new Error("read failed"));
+    fr.readAsDataURL(file);
+  });
+  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const im = new Image();
+    im.onload = () => resolve(im);
+    im.onerror = () => reject(new Error("decode failed"));
+    im.src = dataUrl;
+  });
+  const canvas = document.createElement("canvas");
+  canvas.width = SIZE;
+  canvas.height = SIZE;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return dataUrl;
+  const min = Math.min(img.width, img.height);
+  const sx = (img.width - min) / 2;
+  const sy = (img.height - min) / 2;
+  ctx.drawImage(img, sx, sy, min, min, 0, 0, SIZE, SIZE);
+  return canvas.toDataURL("image/jpeg", 0.82);
 }
 
 type StoredNote = PublicRecommendation & { localId?: string };
@@ -182,7 +211,14 @@ function StickyNote({
         </button>
       )}
         <div className="rec-author">
-          <span className="rec-avatar">{initialsFromName(note.name)}</span>
+          <span className="rec-avatar">
+            {note.avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img className="rec-avatar-img" src={note.avatar_url} alt={note.name} draggable={false} />
+            ) : (
+              initialsFromName(note.name)
+            )}
+          </span>
           <span className="rec-meta">
             <span className="rec-name">{note.name}</span>
             {note.role && <span className="rec-role">{note.role}</span>}
@@ -227,8 +263,30 @@ export default function Recommendations() {
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
   const [message, setMessage] = useState("");
+  const [avatar, setAvatar] = useState<string | null>(null);
+  const [avatarErr, setAvatarErr] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-selecting the same file
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setAvatarErr("Please choose an image file.");
+      return;
+    }
+    if (file.size > AVATAR_MAX_BYTES) {
+      setAvatarErr("Image must be 500KB or smaller.");
+      return;
+    }
+    try {
+      setAvatar(await fileToAvatarDataUrl(file));
+      setAvatarErr(null);
+    } catch {
+      setAvatarErr("Could not read that image. Try another.");
+    }
+  };
 
   // Initial load: approved from API + my pending notes from this browser.
   useEffect(() => {
@@ -270,6 +328,8 @@ export default function Recommendations() {
     setName("");
     setRole("");
     setMessage("");
+    setAvatar(null);
+    setAvatarErr(null);
     setFeedback(null);
   };
 
@@ -305,6 +365,7 @@ export default function Recommendations() {
       return;
     }
     const cleanRole = role.trim() || null;
+    const cleanAvatar = avatar;
 
     // Optimistic: show the note on the wall instantly with a temporary id.
     const localId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
@@ -314,6 +375,7 @@ export default function Recommendations() {
       name: cleanName,
       role: cleanRole,
       message: cleanMessage,
+      avatar_url: cleanAvatar,
       color: DEFAULT_NOTE_COLOR,
       created_at: new Date().toISOString(),
       status: "pending",
@@ -338,7 +400,7 @@ export default function Recommendations() {
         const res = await fetch("/api/recommendations", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: cleanName, role: cleanRole, message: cleanMessage }),
+          body: JSON.stringify({ name: cleanName, role: cleanRole, message: cleanMessage, avatar_url: cleanAvatar }),
         });
         const result = await res.json().catch(() => null);
         if (!res.ok || !result?.ok) throw new Error(result?.message || "save failed");
@@ -386,7 +448,9 @@ export default function Recommendations() {
         >
           <div>
             <motion.p className="rec-eyebrow" variants={headItem}>Kind words</motion.p>
-            <motion.h2 className="rec-title" variants={headItem}>Recommendations</motion.h2>
+            <h2 className="rec-title">
+              <AnimatedIntroText>Recommendations</AnimatedIntroText>
+            </h2>
             <motion.p className="rec-sub" variants={headItem}>
               Worked with me, learned with me, or just have something nice to say? Pin a note to the wall —
               drag them around too.
@@ -460,6 +524,37 @@ export default function Recommendations() {
               <p className="rec-modal-sub">It appears on the wall for you right away, and goes public once I approve it.</p>
 
               <form className="rec-form" onSubmit={handleSubmit}>
+              <div className="rec-avatar-field">
+                <span className="rec-avatar-preview">
+                  {avatar ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={avatar} alt="Your photo" />
+                  ) : name.trim() ? (
+                    initialsFromName(name)
+                  ) : (
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                  )}
+                </span>
+                <div className="rec-avatar-controls">
+                  <div className="rec-avatar-buttons">
+                    <label className="rec-upload-btn">
+                      {avatar ? "Change photo" : "Add photo"}
+                      <input type="file" accept="image/*" onChange={handleAvatarChange} hidden />
+                    </label>
+                    {avatar && (
+                      <button type="button" className="rec-remove-btn" onClick={() => setAvatar(null)}>
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                  <span className="rec-upload-hint">Optional · JPG/PNG · 500KB max</span>
+                  {avatarErr && <span className="rec-upload-err">{avatarErr}</span>}
+                </div>
+              </div>
+
               <label className="rec-field">
                 <span className="rec-label">Your name<span className="rec-req">*</span></span>
                 <input
@@ -544,6 +639,14 @@ function RecStyles() {
         pointer-events: none;
       }
 
+      @font-face {
+        font-family: 'Coolvetica';
+        src: url('/fonts/Coolvetica Rg.otf') format('opentype');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+      }
+
       .rec-inner { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; }
 
       .rec-head {
@@ -564,12 +667,13 @@ function RecStyles() {
         margin: 0 0 0.5rem;
       }
       .rec-title {
-        font-size: clamp(2.2rem, 4vw, 3.2rem);
-        font-weight: 800;
-        letter-spacing: -0.03em;
+        font-size: 8.5rem;
+        font-family: 'Coolvetica', sans-serif;
+        font-weight: inherit;
+        letter-spacing: 0.05em;
         color: var(--mf-dark, #343434);
+        line-height: 1;
         margin: 0;
-        line-height: 1.05;
       }
       .rec-sub {
         font-size: 1.02rem;
@@ -719,6 +823,16 @@ function RecStyles() {
         font-size: 0.85rem;
         font-weight: 800;
         letter-spacing: 0.02em;
+        overflow: hidden;
+      }
+      .rec-avatar-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+        display: block;
+        user-select: none;
+        -webkit-user-drag: none;
       }
       .rec-meta { display: flex; flex-direction: column; min-width: 0; }
       .rec-name { font-weight: 700; font-size: 0.95rem; line-height: 1.2; }
@@ -775,6 +889,61 @@ function RecStyles() {
       .rec-modal-sub { font-size: 0.9rem; color: #777; margin: 0 0 1.5rem; line-height: 1.45; }
 
       .rec-form { display: flex; flex-direction: column; gap: 1.1rem; }
+
+      .rec-avatar-field {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      .rec-avatar-preview {
+        flex-shrink: 0;
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: #f0ede0;
+        border: 1px dashed #d7d0ba;
+        color: #9a937a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        font-weight: 800;
+        overflow: hidden;
+      }
+      .rec-avatar-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .rec-avatar-controls { display: flex; flex-direction: column; gap: 0.35rem; }
+      .rec-avatar-buttons { display: flex; align-items: center; gap: 0.6rem; }
+      .rec-upload-btn {
+        display: inline-flex;
+        align-items: center;
+        cursor: pointer;
+        background: var(--mf-dark, #343434);
+        color: #fff;
+        font-size: 0.82rem;
+        font-weight: 600;
+        padding: 0.45rem 0.9rem;
+        border-radius: 99px;
+      }
+      .rec-upload-btn:hover { opacity: 0.9; }
+      .rec-remove-btn {
+        background: none;
+        border: none;
+        padding: 0;
+        font: inherit;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--mf-red, #ea3e3e);
+        cursor: pointer;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+      .rec-upload-hint { font-size: 0.74rem; color: #aaa; }
+      .rec-upload-err { font-size: 0.78rem; color: var(--mf-red, #dc2626); font-weight: 500; }
       .rec-field { display: flex; flex-direction: column; gap: 0.4rem; }
       .rec-label {
         font-size: 0.82rem;
@@ -827,6 +996,7 @@ function RecStyles() {
       @media (max-width: 640px) {
         .rec-section { padding: 4.5rem 1.25rem 5.5rem; min-height: auto; }
         .rec-head { flex-direction: column; align-items: flex-start; gap: 1.25rem; }
+        .rec-title { font-size: 5rem; line-height: 0.92; }
         .rec-add-btn { width: 100%; justify-content: center; }
         .rec-wall { grid-template-columns: 1fr; gap: 1.75rem; min-height: auto; }
       }

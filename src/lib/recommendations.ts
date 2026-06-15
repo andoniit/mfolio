@@ -7,6 +7,7 @@ export type Recommendation = {
   name: string;
   role: string | null;
   message: string;
+  avatar_url: string | null;
   color: RecommendationColor;
   status: RecommendationStatus;
   sort_order: number;
@@ -17,7 +18,7 @@ export type Recommendation = {
 /** Public-facing shape (what the home page wall needs). */
 export type PublicRecommendation = Pick<
   Recommendation,
-  "id" | "name" | "role" | "message" | "color" | "created_at"
+  "id" | "name" | "role" | "message" | "avatar_url" | "color" | "created_at"
 > & { status?: RecommendationStatus };
 
 // Sticky-note palette built from the site's brand colors
@@ -48,10 +49,21 @@ export const NAME_MAX = 80;
 export const ROLE_MAX = 100;
 export const MESSAGE_MAX = 600;
 
+/** Max raw upload size for a public avatar photo. */
+export const AVATAR_MAX_BYTES = 500 * 1024; // 500 KB
+/** Upper bound on the stored avatar string (data URL or hosted link). */
+export const AVATAR_URL_MAX_CHARS = 800_000;
+
+/** Accept a hosted http(s) image link or an inline `data:image/...` URL. */
+export function isValidAvatarValue(value: string): boolean {
+  return value.startsWith("data:image/") || /^https?:\/\//i.test(value);
+}
+
 export type RecommendationInput = {
   name: string;
   role: string | null;
   message: string;
+  avatar_url: string | null;
 };
 
 /**
@@ -78,7 +90,19 @@ export function parseRecommendationInput(body: unknown):
   const rawRole = typeof b.role === "string" ? b.role.trim() : "";
   const role = rawRole ? rawRole.slice(0, ROLE_MAX) : null;
 
-  return { ok: true, value: { name: name.slice(0, NAME_MAX), message, role } };
+  const rawAvatar = typeof b.avatar_url === "string" ? b.avatar_url.trim() : "";
+  let avatar_url: string | null = null;
+  if (rawAvatar) {
+    if (!isValidAvatarValue(rawAvatar)) {
+      return { ok: false, error: "That image doesn't look valid." };
+    }
+    if (rawAvatar.length > AVATAR_URL_MAX_CHARS) {
+      return { ok: false, error: "Image is too large. Please keep it under 500KB." };
+    }
+    avatar_url = rawAvatar;
+  }
+
+  return { ok: true, value: { name: name.slice(0, NAME_MAX), message, role, avatar_url } };
 }
 
 /** Initials for the avatar bubble, e.g. "Sarah Chen" -> "SC". */
