@@ -14,6 +14,8 @@ export default async function AdminDashboardPage() {
     { count: volunteerCount },
     { count: volunteerTrashCount },
     { count: newsletterActiveCount },
+    { count: recommendationsPendingCount },
+    { count: recommendationsApprovedCount },
   ] = await Promise.all([
     supabaseAdmin.from("posts").select("*", { count: "exact", head: true }).is("trashed_at", null),
     supabaseAdmin.from("posts").select("*", { count: "exact", head: true }).not("trashed_at", "is", null),
@@ -27,6 +29,14 @@ export default async function AdminDashboardPage() {
       .from("newsletter_subscribers")
       .select("*", { count: "exact", head: true })
       .eq("status", "active"),
+    supabaseAdmin
+      .from("recommendations")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "pending"),
+    supabaseAdmin
+      .from("recommendations")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "approved"),
   ]);
 
   const cards = [
@@ -74,6 +84,17 @@ export default async function AdminDashboardPage() {
       publicHref: null as string | null,
       publicLabel: null as string | null,
       meta: `${newsletterActiveCount ?? 0} active`,
+    },
+    {
+      title: "Recommendations",
+      description: "Visitor sticky notes for the home page. Approve to publish.",
+      href: "/admin/recommendations",
+      cta: "Manage recommendations",
+      publicHref: "/#recommendations",
+      publicLabel: "View on site",
+      meta: `${recommendationsApprovedCount ?? 0} published${
+        recommendationsPendingCount ? ` · ${recommendationsPendingCount} pending review` : ""
+      }`,
     },
     {
       title: "Resume",

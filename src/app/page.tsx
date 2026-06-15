@@ -13,6 +13,7 @@ import Preloader from "@/components/home/Preloader"
 import { AnimatePresence } from 'framer-motion';
 import Projects from "@/components/home/Projects/Project"
 import MySetups from "@/components/home/MySetups"
+import Recommendations from "@/components/home/Recommendations"
 import Slideshow from "@/components/home/SliderSection"
 import Header from "@/components/layout/header/header"
 
@@ -86,6 +87,7 @@ export default function Home() {
       <MyVision/>
       <Projects/>
       <MySetups />
+      <Recommendations />
       <Slideshow/>
     </main>
     

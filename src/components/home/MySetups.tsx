@@ -426,6 +426,9 @@ function MdsStyles() {
         line-height: 1.6;
         color: #555;
         margin: 0;
+        /* Reserve space for the longest caption so switching slides doesn't
+           change the section height and shove the content below it around. */
+        min-height: calc(1.05rem * 1.6 * 6);
       }
 
       .mds-controls-group {
@@ -573,6 +576,12 @@ function MdsStyles() {
         
         .mds-text-container {
           order: 2; /* Move description text below controls */
+        }
+
+        /* Narrower column wraps to more lines — reserve a bit more so the
+           section height stays stable across slides. */
+        .mds-setup-desc {
+          min-height: calc(1.05rem * 1.6 * 9);
         }
 
         .mds-dots {

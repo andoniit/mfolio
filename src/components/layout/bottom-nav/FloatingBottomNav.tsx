@@ -103,6 +103,7 @@ const HOME_SECTIONS = [
   { id: "my-vision", label: "My Vision" },
   { id: "featured-projects", label: "Featured Projects" },
   { id: "my-desk-setup", label: "My Desk Setup" },
+  { id: "recommendations", label: "Recommendations" },
 ] as const;
 
 type HomeSectionLabel = (typeof HOME_SECTIONS)[number]["label"];
