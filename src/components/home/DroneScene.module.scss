@@ -1,0 +1,17 @@
+.droneCanvas {
+  width: 100%;
+  height: 100%;
+  /* Re-enable interaction (the landing overlay is pointer-events:none). */
+  pointer-events: auto;
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+  }
+}

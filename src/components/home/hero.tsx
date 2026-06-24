@@ -11,6 +11,7 @@ import Picture3 from '../../../public/images/4.jpg';
 import Picture5 from '../../../public/images/25.jpg';
 import Picture7 from '../../../public/images/7.jpg';
 import AnimatedIntroText from './AnimatedIntroText';
+import DroneScene from './DroneScene';
 
 
 export default function Hero() {
@@ -36,6 +37,12 @@ export default function Hero() {
 
   // Opacity for other images to appear on scroll
   const opacityOthers = useTransform(scrollYProgress, [0.02, 0.08], [0, 1]);
+
+  // Drone "fly out" — zooms up and off to the right as the landing scrolls away.
+  const droneFlyX = useTransform(scrollYProgress, [0, 0.06], [0, 440]);
+  const droneFlyY = useTransform(scrollYProgress, [0, 0.06], [0, -560]);
+  const droneFlyScale = useTransform(scrollYProgress, [0, 0.06], [1, 0.3]);
+  const droneFlyRotate = useTransform(scrollYProgress, [0, 0.06], [0, 35]);
 
  // Seattle local time (without seconds)
 const [seattleTime, setSeattleTime] = useState("");
@@ -114,13 +121,20 @@ useEffect(() => {
             </div>
           </div>
           
-          <motion.div 
-            className={styles.purpleStar}
-            initial={{ opacity: 0, x: 100, rotate: 90 }}
-            animate={preloaderFinished ? { opacity: 1, x: 0, rotate: 0 } : { opacity: 0, x: 100, rotate: 90 }}
-            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+          {/* Interactive Three.js drone — sits where the star was. Outer div flies
+              it out on scroll; inner div flies it in on load. */}
+          <motion.div
+            className={styles.droneWrap}
+            style={{ x: droneFlyX, y: droneFlyY, scale: droneFlyScale, rotate: droneFlyRotate }}
           >
-            <Image src="/icons/star.png" alt="Star graphic" fill style={{ objectFit: 'contain' }} />
+            <motion.div
+              className={styles.droneInner}
+              initial={{ opacity: 0, x: 140, y: -40, scale: 0.6 }}
+              animate={preloaderFinished ? { opacity: 1, x: 0, y: 0, scale: 1 } : { opacity: 0, x: 140, y: -40, scale: 0.6 }}
+              transition={{ duration: 1.3, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+            >
+              <DroneScene />
+            </motion.div>
           </motion.div>
 
           <div className={styles.bottomLeftInfo}>
