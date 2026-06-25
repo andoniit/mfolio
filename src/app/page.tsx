@@ -12,6 +12,7 @@ import MyVision from "@/components/home/MyVision"
 import Preloader from "@/components/home/Preloader"
 import { AnimatePresence } from 'framer-motion';
 import Projects from "@/components/home/Projects/Project"
+import PolaroidSection from "@/components/home/PolaroidSection"
 import MySetups from "@/components/home/MySetups"
 import Recommendations from "@/components/home/Recommendations"
 import Slideshow from "@/components/home/SliderSection"
@@ -82,6 +83,7 @@ export default function Home() {
         <Hero />
         <AboutMe />
       </div>
+      <PolaroidSection />
       <Experience />
       <VoluntaryRoles />
       <MyVision/>

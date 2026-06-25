@@ -1,0 +1,171 @@
+.section {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+/* Three big faint gray lines behind the camera, each looping continuously. */
+.bgText {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 0.5vh;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+  overflow: hidden;
+}
+
+.bgLine {
+  width: max-content;
+  white-space: nowrap;
+  font-family: 'Coolvetica', sans-serif;
+  font-weight: 400;
+  font-size: 11vw;
+  line-height: 1.02;
+  letter-spacing: 0.02em;
+  color: #ededed;
+  will-change: transform;
+  /* Base = scroll left. Even rows flip to scroll right via .bgLineRight.
+     All lines share this duration so every row moves at the same speed. */
+  animation: bgLoop 38s linear infinite;
+}
+
+/* Rows 0 & 2 scroll right (reverse of the left loop), same speed. */
+.bgLineRight {
+  animation-direction: reverse;
+}
+
+@keyframes bgLoop {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    /* Half the content width — with identical repeats this wraps seamlessly. */
+    transform: translateX(-50%);
+  }
+}
+
+/* The interactive camera, centered above the text. */
+.cameraStage {
+  position: relative;
+  z-index: 1;
+  width: min(60vw, 640px);
+  height: min(70vh, 640px);
+}
+
+.hint {
+  position: absolute;
+  top: 9vh;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  z-index: 2;
+  font-family: 'Coolvetica', sans-serif;
+  letter-spacing: 0.08em;
+  font-size: 0.95rem;
+  color: #9a9a9a;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+/* Captured-photo preview with actions. */
+.result {
+  position: absolute;
+  bottom: 5vh;
+  right: 4vw;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  animation: resultIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes resultIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px) rotate(-3deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(0);
+  }
+}
+
+.resultPhoto {
+  width: clamp(140px, 16vw, 220px);
+  height: auto;
+  display: block;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
+  transform: rotate(-2deg);
+}
+
+.resultActions {
+  display: flex;
+  gap: 10px;
+}
+
+.downloadBtn,
+.retakeBtn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 999px;
+  font-family: 'Coolvetica', sans-serif;
+  letter-spacing: 0.06em;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.18s ease, background 0.18s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.downloadBtn {
+  background: #141414;
+  color: #fff;
+
+  &:hover {
+    background: #000;
+  }
+}
+
+.retakeBtn {
+  background: #ececec;
+  color: #141414;
+
+  &:hover {
+    background: #e0e0e0;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .bgLine {
+    font-size: 17vw;
+  }
+  .cameraStage {
+    width: 88vw;
+    height: 60vh;
+  }
+  .hint {
+    font-size: 0.8rem;
+    top: 7vh;
+  }
+  .result {
+    right: 50%;
+    transform: translateX(50%);
+    bottom: 4vh;
+  }
+}

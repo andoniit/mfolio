@@ -1,0 +1,435 @@
+"use client";
+
+import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import styles from "./PolaroidScene.module.scss";
+
+/**
+ * Interactive Three.js Polaroid camera.
+ *
+ * - The camera body tilts toward the cursor.
+ * - Clicking the camera asks for webcam access (browser permission prompt),
+ *   grabs a single frame, applies it to the photo, and ejects the Polaroid out
+ *   of the slot. Clicking again retakes the shot.
+ *
+ * Loads `/public/polaroid.glb`. All resources are disposed on unmount.
+ */
+
+// How far the photo is tucked up inside the body before a shot, and how far it
+// slides down past the slot once ejected (in model-local units, pre-scale).
+const TUCK_OFFSET = 0.55;
+const EJECT_OFFSET = -0.5;
+const EJECT_DURATION = 1.6; // seconds
+
+/** Loads the brand logo once and caches it for the download composition. */
+let logoImg: HTMLImageElement | null = null;
+let logoPromise: Promise<HTMLImageElement | null> | null = null;
+function loadLogo(): Promise<HTMLImageElement | null> {
+  if (logoImg) return Promise.resolve(logoImg);
+  if (!logoPromise) {
+    logoPromise = new Promise((resolve) => {
+      const im = new Image();
+      im.crossOrigin = "anonymous";
+      im.onload = () => {
+        logoImg = im;
+        resolve(im);
+      };
+      im.onerror = () => resolve(null);
+      im.src = "/logo/anikap.svg";
+    });
+  }
+  return logoPromise;
+}
+
+/** Builds a classic Polaroid-framed PNG (white border, taller bottom) from a
+ *  square source canvas. The bottom caption shows the date with the brand logo
+ *  on the right. Returns a data URL. */
+async function composePolaroid(src: HTMLCanvasElement): Promise<string> {
+  const side = 56;
+  const img = 620;
+  const top = 56;
+  const bottom = 168; // taller bottom lip, like a real Polaroid
+  const out = document.createElement("canvas");
+  out.width = side * 2 + img;
+  out.height = top + img + bottom;
+  const ctx = out.getContext("2d")!;
+
+  // Paper.
+  ctx.fillStyle = "#fbfbf6";
+  ctx.fillRect(0, 0, out.width, out.height);
+
+  // Thin dark frame, then the photo.
+  ctx.fillStyle = "#141414";
+  ctx.fillRect(side - 3, top - 3, img + 6, img + 6);
+  ctx.drawImage(src, side, top, img, img);
+
+  // Caption row: date on the left, brand logo on the right.
+  const capY = top + img + bottom / 2;
+  const date = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  const logo = await loadLogo();
+
+  if (logo) {
+    const lh = 92;
+    const lw = lh * (logo.width / logo.height || 1.03);
+    const lx = out.width - side - lw;
+    ctx.drawImage(logo, lx, capY - lh / 2, lw, lh);
+
+    ctx.fillStyle = "#444";
+    ctx.textAlign = "right";
+    ctx.font = "italic 30px Georgia, 'Times New Roman', serif";
+    ctx.fillText(date, lx - 26, capY + 10);
+  } else {
+    // Fallback if the logo can't load: centered date only.
+    ctx.fillStyle = "#444";
+    ctx.textAlign = "center";
+    ctx.font = "italic 30px Georgia, 'Times New Roman', serif";
+    ctx.fillText(date, out.width / 2, capY + 10);
+  }
+
+  return out.toDataURL("image/png");
+}
+
+export interface PolaroidSceneProps {
+  /** Called with a Polaroid-framed PNG data URL each time a photo is taken. */
+  onCapture?: (dataUrl: string) => void;
+}
+
+export interface PolaroidSceneHandle {
+  /** Re-trigger the capture flow (requests webcam, shoots, re-ejects). */
+  retake: () => void;
+}
+
+const PolaroidScene = forwardRef<PolaroidSceneHandle, PolaroidSceneProps>(
+  function PolaroidScene({ onCapture }, ref) {
+  const mountRef = useRef<HTMLDivElement>(null);
+  const flashRef = useRef<HTMLDivElement>(null);
+  const onCaptureRef = useRef(onCapture);
+  onCaptureRef.current = onCapture;
+  const captureFnRef = useRef<() => void>(() => {});
+  useImperativeHandle(ref, () => ({ retake: () => captureFnRef.current?.() }), []);
+
+  useEffect(() => {
+    const mount = mountRef.current;
+    if (!mount) return;
+
+    // --- Renderer ---------------------------------------------------------
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    mount.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+
+    // Camera framing. `frameRadius` is the worst-case distance from the model's
+    // pivot origin to any point it can occupy (body + fully-ejected photo). We
+    // fit the tighter of the vertical/horizontal FOV, so every edge stays
+    // on-screen at any tilt and any container aspect ratio.
+    let frameRadius = 2;
+    const frameCamera = () => {
+      const vfov = THREE.MathUtils.degToRad(camera.fov);
+      const hfov = 2 * Math.atan(Math.tan(vfov / 2) * camera.aspect);
+      const fitFov = Math.min(vfov, hfov);
+      const dist = (frameRadius / Math.sin(fitFov / 2)) * 1.12;
+      camera.position.set(0, 0, dist);
+      camera.near = Math.max(0.1, dist - frameRadius * 2);
+      camera.far = dist + frameRadius * 2;
+      camera.lookAt(0, 0, 0);
+      camera.updateProjectionMatrix();
+    };
+
+    // Self-healing size sync (handles late layout / resize).
+    let lastW = 0;
+    let lastH = 0;
+    const syncSize = () => {
+      const w = mount.clientWidth;
+      const h = mount.clientHeight;
+      if (w === 0 || h === 0 || (w === lastW && h === lastH)) return;
+      lastW = w;
+      lastH = h;
+      camera.aspect = w / h;
+      frameCamera();
+      renderer.setSize(w, h);
+    };
+
+    // --- Lighting ---------------------------------------------------------
+    scene.add(new THREE.HemisphereLight(0xffffff, 0xbfc4d4, 1.25));
+    const keyLight = new THREE.DirectionalLight(0xffffff, 2.0);
+    keyLight.position.set(3, 5, 6);
+    scene.add(keyLight);
+    const fillLight = new THREE.DirectionalLight(0xdfe6ff, 1.0);
+    fillLight.position.set(-5, 1, 3);
+    scene.add(fillLight);
+
+    // --- Pivot for mouse tilt --------------------------------------------
+    const pivot = new THREE.Group();
+    scene.add(pivot);
+
+    // --- State ------------------------------------------------------------
+    const pointer = { x: 0, y: 0 };
+    let raf = 0;
+    let polaroid: THREE.Object3D | null = null;
+    let photoImage: THREE.Mesh | null = null;
+    let shutterButton: THREE.Object3D | null = null;
+    let shutterRestY = 0;
+    let polaroidRestY = 0; // authored Y of the photo (its "ejected" resting spot)
+    let ejecting = false;
+    let ejectT = 0; // 0..1
+    let pressT = 0; // shutter press timer (seconds remaining)
+    let busy = false; // a capture is in flight
+    const clickableMeshes: THREE.Object3D[] = [];
+
+    // Hidden <video> we draw a single frame from.
+    const video = document.createElement("video");
+    video.muted = true;
+    video.playsInline = true;
+    video.setAttribute("playsinline", "");
+
+    const raycaster = new THREE.Raycaster();
+    const ndc = new THREE.Vector2();
+
+    // --- Load model -------------------------------------------------------
+    const loader = new GLTFLoader();
+    loader.load(
+      "/polaroid.glb",
+      (gltf) => {
+        const model = gltf.scene;
+
+        // Drop a stray default "Cube" backdrop if the export left one in.
+        const cube = model.getObjectByName("Cube");
+        if (cube) cube.visible = false;
+
+        // Scale so the camera body reads at a consistent size.
+        const body = model.getObjectByName("CameraBody_Group") ?? model;
+        const bodyBox = new THREE.Box3().setFromObject(body);
+        const bodySize = bodyBox.getSize(new THREE.Vector3());
+        const maxDim = Math.max(bodySize.x, bodySize.y, bodySize.z) || 1;
+        const targetSize = 3.0;
+        model.scale.setScalar(targetSize / maxDim);
+
+        // Recenter the body at the origin (post-scale).
+        const box = new THREE.Box3().setFromObject(body);
+        const center = box.getCenter(new THREE.Vector3());
+        model.position.sub(center);
+
+        pivot.add(model);
+
+        // Grab the parts we animate / texture. NOTE: the node named "Polaroid"
+        // is the whole assembly (body + photo); the ejectable photo is "PhotoCard".
+        polaroid = model.getObjectByName("PhotoCard");
+        photoImage = model.getObjectByName("PhotoImage") as THREE.Mesh | null;
+        shutterButton = model.getObjectByName("ClickButton");
+        if (shutterButton) shutterRestY = shutterButton.position.y;
+
+        if (polaroid) {
+          polaroidRestY = polaroid.position.y;
+          // Start tucked up inside the body and hidden until the first shot.
+          polaroid.position.y = polaroidRestY + TUCK_OFFSET;
+          polaroid.visible = false;
+        }
+
+        // Everything in the model is clickable (whole camera triggers a shot).
+        model.traverse((o) => {
+          if ((o as THREE.Mesh).isMesh && o.visible) clickableMeshes.push(o);
+        });
+
+        // Compute the worst-case reach from the pivot origin: the body plus the
+        // photo at its fully-ejected position. The farthest box corner becomes
+        // `frameRadius`, which frameCamera() fits — guaranteeing no clipped edges.
+        const reach = new THREE.Box3().setFromObject(body);
+        if (polaroid) {
+          const tuckedY = polaroid.position.y;
+          polaroid.position.y = polaroidRestY + EJECT_OFFSET;
+          polaroid.updateWorldMatrix(true, true);
+          reach.expandByObject(polaroid);
+          polaroid.position.y = tuckedY;
+          polaroid.updateWorldMatrix(true, true);
+        }
+        const mn = reach.min;
+        const mx = reach.max;
+        let r = 0;
+        for (const x of [mn.x, mx.x])
+          for (const y of [mn.y, mx.y])
+            for (const z of [mn.z, mx.z]) r = Math.max(r, Math.hypot(x, y, z));
+        frameRadius = r;
+        frameCamera();
+      },
+      undefined,
+      (err) => console.error("PolaroidScene: failed to load /polaroid.glb", err)
+    );
+
+    // --- Webcam capture ---------------------------------------------------
+    const flash = () => {
+      const el = flashRef.current;
+      if (!el) return;
+      el.style.transition = "none";
+      el.style.opacity = "0.9";
+      // next frame, fade out
+      requestAnimationFrame(() => {
+        el.style.transition = "opacity 0.6s ease-out";
+        el.style.opacity = "0";
+      });
+    };
+
+    const capture = async () => {
+      if (busy || !photoImage) return;
+      busy = true;
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "user" },
+          audio: false,
+        });
+        video.srcObject = stream;
+        await video.play();
+        // Wait until we actually have pixels.
+        if (!video.videoWidth) {
+          await new Promise<void>((res) => {
+            video.onloadeddata = () => res();
+          });
+        }
+
+        // Center-crop to a square and draw to an offscreen canvas.
+        const cw = video.videoWidth || 640;
+        const ch = video.videoHeight || 480;
+        const s = Math.min(cw, ch);
+        const canvas = document.createElement("canvas");
+        canvas.width = 512;
+        canvas.height = 512;
+        const ctx = canvas.getContext("2d")!;
+        // Mirror horizontally so it reads like a selfie (used for both the 3D
+        // texture and the downloadable image).
+        ctx.translate(512, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(video, (cw - s) / 2, (ch - s) / 2, s, s, 0, 0, 512, 512);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+        // Stop the camera right after grabbing the frame.
+        stream.getTracks().forEach((t) => t.stop());
+        video.srcObject = null;
+
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.flipY = false; // match glTF UV convention
+
+        const mat = new THREE.MeshBasicMaterial({
+          map: texture,
+          toneMapped: false,
+          side: THREE.DoubleSide, // photo is always visible to the user, never culled
+        });
+        const old = photoImage.material as THREE.Material;
+        photoImage.material = mat;
+        if (old && old !== mat) old.dispose();
+
+        // Hand the framed Polaroid back to the section for download.
+        composePolaroid(canvas).then((url) => onCaptureRef.current?.(url));
+
+        flash();
+        if (polaroid) {
+          polaroid.visible = true;
+          polaroid.position.y = polaroidRestY + TUCK_OFFSET;
+        }
+        pressT = 0.25;
+        ejecting = true;
+        ejectT = 0;
+      } catch (err) {
+        // Permission denied / no camera — just log and stay idle.
+        console.warn("PolaroidScene: camera unavailable", err);
+      } finally {
+        busy = false;
+      }
+    };
+    captureFnRef.current = capture;
+
+    // --- Pointer handlers -------------------------------------------------
+    const onPointerMove = (e: PointerEvent) => {
+      const rect = mount.getBoundingClientRect();
+      pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.y = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+    };
+    const onPointerDown = (e: PointerEvent) => {
+      const rect = mount.getBoundingClientRect();
+      ndc.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      ndc.y = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
+      raycaster.setFromCamera(ndc, camera);
+      const hit = raycaster.intersectObjects(clickableMeshes, false);
+      if (hit.length > 0) capture();
+    };
+
+    window.addEventListener("pointermove", onPointerMove);
+    mount.addEventListener("pointerdown", onPointerDown);
+
+    // --- Animation loop ---------------------------------------------------
+    const clock = new THREE.Clock();
+    const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
+    const animate = () => {
+      syncSize();
+      const dt = Math.min(clock.getDelta(), 0.05);
+
+      // Ease the camera's tilt toward the pointer.
+      const targetRotY = pointer.x * 0.5;
+      const targetRotX = pointer.y * 0.32;
+      pivot.rotation.y += (targetRotY - pivot.rotation.y) * 0.07;
+      pivot.rotation.x += (targetRotX - pivot.rotation.x) * 0.07;
+
+      // Shutter button press/return.
+      if (shutterButton) {
+        const pressed = pressT > 0;
+        if (pressed) pressT -= dt;
+        const target = pressed ? shutterRestY - 0.12 : shutterRestY;
+        shutterButton.position.y += (target - shutterButton.position.y) * 0.3;
+      }
+
+      // Photo ejection.
+      if (ejecting && polaroid) {
+        ejectT = Math.min(1, ejectT + dt / EJECT_DURATION);
+        const from = polaroidRestY + TUCK_OFFSET;
+        const to = polaroidRestY + EJECT_OFFSET;
+        polaroid.position.y = from + (to - from) * easeOut(ejectT);
+        if (ejectT >= 1) ejecting = false;
+      }
+
+      // Keep the ejected photo facing the viewer head-on, regardless of how the
+      // camera body is tilted toward the cursor. The photo's only rotating
+      // ancestor is `pivot`, so cancelling its rotation makes the photo's world
+      // orientation identity (its face points +Z, straight at the camera).
+      if (polaroid && polaroid.visible) {
+        polaroid.quaternion.copy(pivot.quaternion).invert();
+      }
+
+      renderer.render(scene, camera);
+      raf = requestAnimationFrame(animate);
+    };
+    animate();
+
+    // --- Cleanup ----------------------------------------------------------
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("pointermove", onPointerMove);
+      mount.removeEventListener("pointerdown", onPointerDown);
+      const s = video.srcObject as MediaStream | null;
+      if (s) s.getTracks().forEach((t) => t.stop());
+      video.srcObject = null;
+      scene.traverse((obj) => {
+        const mesh = obj as THREE.Mesh;
+        if (mesh.geometry) mesh.geometry.dispose();
+        const m = mesh.material;
+        if (Array.isArray(m)) m.forEach((mm) => mm.dispose());
+        else if (m) (m as THREE.Material).dispose();
+      });
+      renderer.dispose();
+      if (renderer.domElement.parentNode === mount) {
+        mount.removeChild(renderer.domElement);
+      }
+    };
+  }, []);
+
+  return (
+    <div className={styles.sceneWrap}>
+      <div ref={mountRef} className={styles.canvasMount} />
+      <div ref={flashRef} className={styles.flash} aria-hidden="true" />
+    </div>
+  );
+});
+
+export default PolaroidScene;

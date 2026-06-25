@@ -1,0 +1,28 @@
+.sceneWrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.canvasMount {
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+  cursor: pointer;
+
+  canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+  }
+}
+
+/* White flash overlay, sits over the camera and fades on capture. */
+.flash {
+  position: absolute;
+  inset: 0;
+  background: #ffffff;
+  opacity: 0;
+  pointer-events: none;
+  border-radius: 24px;
+}
