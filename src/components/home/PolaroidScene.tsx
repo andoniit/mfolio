@@ -237,9 +237,9 @@ const PolaroidScene = forwardRef<PolaroidSceneHandle, PolaroidSceneProps>(
 
         // Grab the parts we animate. NOTE: the node named "Polaroid" is the whole
         // assembly (body + photo); the ejectable photo card is "PhotoCard".
-        polaroid = model.getObjectByName("PhotoCard");
-        photoImage = model.getObjectByName("PhotoImage") as THREE.Mesh | null;
-        shutterButton = model.getObjectByName("ClickButton");
+        polaroid = model.getObjectByName("PhotoCard") ?? null;
+        photoImage = (model.getObjectByName("PhotoImage") as THREE.Mesh) ?? null;
+        shutterButton = model.getObjectByName("ClickButton") ?? null;
         if (shutterButton) shutterRestY = shutterButton.position.y;
 
         // Hide the photo and tuck it back into the slot until the first shot.
