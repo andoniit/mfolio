@@ -18,8 +18,10 @@ import styles from "./PolaroidScene.module.scss";
 
 // How far the photo is tucked up inside the body before a shot, and how far it
 // slides down past the slot once ejected (in model-local units, pre-scale).
-const TUCK_OFFSET = 0.55;
-const EJECT_OFFSET = -0.5;
+// The photo slides FORWARD out of the front slot (lying flat, image up). This is
+// how far it travels: it starts tucked back inside and slides to its authored
+// resting spot (sticking out the front, as modeled).
+const EJECT_TRAVEL = 0.95;
 const EJECT_DURATION = 1.6; // seconds
 
 /** Loads the brand logo once and caches it for the download composition. */
@@ -127,12 +129,21 @@ const PolaroidScene = forwardRef<PolaroidSceneHandle, PolaroidSceneProps>(
     // fit the tighter of the vertical/horizontal FOV, so every edge stays
     // on-screen at any tilt and any container aspect ratio.
     let frameRadius = 2;
+    // 3/4 view — from the front, slightly above and to the right — so the photo
+    // that slides out flat (image facing up) is clearly visible, like in Blender.
+    const VIEW_DIR = new THREE.Vector3(0.32, 0.55, 1).normalize();
+    // Orientation that points the camera body's front (+Z) straight at the
+    // viewer — used for the "look at you" turn while a photo is taken.
+    const faceTarget = new THREE.Quaternion().setFromUnitVectors(
+      new THREE.Vector3(0, 0, 1),
+      VIEW_DIR
+    );
     const frameCamera = () => {
       const vfov = THREE.MathUtils.degToRad(camera.fov);
       const hfov = 2 * Math.atan(Math.tan(vfov / 2) * camera.aspect);
       const fitFov = Math.min(vfov, hfov);
-      const dist = (frameRadius / Math.sin(fitFov / 2)) * 1.12;
-      camera.position.set(0, 0, dist);
+      const dist = (frameRadius / Math.sin(fitFov / 2)) * 1.08;
+      camera.position.copy(VIEW_DIR).multiplyScalar(dist);
       camera.near = Math.max(0.1, dist - frameRadius * 2);
       camera.far = dist + frameRadius * 2;
       camera.lookAt(0, 0, 0);
@@ -173,9 +184,11 @@ const PolaroidScene = forwardRef<PolaroidSceneHandle, PolaroidSceneProps>(
     let photoImage: THREE.Mesh | null = null;
     let shutterButton: THREE.Object3D | null = null;
     let shutterRestY = 0;
-    let polaroidRestY = 0; // authored Y of the photo (its "ejected" resting spot)
+    let polaroidRestZ = 0; // authored Z of the photo (its "ejected" resting spot)
     let ejecting = false;
     let ejectT = 0; // 0..1
+    let facingUser = false; // turn to face the viewer while taking the shot
+    let ejectDelay = 0; // seconds to wait (facing the user) before ejecting
     let pressT = 0; // shutter press timer (seconds remaining)
     let busy = false; // a capture is in flight
     const clickableMeshes: THREE.Object3D[] = [];
@@ -200,60 +213,46 @@ const PolaroidScene = forwardRef<PolaroidSceneHandle, PolaroidSceneProps>(
         const cube = model.getObjectByName("Cube");
         if (cube) cube.visible = false;
 
-        // Scale so the camera body reads at a consistent size.
-        const body = model.getObjectByName("CameraBody_Group") ?? model;
-        const bodyBox = new THREE.Box3().setFromObject(body);
-        const bodySize = bodyBox.getSize(new THREE.Vector3());
-        const maxDim = Math.max(bodySize.x, bodySize.y, bodySize.z) || 1;
-        const targetSize = 3.0;
-        model.scale.setScalar(targetSize / maxDim);
-
-        // Recenter the body at the origin (post-scale).
-        const box = new THREE.Box3().setFromObject(body);
-        const center = box.getCenter(new THREE.Vector3());
-        model.position.sub(center);
-
         pivot.add(model);
 
-        // Grab the parts we animate / texture. NOTE: the node named "Polaroid"
-        // is the whole assembly (body + photo); the ejectable photo is "PhotoCard".
+        // Scale so the camera body reads at a consistent size.
+        const body = model.getObjectByName("CameraBody_Group") ?? model;
+        model.updateWorldMatrix(true, true);
+        const bodySize = new THREE.Box3().setFromObject(body).getSize(new THREE.Vector3());
+        const maxDim = Math.max(bodySize.x, bodySize.y, bodySize.z) || 1;
+        const targetSize = 3.6;
+        model.scale.setScalar(targetSize / maxDim);
+        model.updateWorldMatrix(true, true);
+
+        // The photo loads at its authored (fully-ejected) spot, sticking out the
+        // front. Center the WHOLE assembly (body + ejected photo) at the origin so
+        // the tilt rotates it in place and its bounding sphere never clips, then
+        // frame that sphere.
+        const contentBox = new THREE.Box3().setFromObject(model);
+        model.position.sub(contentBox.getCenter(new THREE.Vector3()));
+        model.updateWorldMatrix(true, true);
+        const sphere = new THREE.Box3().setFromObject(model).getBoundingSphere(new THREE.Sphere());
+        frameRadius = sphere.radius;
+        frameCamera();
+
+        // Grab the parts we animate. NOTE: the node named "Polaroid" is the whole
+        // assembly (body + photo); the ejectable photo card is "PhotoCard".
         polaroid = model.getObjectByName("PhotoCard");
         photoImage = model.getObjectByName("PhotoImage") as THREE.Mesh | null;
         shutterButton = model.getObjectByName("ClickButton");
         if (shutterButton) shutterRestY = shutterButton.position.y;
 
+        // Hide the photo and tuck it back into the slot until the first shot.
         if (polaroid) {
-          polaroidRestY = polaroid.position.y;
-          // Start tucked up inside the body and hidden until the first shot.
-          polaroid.position.y = polaroidRestY + TUCK_OFFSET;
+          polaroidRestZ = polaroid.position.z;
+          polaroid.position.z = polaroidRestZ - EJECT_TRAVEL;
           polaroid.visible = false;
         }
 
-        // Everything in the model is clickable (whole camera triggers a shot).
+        // Everything visible is clickable (clicking the camera triggers a shot).
         model.traverse((o) => {
           if ((o as THREE.Mesh).isMesh && o.visible) clickableMeshes.push(o);
         });
-
-        // Compute the worst-case reach from the pivot origin: the body plus the
-        // photo at its fully-ejected position. The farthest box corner becomes
-        // `frameRadius`, which frameCamera() fits — guaranteeing no clipped edges.
-        const reach = new THREE.Box3().setFromObject(body);
-        if (polaroid) {
-          const tuckedY = polaroid.position.y;
-          polaroid.position.y = polaroidRestY + EJECT_OFFSET;
-          polaroid.updateWorldMatrix(true, true);
-          reach.expandByObject(polaroid);
-          polaroid.position.y = tuckedY;
-          polaroid.updateWorldMatrix(true, true);
-        }
-        const mn = reach.min;
-        const mx = reach.max;
-        let r = 0;
-        for (const x of [mn.x, mx.x])
-          for (const y of [mn.y, mx.y])
-            for (const z of [mn.z, mx.z]) r = Math.max(r, Math.hypot(x, y, z));
-        frameRadius = r;
-        frameCamera();
       },
       undefined,
       (err) => console.error("PolaroidScene: failed to load /polaroid.glb", err)
@@ -315,7 +314,7 @@ const PolaroidScene = forwardRef<PolaroidSceneHandle, PolaroidSceneProps>(
         const mat = new THREE.MeshBasicMaterial({
           map: texture,
           toneMapped: false,
-          side: THREE.DoubleSide, // photo is always visible to the user, never culled
+          side: THREE.DoubleSide,
         });
         const old = photoImage.material as THREE.Material;
         photoImage.material = mat;
@@ -327,11 +326,15 @@ const PolaroidScene = forwardRef<PolaroidSceneHandle, PolaroidSceneProps>(
         flash();
         if (polaroid) {
           polaroid.visible = true;
-          polaroid.position.y = polaroidRestY + TUCK_OFFSET;
+          polaroid.position.z = polaroidRestZ - EJECT_TRAVEL; // start tucked in
         }
         pressT = 0.25;
-        ejecting = true;
+        // Turn to face the viewer for the shot, then (after the beat) the
+        // animation loop returns to the 3/4 view and ejects the photo.
+        facingUser = true;
+        ejecting = false;
         ejectT = 0;
+        ejectDelay = 0.6;
       } catch (err) {
         // Permission denied / no camera — just log and stay idle.
         console.warn("PolaroidScene: camera unavailable", err);
@@ -366,11 +369,26 @@ const PolaroidScene = forwardRef<PolaroidSceneHandle, PolaroidSceneProps>(
       syncSize();
       const dt = Math.min(clock.getDelta(), 0.05);
 
-      // Ease the camera's tilt toward the pointer.
-      const targetRotY = pointer.x * 0.5;
-      const targetRotX = pointer.y * 0.32;
-      pivot.rotation.y += (targetRotY - pivot.rotation.y) * 0.07;
-      pivot.rotation.x += (targetRotX - pivot.rotation.x) * 0.07;
+      if (facingUser) {
+        // Turn the camera to look straight at the viewer for the shot.
+        pivot.quaternion.slerp(faceTarget, 0.14);
+      } else {
+        // Otherwise ease the tilt toward the pointer.
+        const targetRotY = pointer.x * 0.5;
+        const targetRotX = pointer.y * 0.32;
+        pivot.rotation.y += (targetRotY - pivot.rotation.y) * 0.07;
+        pivot.rotation.x += (targetRotX - pivot.rotation.x) * 0.07;
+      }
+
+      // After the brief "facing" beat, return to the 3/4 view and slide the photo out.
+      if (ejectDelay > 0) {
+        ejectDelay -= dt;
+        if (ejectDelay <= 0) {
+          facingUser = false;
+          ejecting = true;
+          ejectT = 0;
+        }
+      }
 
       // Shutter button press/return.
       if (shutterButton) {
@@ -380,21 +398,13 @@ const PolaroidScene = forwardRef<PolaroidSceneHandle, PolaroidSceneProps>(
         shutterButton.position.y += (target - shutterButton.position.y) * 0.3;
       }
 
-      // Photo ejection.
+      // Photo ejection — slides forward out of the front slot.
       if (ejecting && polaroid) {
         ejectT = Math.min(1, ejectT + dt / EJECT_DURATION);
-        const from = polaroidRestY + TUCK_OFFSET;
-        const to = polaroidRestY + EJECT_OFFSET;
-        polaroid.position.y = from + (to - from) * easeOut(ejectT);
+        const from = polaroidRestZ - EJECT_TRAVEL;
+        const to = polaroidRestZ;
+        polaroid.position.z = from + (to - from) * easeOut(ejectT);
         if (ejectT >= 1) ejecting = false;
-      }
-
-      // Keep the ejected photo facing the viewer head-on, regardless of how the
-      // camera body is tilted toward the cursor. The photo's only rotating
-      // ancestor is `pivot`, so cancelling its rotation makes the photo's world
-      // orientation identity (its face points +Z, straight at the camera).
-      if (polaroid && polaroid.visible) {
-        polaroid.quaternion.copy(pivot.quaternion).invert();
       }
 
       renderer.render(scene, camera);
