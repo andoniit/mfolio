@@ -95,6 +95,8 @@ async function composePolaroid(src: HTMLCanvasElement): Promise<string> {
 export interface PolaroidSceneProps {
   /** Called with a Polaroid-framed PNG data URL each time a photo is taken. */
   onCapture?: (dataUrl: string) => void;
+  /** Called with a human-readable reason when the camera can't be used. */
+  onError?: (message: string) => void;
 }
 
 export interface PolaroidSceneHandle {
@@ -103,11 +105,13 @@ export interface PolaroidSceneHandle {
 }
 
 const PolaroidScene = forwardRef<PolaroidSceneHandle, PolaroidSceneProps>(
-  function PolaroidScene({ onCapture }, ref) {
+  function PolaroidScene({ onCapture, onError }, ref) {
   const mountRef = useRef<HTMLDivElement>(null);
   const flashRef = useRef<HTMLDivElement>(null);
   const onCaptureRef = useRef(onCapture);
   onCaptureRef.current = onCapture;
+  const onErrorRef = useRef(onError);
+  onErrorRef.current = onError;
   const captureFnRef = useRef<() => void>(() => {});
   useImperativeHandle(ref, () => ({ retake: () => captureFnRef.current?.() }), []);
 
@@ -191,16 +195,12 @@ const PolaroidScene = forwardRef<PolaroidSceneHandle, PolaroidSceneProps>(
     let ejectDelay = 0; // seconds to wait (facing the user) before ejecting
     let pressT = 0; // shutter press timer (seconds remaining)
     let busy = false; // a capture is in flight
-    const clickableMeshes: THREE.Object3D[] = [];
 
     // Hidden <video> we draw a single frame from.
     const video = document.createElement("video");
     video.muted = true;
     video.playsInline = true;
     video.setAttribute("playsinline", "");
-
-    const raycaster = new THREE.Raycaster();
-    const ndc = new THREE.Vector2();
 
     // --- Load model -------------------------------------------------------
     const loader = new GLTFLoader();
@@ -248,11 +248,6 @@ const PolaroidScene = forwardRef<PolaroidSceneHandle, PolaroidSceneProps>(
           polaroid.position.z = polaroidRestZ - EJECT_TRAVEL;
           polaroid.visible = false;
         }
-
-        // Everything visible is clickable (clicking the camera triggers a shot).
-        model.traverse((o) => {
-          if ((o as THREE.Mesh).isMesh && o.visible) clickableMeshes.push(o);
-        });
       },
       undefined,
       (err) => console.error("PolaroidScene: failed to load /polaroid.glb", err)
@@ -273,6 +268,14 @@ const PolaroidScene = forwardRef<PolaroidSceneHandle, PolaroidSceneProps>(
 
     const capture = async () => {
       if (busy || !photoImage) return;
+      // Webcam access requires a secure context (https or localhost). Over plain
+      // http (e.g. a phone on the LAN IP) `navigator.mediaDevices` is undefined.
+      if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
+        onErrorRef.current?.(
+          "Camera needs a secure (https) connection. Open the live site to take a photo."
+        );
+        return;
+      }
       busy = true;
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -336,7 +339,16 @@ const PolaroidScene = forwardRef<PolaroidSceneHandle, PolaroidSceneProps>(
         ejectT = 0;
         ejectDelay = 0.6;
       } catch (err) {
-        // Permission denied / no camera — just log and stay idle.
+        const name = (err as { name?: string })?.name;
+        let msg = "Couldn't access the camera. Please try again.";
+        if (name === "NotAllowedError" || name === "SecurityError") {
+          msg = "Camera access was blocked. Allow camera permission and try again.";
+        } else if (name === "NotFoundError" || name === "OverconstrainedError") {
+          msg = "No camera was found on this device.";
+        } else if (name === "NotReadableError") {
+          msg = "The camera is in use by another app. Close it and try again.";
+        }
+        onErrorRef.current?.(msg);
         console.warn("PolaroidScene: camera unavailable", err);
       } finally {
         busy = false;
@@ -350,17 +362,25 @@ const PolaroidScene = forwardRef<PolaroidSceneHandle, PolaroidSceneProps>(
       pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       pointer.y = ((e.clientY - rect.top) / rect.height) * 2 - 1;
     };
+    // Treat a tap/click anywhere on the canvas as "take a photo". We detect a tap
+    // (vs. a scroll/drag) so touch scrolling doesn't fire the camera — this is far
+    // more reliable on touch than requiring a precise raycast hit on the model.
+    let downX = 0;
+    let downY = 0;
+    let downT = 0;
     const onPointerDown = (e: PointerEvent) => {
-      const rect = mount.getBoundingClientRect();
-      ndc.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-      ndc.y = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
-      raycaster.setFromCamera(ndc, camera);
-      const hit = raycaster.intersectObjects(clickableMeshes, false);
-      if (hit.length > 0) capture();
+      downX = e.clientX;
+      downY = e.clientY;
+      downT = performance.now();
+    };
+    const onPointerUp = (e: PointerEvent) => {
+      const moved = Math.hypot(e.clientX - downX, e.clientY - downY);
+      if (moved < 14 && performance.now() - downT < 700) capture();
     };
 
     window.addEventListener("pointermove", onPointerMove);
     mount.addEventListener("pointerdown", onPointerDown);
+    mount.addEventListener("pointerup", onPointerUp);
 
     // --- Animation loop ---------------------------------------------------
     const clock = new THREE.Clock();
@@ -417,6 +437,7 @@ const PolaroidScene = forwardRef<PolaroidSceneHandle, PolaroidSceneProps>(
       cancelAnimationFrame(raf);
       window.removeEventListener("pointermove", onPointerMove);
       mount.removeEventListener("pointerdown", onPointerDown);
+      mount.removeEventListener("pointerup", onPointerUp);
       const s = video.srcObject as MediaStream | null;
       if (s) s.getTracks().forEach((t) => t.stop());
       video.srcObject = null;

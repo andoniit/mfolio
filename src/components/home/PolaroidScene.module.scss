@@ -9,6 +9,9 @@
   height: 100%;
   pointer-events: auto;
   cursor: pointer;
+  /* Let vertical scrolling through, but register taps immediately (no 300ms
+     delay) and don't hijack the gesture as a zoom. */
+  touch-action: pan-y;
 
   canvas {
     display: block;

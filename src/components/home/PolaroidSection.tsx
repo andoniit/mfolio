@@ -4,11 +4,17 @@ import { useRef, useState } from "react";
 import PolaroidScene, { type PolaroidSceneHandle } from "./PolaroidScene";
 import styles from "./PolaroidSection.module.scss";
 
-const SNAP_LINE = "Let's take a snap";
+const SNAP_LINE = "Let's take a picture";
 
 export default function PolaroidSection() {
   const [photo, setPhoto] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const sceneRef = useRef<PolaroidSceneHandle>(null);
+
+  const handleError = (msg: string) => {
+    setError(msg);
+    window.setTimeout(() => setError(null), 5000);
+  };
 
   const download = () => {
     if (!photo) return;
@@ -40,7 +46,7 @@ export default function PolaroidSection() {
       </div>
 
       <div className={styles.cameraStage}>
-        <PolaroidScene ref={sceneRef} onCapture={setPhoto} />
+        <PolaroidScene ref={sceneRef} onCapture={setPhoto} onError={handleError} />
       </div>
 
       {photo ? (
@@ -56,7 +62,9 @@ export default function PolaroidSection() {
           </div>
         </div>
       ) : (
-        <p className={styles.hint}>Tap the camera to take a Polaroid</p>
+        <p className={`${styles.hint} ${error ? styles.hintError : ""}`}>
+          {error ?? "Tap the camera to take a Polaroid"}
+        </p>
       )}
     </section>
   );
