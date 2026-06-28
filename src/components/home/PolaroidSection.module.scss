@@ -24,6 +24,13 @@
   overflow: hidden;
 }
 
+/* Entrance wrapper for each line (slides in from a side); the inner .bgLine
+   keeps looping independently. */
+.bgRow {
+  width: max-content;
+  will-change: transform, opacity;
+}
+
 .bgLine {
   width: max-content;
   white-space: nowrap;
