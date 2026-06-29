@@ -64,6 +64,10 @@ export default function DroneScene() {
 
     // --- Interaction state ------------------------------------------------
     const pointer = { x: 0, y: 0 }; // normalized -1..1, target tilt
+    let cursorX = -99999; // raw cursor position (for the proximity follow)
+    let cursorY = -99999;
+    let followX = 0; // eased screen-space offset the drone drifts by
+    let followY = 0;
     let userRotY = 0; // extra yaw from drag
     let dragging = false;
     let lastDragX = 0;
@@ -115,6 +119,8 @@ export default function DroneScene() {
       const rect = mount.getBoundingClientRect();
       pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       pointer.y = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+      cursorX = e.clientX;
+      cursorY = e.clientY;
       if (dragging) {
         userRotY += (e.clientX - lastDragX) * 0.01;
         lastDragX = e.clientX;
@@ -150,6 +156,27 @@ export default function DroneScene() {
       const targetRotX = pointer.y * 0.35;
       pivot.rotation.y += (targetRotY - pivot.rotation.y) * 0.06;
       pivot.rotation.x += (targetRotX - pivot.rotation.x) * 0.06;
+
+      // Drift toward the cursor when it's near the drone. We move the canvas
+      // element (not the mount), so the mount's rect stays stable for the
+      // pointer math above — no feedback loop.
+      const rect = mount.getBoundingClientRect();
+      const dx = cursorX - (rect.left + rect.width / 2);
+      const dy = cursorY - (rect.top + rect.height / 2);
+      const dist = Math.hypot(dx, dy);
+      const nearRadius = Math.max(rect.width, rect.height) * 1.15;
+      const proximity = Math.max(0, 1 - dist / nearRadius); // 1 = on it, 0 = far
+      let tx = dx * 0.45 * proximity;
+      let ty = dy * 0.45 * proximity;
+      const mag = Math.hypot(tx, ty);
+      const MAX_FOLLOW = 55; // px, so it never wanders too far from its spot
+      if (mag > MAX_FOLLOW) {
+        tx = (tx / mag) * MAX_FOLLOW;
+        ty = (ty / mag) * MAX_FOLLOW;
+      }
+      followX += (tx - followX) * 0.12;
+      followY += (ty - followY) * 0.12;
+      renderer.domElement.style.transform = `translate(${followX.toFixed(1)}px, ${followY.toFixed(1)}px)`;
 
       renderer.render(scene, camera);
       raf = requestAnimationFrame(animate);
