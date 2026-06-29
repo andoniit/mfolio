@@ -118,6 +118,32 @@ export default function SiteFooter() {
                   © 2026 Anirudha Kapileshwari. All rights reserved.
                 </p>
               </div>
+
+              {/* WD Awards — Favourite Web Design badge */}
+              <a
+                href="https://wdawards.com/web/anikap-tech"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.awardBadge}
+                aria-label="WD Awards — Favourite Web Design winner. View the award."
+              >
+                <span className={styles.awardSeal} aria-hidden="true">
+                  <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M7 6h26a4 4 0 0 1 4 4v15a4 4 0 0 1-4 4H18l-7 6v-6H7a4 4 0 0 1-4-4V10a4 4 0 0 1 4-4z"
+                      stroke="var(--mf-red, #ea3e3e)"
+                      strokeWidth="3"
+                    />
+                    <g transform="translate(14,10) scale(0.5)" fill="var(--mf-red, #ea3e3e)">
+                      <path d="M12 2l2.9 6.3 6.9.6-5.2 4.6 1.6 6.8L12 17.3 5.8 20.9l1.6-6.8L2.2 8.9l6.9-.6z" />
+                    </g>
+                  </svg>
+                </span>
+                <span className={styles.awardInfo}>
+                  <span className={styles.awardTitle}>Favourite Web Design</span>
+                  <span className={styles.awardMeta}>WD Awards · 2026</span>
+                </span>
+              </a>
             </div>
           </div>
 

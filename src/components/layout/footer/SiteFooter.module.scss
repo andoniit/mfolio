@@ -219,6 +219,7 @@
   }
   .footerBottomRight { order: 5; height: auto; justify-content: flex-start; margin-top: 10px; }
   .footerBottomLeft { order: 6; height: auto; margin-top: 10px; }
+  .awardBadge { order: 7; margin-top: 16px; }
   .contactEmail {
     font-size: clamp(1rem, 5.2vw, 1.2rem) !important;
   }
@@ -447,6 +448,62 @@
   color: #fff;
   font-weight: 500;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+/* WD Awards badge — small chip at the bottom of the footer. */
+.awardBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  margin-top: 14px;
+  padding: 7px 14px 7px 8px;
+  border-radius: 999px;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(4px);
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.13);
+    border-color: rgba(255, 255, 255, 0.32);
+  }
+}
+
+.awardSeal {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+
+  svg {
+    display: block;
+    width: 30px;
+    height: 30px;
+  }
+}
+
+.awardInfo {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.awardTitle {
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.01em;
+}
+
+.awardMeta {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.66rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
 }
 
 .socialIcons {
