@@ -1,214 +1,157 @@
+"use client";
+
 import React, { useRef } from "react";
 import Link from "next/link";
-import { 
-  motion, 
-  useScroll, 
-  useTransform, 
-  useMotionTemplate, 
-  useMotionValue, 
-  useSpring 
-} from "framer-motion";
+import { motion, useInView, type Variants } from "framer-motion";
 import styles from "./SiteFooter.module.scss";
-import FooterFractalGlass from "./FooterFractalGlass";
 import NewsletterSubscribeForm from "./NewsletterSubscribeForm";
+
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+const SOCIALS = [
+  {
+    href: "https://www.linkedin.com/in/anirudha-kapileshwari-293826202/",
+    icon: "/icons/3.png",
+    label: "LinkedIn",
+    handle: "@anirudha",
+  },
+  { href: "https://github.com/andoniit", icon: "/icons/2.png", label: "GitHub", handle: "@andoniit" },
+  {
+    href: "https://www.behance.net/aniruddkapiles1",
+    icon: "/icons/1.png",
+    label: "Behance",
+    handle: "@aniruddkapiles1",
+  },
+];
+
+const container: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.09, delayChildren: 0.05 } },
+};
+const item: Variants = {
+  hidden: { opacity: 0, y: 26 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE } },
+};
 
 export default function SiteFooter() {
   const footerRef = useRef<HTMLElement>(null);
-
-  const { scrollYProgress } = useScroll({
-    target: footerRef,
-    offset: ["0 1", "1 1"], 
-  });
-
-  // ==========================================
-  // Mouse Tracking for Red Flare Background
-  // ==========================================
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  
-  // Smooth spring physics for fluid follow effect
-  const smoothX = useSpring(mouseX, { stiffness: 40, damping: 20 });
-  const smoothY = useSpring(mouseY, { stiffness: 40, damping: 20 });
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
-    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX - left - width / 2) * 0.35;
-    const y = (e.clientY - top - height / 2) * 0.35;
-    mouseX.set(x);
-    mouseY.set(y);
-  };
-
-  const glowScrollY = useTransform(scrollYProgress, [0, 1], [80, -30]);
-  const glowScale = useTransform(scrollYProgress, [0, 1], [0.85, 1.1]);
-  const limeGlowX = useTransform(smoothX, (value) => value * -0.55);
-  const limeGlowY = useTransform(smoothY, (value) => value * -0.4);
-  const purpleGlowX = useTransform(smoothX, (value) => value * 0.18);
-  const purpleGlowY = useTransform(smoothY, (value) => value * -0.2);
-  const redGlowX = useTransform(smoothX, (value) => value * 0.9);
-  const redGlowY = useTransform(smoothY, (value) => value * 0.75);
-  const limeGlowOffsetY = useTransform(
-    [limeGlowY, glowScrollY],
-    ([mouse, scroll]: number[]) => mouse + scroll
-  );
-  const purpleGlowOffsetY = useTransform(
-    [purpleGlowY, glowScrollY],
-    ([mouse, scroll]: number[]) => mouse + scroll
-  );
-  const redGlowOffsetY = useTransform(
-    [redGlowY, glowScrollY],
-    ([mouse, scroll]: number[]) => mouse + scroll
-  );
-
-  // ==========================================
-  // Element Animations
-  // ==========================================
-  const andonScale = useTransform(scrollYProgress, [0, 1], [0.85, 1]);
-  const contactScale = useTransform(scrollYProgress, [0, 1], [0.85, 1]);
-  const footerBorderRadius = useTransform(scrollYProgress, [0, 1], ["0px", "40px"]);
-
-  const fillPercentage = useTransform(scrollYProgress, [0.6, 0.9], [0, 100]);
-  const textFillGradient = useMotionTemplate`linear-gradient(to bottom, var(--mf-white) ${fillPercentage}%, var(--mf-dark) ${fillPercentage}%)`;
-
-  const pill1Scale = useTransform(scrollYProgress, [0.1, 0.5], [0.6, 1]);
-  const pill2Scale = useTransform(scrollYProgress, [0.2, 0.6], [0.6, 1]);
-  const pill3Scale = useTransform(scrollYProgress, [0.3, 0.7], [0.6, 1]);
+  const inView = useInView(footerRef, { once: true, amount: 0.2 });
 
   return (
     <section className={styles.footerWrapper} data-site-footer="true">
-
-
-      {/* Main Footer Box - Mouse Tracking applied here now */}
-      <motion.footer 
-        ref={footerRef} 
-        className={styles.footer} 
-        style={{ borderRadius: footerBorderRadius }} 
-        role="contentinfo"
-        onMouseMove={handleMouseMove}
-      >
-        <FooterFractalGlass />
-
-        <div className={styles.inner}>
-          
-          {/* LEFT COLUMN */}
-          <div className={styles.leftCol}>
-            <div className={styles.newsletterSection}>
+      <footer ref={footerRef} className={styles.footer} role="contentinfo">
+        <motion.div
+          className={styles.footerTop}
+          variants={container}
+          initial="hidden"
+          animate={inView ? "visible" : "hidden"}
+        >
+          {/* Brand + newsletter */}
+          <motion.div className={styles.brandCol} variants={item}>
+            <div className={styles.newsletterBlock}>
               <h3 className={styles.newsletterHeading}>Subscribe to my newsletter</h3>
-              <p className={styles.newsletterSubtext}>
-                Get blog posts and updates from me.
-              </p>
+              <p className={styles.newsletterSubtext}>Get blog posts and updates from me.</p>
               <NewsletterSubscribeForm />
             </div>
+          </motion.div>
 
-            <div className={styles.bottomLeftGroup}>
-              {/* Animated ANDON Arrow Box */}
-              <motion.div 
-                className={styles.arrowBox}
-                style={{ scale: andonScale, transformOrigin: "left center" }}
-              >
-                <motion.span 
-                  className={styles.arrowText}
-                  style={{ backgroundImage: textFillGradient }}
+          {/* Explore */}
+          <motion.nav className={styles.linksCol} variants={item} aria-label="Explore">
+            <span className={styles.colHeading}>Explore</span>
+            <Link href="/" className={styles.colLink}>Home</Link>
+            <Link href="/blog" className={styles.colLink}>Blogs</Link>
+            <Link href="/projects" className={styles.colLink}>Projects</Link>
+            <a href="mailto:anikap1999@gmail.com" className={styles.colLink}>Contact</a>
+          </motion.nav>
+
+          {/* Follow me */}
+          <motion.div className={styles.linksCol} variants={item}>
+            <span className={styles.colHeading}>Follow me</span>
+            <div className={styles.followPills}>
+              {SOCIALS.map((s) => (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.followPill}
                 >
-                  Hey let's chat
-                </motion.span>
-              </motion.div>
-              
-              <div className={styles.footerBottomLeft}>
-                <p className={styles.copyrightText}>
-                  © 2026 Anirudha Kapileshwari. All rights reserved.
-                </p>
-              </div>
-
-              {/* WD Awards — Favourite Web Design badge */}
-              <a
-                href="https://wdawards.com/web/anikap-tech"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.awardBadge}
-                aria-label="WD Awards — Favourite Web Design winner. View the award."
-              >
-                <span className={styles.awardSeal} aria-hidden="true">
-                  <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      d="M7 6h26a4 4 0 0 1 4 4v15a4 4 0 0 1-4 4H18l-7 6v-6H7a4 4 0 0 1-4-4V10a4 4 0 0 1 4-4z"
-                      stroke="var(--mf-red, #ea3e3e)"
-                      strokeWidth="3"
-                    />
-                    <g transform="translate(14,10) scale(0.5)" fill="var(--mf-red, #ea3e3e)">
-                      <path d="M12 2l2.9 6.3 6.9.6-5.2 4.6 1.6 6.8L12 17.3 5.8 20.9l1.6-6.8L2.2 8.9l6.9-.6z" />
-                    </g>
-                  </svg>
-                </span>
-                <span className={styles.awardInfo}>
-                  <span className={styles.awardTitle}>Favourite Web Design</span>
-                  <span className={styles.awardMeta}>WD Awards · 2026</span>
-                </span>
-              </a>
-            </div>
-          </div>
-
-          {/* RIGHT COLUMN */}
-          <div className={styles.rightCol}>
-            
-            <div className={styles.bottomRightGroup}>
-              
-              {/* Animated Nav Pills */}
-              <div className={styles.navPills}>
-                <motion.div style={{ scale: pill1Scale }} className={styles.navPillWrapper}>
-                  <Link href="/" className={styles.navPill}>Home</Link>
-                </motion.div>
-                <motion.div style={{ scale: pill2Scale }} className={styles.navPillWrapper}>
-                  <Link href="/blog" className={styles.navPill}>Blogs</Link>
-                </motion.div>
-                <motion.div style={{ scale: pill3Scale }} className={styles.navPillWrapper}>
-                  <Link href="/projects" className={styles.navPill}>Projects</Link>
-                </motion.div>
-              </div>
-
-              {/* Animated Contact Box */}
-              <motion.div 
-                className={styles.contactWrapper}
-                style={{ scale: contactScale, transformOrigin: "right center" }}
-              >
-                <a href="mailto:anikap1999@gmail.com" className={styles.contactButton}>
-                  <span className={styles.contactLabel}>Lets get connected</span>
-                  <span className={styles.contactEmail}>anikap1999@gmail.com</span>
+                  <img src={s.icon} alt={s.label} />
+                  <span>{s.handle}</span>
                 </a>
-              </motion.div>
-
-              <div className={styles.footerBottomRight}>
-                <div className={styles.socialIcons}>
-                  <a 
-                    href="https://www.linkedin.com/in/anirudha-kapileshwari-293826202/" 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className={styles.socialBtn}
-                  >
-                    <img src="/icons/3.png" alt="LinkedIn" className={styles.socialIconImg} />
-                  </a>
-                  <a 
-                    href="https://github.com/andoniit" 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className={styles.socialBtn}
-                  >
-                    <img src="/icons/2.png" alt="GitHub" className={styles.socialIconImg} />
-                  </a>
-                  <a 
-                    href="https://www.behance.net/aniruddkapiles1" 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className={styles.socialBtn}
-                  >
-                    <img src="/icons/1.png" alt="Behance" className={styles.socialIconImg} />
-                  </a>
-                </div>
-              </div>
+              ))}
             </div>
+          </motion.div>
 
-          </div>
-        </div>
-      </motion.footer>
+          {/* CTAs */}
+          <motion.div className={styles.ctaCol} variants={item}>
+            <a
+              href="mailto:anikap1999@gmail.com"
+              className={`${styles.ctaCard} ${styles.ctaPrimary}`}
+            >
+              <span className={styles.ctaHead}>
+                Let&apos;s chat <span className={styles.ctaArrow} aria-hidden>↗</span>
+              </span>
+              <span className={styles.ctaSub}>Let&apos;s work together</span>
+            </a>
+            <Link href="/projects" className={`${styles.ctaCard} ${styles.ctaSecondary}`}>
+              <span className={styles.ctaHead}>
+                View my work <span className={styles.ctaArrow} aria-hidden>↗</span>
+              </span>
+              <span className={styles.ctaSub}>Selected projects</span>
+            </Link>
+          </motion.div>
+        </motion.div>
+
+        {/* Legal row (sits just above the giant wordmark) */}
+        <motion.div
+          className={styles.metaRow}
+          initial={{ opacity: 0 }}
+          animate={inView ? { opacity: 1 } : undefined}
+          transition={{ duration: 0.6, delay: 0.55 }}
+        >
+          <span className={styles.metaLeft}>
+            © 2026 Anirudha Kapileshwari <span className={styles.metaDot}>·</span>{" "}
+            <span className={styles.metaMuted}>Privacy Policy</span>
+          </span>
+
+          <a
+            href="https://wdawards.com/web/anikap-tech"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.awardBadge}
+            aria-label="WD Awards — Favourite Web Design winner. View the award."
+          >
+            <span className={styles.awardSeal} aria-hidden="true">
+              <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M7 6h26a4 4 0 0 1 4 4v15a4 4 0 0 1-4 4H18l-7 6v-6H7a4 4 0 0 1-4-4V10a4 4 0 0 1 4-4z"
+                  stroke="var(--mf-red, #ea3e3e)"
+                  strokeWidth="3"
+                />
+                <g transform="translate(14,10) scale(0.5)" fill="var(--mf-red, #ea3e3e)">
+                  <path d="M12 2l2.9 6.3 6.9.6-5.2 4.6 1.6 6.8L12 17.3 5.8 20.9l1.6-6.8L2.2 8.9l6.9-.6z" />
+                </g>
+              </svg>
+            </span>
+            <span className={styles.awardInfo}>
+              <span className={styles.awardTitle}>Favourite Web Design</span>
+              <span className={styles.awardMeta}>WD Awards · 2026</span>
+            </span>
+          </a>
+        </motion.div>
+
+        {/* Giant brand wordmark — bleeds off the bottom edge */}
+        <motion.div
+          className={styles.wordmark}
+          initial={{ y: 100, opacity: 0 }}
+          animate={inView ? { y: 0, opacity: 1 } : undefined}
+          transition={{ duration: 1.1, ease: EASE, delay: 0.2 }}
+          aria-hidden="true"
+        >
+          anikap.tech
+        </motion.div>
+      </footer>
     </section>
   );
 }
