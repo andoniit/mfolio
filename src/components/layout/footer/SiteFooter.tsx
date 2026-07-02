@@ -1,16 +1,13 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useRef } from "react";
 import Link from "next/link";
-import { motion, useMotionValue, useTransform, type MotionValue } from "framer-motion";
+import { motion, useInView, type Variants } from "framer-motion";
 import styles from "./SiteFooter.module.scss";
 import NewsletterSubscribeForm from "./NewsletterSubscribeForm";
 
+const EASE = [0.16, 1, 0.3, 1] as const;
 const WORDMARK = "anikap.tech";
-// Letters reveal across this slice of the wordmark's on-screen progress.
-const LB_START = 0.2;
-const LB_WINDOW = 0.12;
-const LB_STEP = 0.028;
 
 const SOCIALS = [
   {
@@ -28,130 +25,65 @@ const SOCIALS = [
   },
 ];
 
-const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
+const container: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.09, delayChildren: 0.05 } },
+};
+const item: Variants = {
+  hidden: { opacity: 0, y: 26 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } },
+};
 
-/** Fades + rises a block as `progress` sweeps `[start, end]`. Reverses on the
- *  way back up. */
-function Reveal({
-  progress,
-  start,
-  end,
-  y = 30,
-  className,
-  role,
-  label,
-  children,
-}: {
-  progress: MotionValue<number>;
-  start: number;
-  end: number;
-  y?: number;
-  className?: string;
-  role?: string;
-  label?: string;
-  children: ReactNode;
-}) {
-  const opacity = useTransform(progress, [start, end], [0, 1]);
-  const ty = useTransform(progress, [start, end], [y, 0]);
-  return (
-    <motion.div className={className} style={{ opacity, y: ty }} role={role} aria-label={label}>
-      {children}
-    </motion.div>
-  );
-}
-
-/** A single wordmark letter, revealed/hidden by the wordmark's scroll progress. */
-function Letter({
-  ch,
-  progress,
-  start,
-  end,
-}: {
-  ch: string;
-  progress: MotionValue<number>;
-  start: number;
-  end: number;
-}) {
-  const opacity = useTransform(progress, [start, end], [0, 1]);
-  const y = useTransform(progress, [start, end], ["65%", "0%"]);
-  return (
-    <motion.span className={styles.wordmarkLetter} style={{ opacity, y }} aria-hidden="true">
-      {ch}
-    </motion.span>
-  );
-}
+// Wordmark: letters reveal left→right on enter, hide right→left on exit (scroll up).
+const wordContainer: Variants = {
+  hidden: { transition: { staggerChildren: 0.05, staggerDirection: -1 } },
+  visible: { transition: { staggerChildren: 0.07, staggerDirection: 1, delayChildren: 0.05 } },
+};
+const letterV: Variants = {
+  hidden: { opacity: 0, y: "65%" },
+  visible: { opacity: 1, y: "0%", transition: { duration: 0.5, ease: EASE } },
+};
 
 export default function SiteFooter() {
   const footerRef = useRef<HTMLElement>(null);
   const wordRef = useRef<HTMLDivElement>(null);
-  // Manual progress values driven by a rAF loop reading each element's position.
-  // Robust against smooth-scroll libs that break scroll events / IntersectionObserver.
-  const footerProgress = useMotionValue(0);
-  const wordProgress = useMotionValue(0);
-
-  useEffect(() => {
-    const measure = () => {
-      const vh = window.innerHeight || 1;
-      const f = footerRef.current;
-      if (f) {
-        const r = f.getBoundingClientRect();
-        if (r.height) footerProgress.set(clamp01((vh - r.top) / r.height));
-      }
-      const w = wordRef.current;
-      if (w) {
-        const r = w.getBoundingClientRect();
-        // 0 when the wordmark's top is at the viewport bottom, ~1 as it rises up.
-        wordProgress.set(clamp01((vh - r.top) / (vh * 0.85)));
-      }
-    };
-    let raf = 0;
-    const loop = () => {
-      measure();
-      raf = requestAnimationFrame(loop);
-    };
-    loop();
-    window.addEventListener("scroll", measure, { passive: true });
-    window.addEventListener("resize", measure);
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", measure);
-      window.removeEventListener("resize", measure);
-    };
-  }, [footerProgress, wordProgress]);
+  // Re-triggerable so scrolling back up reverses the animations.
+  const footerInView = useInView(footerRef, { once: false, amount: 0.2 });
+  const wordInView = useInView(wordRef, { once: false, amount: 0.25 });
 
   const letters = WORDMARK.split("");
+  const footerState = footerInView ? "visible" : "hidden";
+  const wordState = wordInView ? "visible" : "hidden";
 
   return (
     <section className={styles.footerWrapper} data-site-footer="true">
       <footer ref={footerRef} className={styles.footer} role="contentinfo">
-        <div className={styles.footerTop}>
+        <motion.div
+          className={styles.footerTop}
+          variants={container}
+          initial="hidden"
+          animate={footerState}
+        >
           {/* Brand + newsletter */}
-          <Reveal progress={footerProgress} start={0} end={0.14} className={styles.brandCol}>
+          <motion.div className={styles.brandCol} variants={item}>
             <div className={styles.newsletterBlock}>
               <h3 className={styles.newsletterHeading}>Subscribe to my newsletter</h3>
               <p className={styles.newsletterSubtext}>Get blog posts and updates from me.</p>
               <NewsletterSubscribeForm />
             </div>
-          </Reveal>
+          </motion.div>
 
           {/* Explore */}
-          <Reveal
-            progress={footerProgress}
-            start={0.03}
-            end={0.17}
-            className={styles.linksCol}
-            role="navigation"
-            label="Explore"
-          >
+          <motion.nav className={styles.linksCol} variants={item} aria-label="Explore">
             <span className={styles.colHeading}>Explore</span>
             <Link href="/" className={styles.colLink}>Home</Link>
             <Link href="/blog" className={styles.colLink}>Blogs</Link>
             <Link href="/projects" className={styles.colLink}>Projects</Link>
             <a href="mailto:anikap1999@gmail.com" className={styles.colLink}>Contact</a>
-          </Reveal>
+          </motion.nav>
 
           {/* Follow me */}
-          <Reveal progress={footerProgress} start={0.06} end={0.2} className={styles.linksCol}>
+          <motion.div className={styles.linksCol} variants={item}>
             <span className={styles.colHeading}>Follow me</span>
             <div className={styles.followPills}>
               {SOCIALS.map((s) => (
@@ -167,10 +99,10 @@ export default function SiteFooter() {
                 </a>
               ))}
             </div>
-          </Reveal>
+          </motion.div>
 
           {/* CTAs */}
-          <Reveal progress={footerProgress} start={0.09} end={0.23} className={styles.ctaCol}>
+          <motion.div className={styles.ctaCol} variants={item}>
             <a
               href="mailto:anikap1999@gmail.com"
               className={`${styles.ctaCard} ${styles.ctaPrimary}`}
@@ -186,11 +118,16 @@ export default function SiteFooter() {
               </span>
               <span className={styles.ctaSub}>Selected projects</span>
             </Link>
-          </Reveal>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Award badge (sits just above the giant wordmark) */}
-        <Reveal progress={footerProgress} start={0.16} end={0.3} y={24} className={styles.metaRow}>
+        <motion.div
+          className={styles.metaRow}
+          variants={item}
+          initial="hidden"
+          animate={footerState}
+        >
           <a
             href="https://wdawards.com/web/anikap-tech"
             target="_blank"
@@ -202,10 +139,10 @@ export default function SiteFooter() {
               <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
                   d="M7 6h26a4 4 0 0 1 4 4v15a4 4 0 0 1-4 4H18l-7 6v-6H7a4 4 0 0 1-4-4V10a4 4 0 0 1 4-4z"
-                  stroke="var(--mf-red, #ea3e3e)"
+                  stroke="var(--mf-lime, #dcf763)"
                   strokeWidth="3"
                 />
-                <g transform="translate(14,10) scale(0.5)" fill="var(--mf-red, #ea3e3e)">
+                <g transform="translate(14,10) scale(0.5)" fill="var(--mf-lime, #dcf763)">
                   <path d="M12 2l2.9 6.3 6.9.6-5.2 4.6 1.6 6.8L12 17.3 5.8 20.9l1.6-6.8L2.2 8.9l6.9-.6z" />
                 </g>
               </svg>
@@ -215,23 +152,34 @@ export default function SiteFooter() {
               <span className={styles.awardMeta}>WD Awards · 2026</span>
             </span>
           </a>
-        </Reveal>
+        </motion.div>
 
-        {/* Giant wordmark — letters reveal L→R as it scrolls up, hide R→L on scroll up */}
-        <div ref={wordRef} className={styles.wordmark} aria-label={WORDMARK}>
-          {letters.map((ch, i) => {
-            const start = LB_START + i * LB_STEP;
-            return (
-              <Letter key={i} ch={ch} progress={wordProgress} start={start} end={start + LB_WINDOW} />
-            );
-          })}
-        </div>
+        {/* Giant wordmark — letters reveal L→R as it scrolls in, hide R→L on scroll up */}
+        <motion.div
+          ref={wordRef}
+          className={styles.wordmark}
+          variants={wordContainer}
+          initial="hidden"
+          animate={wordState}
+          aria-label={WORDMARK}
+        >
+          {letters.map((ch, i) => (
+            <motion.span key={i} className={styles.wordmarkLetter} variants={letterV} aria-hidden="true">
+              {ch}
+            </motion.span>
+          ))}
+        </motion.div>
 
         {/* Copyright — bottom-left, below the wordmark */}
-        <Reveal progress={wordProgress} start={0.6} end={0.8} y={16} className={styles.copyrightLine}>
+        <motion.div
+          className={styles.copyrightLine}
+          variants={item}
+          initial="hidden"
+          animate={wordState}
+        >
           © 2026 Anirudha Kapileshwari <span className={styles.metaDot}>·</span>{" "}
           <span className={styles.metaMuted}>Privacy Policy</span>
-        </Reveal>
+        </motion.div>
       </footer>
     </section>
   );
