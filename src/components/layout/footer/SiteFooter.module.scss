@@ -260,6 +260,24 @@
   will-change: transform, opacity;
 }
 
+.wordmarkLetter {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+/* Copyright line — bottom-left, below the giant wordmark. */
+.copyrightLine {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  max-width: 1280px;
+  margin: clamp(0.6rem, 1.6vw, 1.4rem) auto 0;
+  text-align: left;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #6b6a63;
+}
+
 /* ============================
    LEGAL ROW
 ============================ */
@@ -274,7 +292,7 @@
   padding-bottom: clamp(0.6rem, 1.4vw, 1rem);
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 16px;
   flex-wrap: wrap;
 }
