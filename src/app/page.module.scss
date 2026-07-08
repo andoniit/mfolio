@@ -3,3 +3,28 @@
   position: relative;
   background-color: var(--mf-white, #ffffff);
 }
+
+/* Emoji keypad parked in the white space to the right of the Experience
+   timeline's tail, before Voluntary Roles. Pulled up into that gap on desktop;
+   centered in normal flow on small screens. */
+.keypadAside {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 clamp(1rem, 7vw, 9rem) 0 1rem;
+  margin-top: clamp(-300px, -16vw, -100px);
+  margin-bottom: 2rem;
+  /* The container is pulled up over the timeline's tail — let clicks pass
+     through everywhere except the keypad itself. */
+  pointer-events: none;
+
+  > * {
+    pointer-events: auto;
+  }
+
+  @media (max-width: 768px) {
+    justify-content: center;
+    padding: 0 1rem;
+    margin-top: 0;
+    margin-bottom: 1rem;
+  }
+}

@@ -2,8 +2,11 @@
 import styles from './combined.module.scss'
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import CopilotProjectGridBridge from '@/components/projects/CopilotProjectGridBridge';
 import AnimatedIntroText from '../AnimatedIntroText';
+
+const EASE = [0.16, 1, 0.3, 1];
 
 export default function Projects() {
   const [projects, setProjects] = useState([]);
@@ -52,11 +55,18 @@ export default function Projects() {
       <div className={styles.mainp}>
         <div className={styles.bodyp}>
           <CopilotProjectGridBridge projects={projects} columns={4} />
-          <div className={styles.buttonContainer}>
+
+          <motion.div
+            className={styles.buttonContainer}
+            initial={{ opacity: 0, scale: 0.85, y: 18 }}
+            whileInView={{ opacity: 1, scale: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.9 }}
+            transition={{ duration: 0.6, ease: EASE }}
+          >
             <Link href="/projects" style={{ textDecoration: 'none' }}>
               <div className={styles.button2}>View More Projects</div>
             </Link>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

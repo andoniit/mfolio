@@ -47,6 +47,13 @@
   margin-top: 0.5rem;
 }
 
+
+@media screen and (max-width: 768px) {
+  .keypadWire {
+    height: 64px;
+  }
+}
+
 .button2 {
   display: inline-block;
   transition: all 0.2s ease-in;
