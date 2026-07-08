@@ -10,7 +10,7 @@ import VoluntaryRoles from "@/components/home/VoluntaryRoles";
 import Contact from "@/components/home/contact/Contact"
 import MyVision from "@/components/home/MyVision"
 import Preloader from "@/components/home/Preloader"
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import Projects from "@/components/home/Projects/Project"
 import EmojiKeypad from "@/components/home/Projects/EmojiKeypad"
 import PolaroidSection from "@/components/home/PolaroidSection"
@@ -86,16 +86,10 @@ export default function Home() {
       </div>
       <PolaroidSection />
       <Experience />
-      {/* Emoji keypad — fills the white space right of the timeline's tail */}
+      {/* Emoji keypad — fills the white space right of the timeline's tail.
+          (Motion intro lives inside the scene: drop-in + key self-test wave.) */}
       <div className={styles.keypadAside} aria-label="Interactive emoji keypad">
-        <motion.div
-          initial={{ opacity: 0, y: 70, rotate: -4 }}
-          whileInView={{ opacity: 1, y: 0, rotate: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <EmojiKeypad />
-        </motion.div>
+        <EmojiKeypad />
       </div>
       <VoluntaryRoles />
       <MyVision/>

@@ -1,8 +1,7 @@
 .keypadWrap {
   position: relative;
-  width: min(640px, 92vw);
-  height: clamp(240px, 34vw, 340px);
-  margin: 0 auto;
+  width: min(460px, 84vw);
+  height: clamp(170px, 24vw, 245px);
 }
 
 .canvasMount {

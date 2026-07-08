@@ -49,7 +49,7 @@ export default function EmojiKeypad() {
       const dist =
         Math.max(frameHalf.x / Math.tan(hfov / 2), frameHalf.y / Math.tan(vfov / 2)) * 1.22 +
         frameHalf.z;
-      camera.position.set(0, dist * 0.45, dist * 0.9);
+      camera.position.set(0, dist * 0.32, dist * 0.95);
       const reach = frameHalf.length();
       camera.near = Math.max(0.1, dist - reach * 3);
       camera.far = dist + reach * 3;
@@ -82,11 +82,35 @@ export default function EmojiKeypad() {
     scene.add(pivot);
 
     // --- State ------------------------------------------------------------
-    const pointer = { x: 0, y: 0 };
     let raf = 0;
     const keys: THREE.Object3D[] = [];
     const keyRestY = new Map<THREE.Object3D, number>();
     const pressT = new Map<THREE.Object3D, number>(); // seconds remaining pressed
+
+    // Intro: the keypad drops in when scrolled into view, then the keys press
+    // themselves once, left to right (a little "self-test" wave).
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const INTRO_DROP_S = 0.85;
+    const WAVE_START_S = 0.7;
+    const WAVE_STEP_S = 0.13;
+    let introElapsed = reducedMotion ? 99 : -1; // -1 = waiting for view
+    const waveFired = new Set<number>();
+    if (!reducedMotion) {
+      pivot.position.y = -3.4; // parked below frame until the intro runs
+      mount.style.opacity = "0";
+      mount.style.transition = "opacity 0.45s ease";
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (introElapsed < 0 && entries.some((e) => e.isIntersecting)) {
+          introElapsed = 0;
+          mount.style.opacity = "1";
+          io.disconnect();
+        }
+      },
+      { threshold: 0.3 }
+    );
+    if (!reducedMotion) io.observe(mount);
 
     const raycaster = new THREE.Raycaster();
     const ndc = new THREE.Vector2();
@@ -101,6 +125,17 @@ export default function EmojiKeypad() {
       (gltf) => {
         const model = gltf.scene;
         pivot.add(model);
+
+        // Measure/center with the pivot at rest — it may be parked below frame
+        // for the intro, which would otherwise skew the world-space centering.
+        const parkedY = pivot.position.y;
+        pivot.position.y = 0;
+        pivot.updateWorldMatrix(true, true);
+
+        // The trailing cable connects to nothing on the page and reads odd —
+        // hide it. (It's also excluded from framing below.)
+        const cable = model.getObjectByName("Cable_Red");
+        if (cable) cable.visible = false;
 
         // Scale + center on the origin — framed on the keypad BODY only (base +
         // keys). Including the trailing cable inflated the bounds and shrank
@@ -118,12 +153,18 @@ export default function EmojiKeypad() {
         const size = bodyBox().getSize(new THREE.Vector3());
         const maxDim = Math.max(size.x, size.y, size.z) || 1;
         model.scale.setScalar(4.6 / maxDim);
+
+        // Gentle 3/4 angle — enough yaw to read as 3D without looking tipped
+        // (applied before framing so the fit accounts for the silhouette).
+        model.rotation.y = 0.3;
+
         model.updateWorldMatrix(true, true);
         model.position.sub(bodyBox().getCenter(new THREE.Vector3()));
         model.updateWorldMatrix(true, true);
 
         frameHalf = bodyBox().getSize(new THREE.Vector3()).multiplyScalar(0.5);
         frameCamera();
+        pivot.position.y = parkedY; // back to the intro park position
 
         const hitMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
         model.traverse((o) => {
@@ -163,12 +204,6 @@ export default function EmojiKeypad() {
     };
 
     // --- Pointer handlers (tap = press key) --------------------------------
-    const onPointerMove = (e: PointerEvent) => {
-      const rect = mount.getBoundingClientRect();
-      pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-      pointer.y = ((e.clientY - rect.top) / rect.height) * 2 - 1;
-    };
-
     let downX = 0;
     let downY = 0;
     const onPointerDown = (e: PointerEvent) => {
@@ -195,7 +230,6 @@ export default function EmojiKeypad() {
       popEmoji(KEY_EMOJI[node.name] ?? "✨", e.clientX, e.clientY);
     };
 
-    window.addEventListener("pointermove", onPointerMove);
     mount.addEventListener("pointerdown", onPointerDown);
     mount.addEventListener("pointerup", onPointerUp);
 
@@ -205,11 +239,19 @@ export default function EmojiKeypad() {
       syncSize();
       const dt = Math.min(clock.getDelta(), 0.05);
 
-      // Gentle tilt toward the cursor.
-      const targetRotY = pointer.x * 0.35;
-      const targetRotX = pointer.y * 0.18;
-      pivot.rotation.y += (targetRotY - pivot.rotation.y) * 0.08;
-      pivot.rotation.x += (targetRotX - pivot.rotation.x) * 0.08;
+      // Intro: ease the keypad up from below, then fire the key wave.
+      if (introElapsed >= 0 && introElapsed < 5) {
+        introElapsed += dt;
+        const t = Math.min(1, introElapsed / INTRO_DROP_S);
+        const e = 1 - Math.pow(1 - t, 3);
+        pivot.position.y = -3.4 * (1 - e);
+        keys.forEach((k, i) => {
+          if (introElapsed >= WAVE_START_S + i * WAVE_STEP_S && !waveFired.has(i)) {
+            waveFired.add(i);
+            pressT.set(k, 0.16);
+          }
+        });
+      }
 
       // Key presses: dip while timer runs, spring back after.
       for (const k of keys) {
@@ -227,7 +269,7 @@ export default function EmojiKeypad() {
 
     return () => {
       cancelAnimationFrame(raf);
-      window.removeEventListener("pointermove", onPointerMove);
+      io.disconnect();
       mount.removeEventListener("pointerdown", onPointerDown);
       mount.removeEventListener("pointerup", onPointerUp);
       scene.traverse((obj) => {
