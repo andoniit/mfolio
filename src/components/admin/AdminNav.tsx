@@ -49,7 +49,8 @@ function NavIcon({
     | "mail"
     | "briefcase"
     | "heart"
-    | "quote";
+    | "quote"
+    | "camera";
 }) {
   const common = { width: 18, height: 18, viewBox: "0 0 24 24" };
   switch (kind) {
@@ -163,6 +164,16 @@ function NavIcon({
             strokeLinecap="round"
             strokeLinejoin="round"
           />
+        </svg>
+      );
+    case "camera":
+      return (
+        <svg {...common} fill="none" stroke="currentColor" strokeWidth="2">
+          <path
+            d="M3 8.5A1.5 1.5 0 0 1 4.5 7h2.2l1.2-2h8.2l1.2 2h2.2A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-9z"
+            strokeLinejoin="round"
+          />
+          <circle cx="12" cy="13" r="3.4" />
         </svg>
       );
   }
@@ -690,6 +701,35 @@ export default function AdminNav({ collapsed = false }: Props) {
                 }`}
               >
                 Recommendations
+              </span>
+            )}
+          </Link>
+
+          <Link
+            href="/admin/photo-wall"
+            className={`group flex items-center gap-3 py-2.5 px-3 transition-all duration-200 rounded-xl ${
+              pathname === "/admin/photo-wall"
+                ? "bg-white/50 text-black shadow-sm border border-white/40"
+                : "text-gray-500 border border-transparent hover:bg-white/30 hover:text-gray-900"
+            } ${collapsed ? "justify-center px-0 w-11 h-11 mx-auto" : ""}`}
+            title="Photo Wall"
+          >
+            <span
+              className={`inline-flex items-center justify-center transition-transform duration-200 ${
+                pathname === "/admin/photo-wall"
+                  ? "text-black scale-105"
+                  : "text-gray-400 group-hover:text-gray-700"
+              }`}
+            >
+              <NavIcon kind="camera" />
+            </span>
+            {!collapsed && (
+              <span
+                className={`text-[14px] tracking-wide ${
+                  pathname === "/admin/photo-wall" ? "font-semibold" : "font-medium"
+                }`}
+              >
+                Photo Wall
               </span>
             )}
           </Link>

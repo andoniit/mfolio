@@ -93,8 +93,12 @@ async function composePolaroid(src: HTMLCanvasElement): Promise<string> {
 }
 
 export interface PolaroidSceneProps {
-  /** Called with a Polaroid-framed PNG data URL each time a photo is taken. */
-  onCapture?: (dataUrl: string) => void;
+  /**
+   * Called each time a photo is taken with the Polaroid-framed PNG data URL
+   * (for preview/download) and the bare square JPEG data URL (what gets pinned
+   * to the photo wall, where the frame is drawn in CSS).
+   */
+  onCapture?: (dataUrl: string, squareDataUrl: string) => void;
   /** Called with a human-readable reason when the camera can't be used. */
   onError?: (message: string) => void;
 }
@@ -323,8 +327,10 @@ const PolaroidScene = forwardRef<PolaroidSceneHandle, PolaroidSceneProps>(
         photoImage.material = mat;
         if (old && old !== mat) old.dispose();
 
-        // Hand the framed Polaroid back to the section for download.
-        composePolaroid(canvas).then((url) => onCaptureRef.current?.(url));
+        // Hand the framed Polaroid back to the section for download, alongside
+        // the bare square shot used for a photo-wall submission.
+        const square = canvas.toDataURL("image/jpeg", 0.85);
+        composePolaroid(canvas).then((url) => onCaptureRef.current?.(url, square));
 
         flash();
         if (polaroid) {

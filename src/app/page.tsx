@@ -14,6 +14,7 @@ import { AnimatePresence } from 'framer-motion';
 import Projects from "@/components/home/Projects/Project"
 import EmojiKeypad from "@/components/home/Projects/EmojiKeypad"
 import PolaroidSection from "@/components/home/PolaroidSection"
+import PhotoWall from "@/components/home/PhotoWall"
 import MySetups from "@/components/home/MySetups"
 import Recommendations from "@/components/home/Recommendations"
 import Slideshow from "@/components/home/SliderSection"
@@ -85,6 +86,7 @@ export default function Home() {
         <AboutMe />
       </div>
       <PolaroidSection />
+      <PhotoWall />
       <Experience />
       {/* Emoji keypad — fills the white space right of the timeline's tail.
           (Motion intro lives inside the scene: drop-in + key self-test wave.) */}

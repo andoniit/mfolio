@@ -16,6 +16,8 @@ export default async function AdminDashboardPage() {
     { count: newsletterActiveCount },
     { count: recommendationsPendingCount },
     { count: recommendationsApprovedCount },
+    { count: photoWallPendingCount },
+    { count: photoWallApprovedCount },
   ] = await Promise.all([
     supabaseAdmin.from("posts").select("*", { count: "exact", head: true }).is("trashed_at", null),
     supabaseAdmin.from("posts").select("*", { count: "exact", head: true }).not("trashed_at", "is", null),
@@ -35,6 +37,14 @@ export default async function AdminDashboardPage() {
       .eq("status", "pending"),
     supabaseAdmin
       .from("recommendations")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "approved"),
+    supabaseAdmin
+      .from("photo_wall_posts")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "pending"),
+    supabaseAdmin
+      .from("photo_wall_posts")
       .select("*", { count: "exact", head: true })
       .eq("status", "approved"),
   ]);
@@ -94,6 +104,17 @@ export default async function AdminDashboardPage() {
       publicLabel: "View on site",
       meta: `${recommendationsApprovedCount ?? 0} published${
         recommendationsPendingCount ? ` · ${recommendationsPendingCount} pending review` : ""
+      }`,
+    },
+    {
+      title: "Photo Wall",
+      description: "Visitor Polaroids from the home page camera. Approve to publish.",
+      href: "/admin/photo-wall",
+      cta: "Manage photo wall",
+      publicHref: "/#photo-wall",
+      publicLabel: "View on site",
+      meta: `${photoWallApprovedCount ?? 0} published${
+        photoWallPendingCount ? ` · ${photoWallPendingCount} pending review` : ""
       }`,
     },
     {
