@@ -58,20 +58,105 @@
   padding: 11px 15px;
   border-radius: 999px;
   pointer-events: auto;
-  /* Same glass recipe as the flyout menu (blur 8px + light border) */
-  background: rgba(255, 255, 255, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  /* Liquid glass dressing. The refraction itself (backdrop-filter with an SVG
+     displacement map) is applied inline by `liquid-glass.js`; everything here is
+     the dressing that makes it read as a solid slab of glass:
+       - the gradient fill gives it thickness (lit top-left, lit bottom-right)
+       - ::before is the refracted rim, ::after the specular highlights */
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.24) 40%,
+    rgba(255, 255, 255, 0.14) 66%,
+    rgba(255, 255, 255, 0.38) 100%
+  );
+  /* Kept transparent so the ::before rim owns the edge without changing metrics
+     (the pill's animated width is measured from this box). */
+  border: 1px solid transparent;
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+    0 12px 36px rgba(0, 0, 0, 0.13),
+    0 2px 8px rgba(0, 0, 0, 0.05),
+    inset 0 1px 1px rgba(255, 255, 255, 0.7),
+    inset 0 -10px 22px rgba(255, 255, 255, 0.14);
   transition:
     padding 0.32s cubic-bezier(0.25, 0.85, 0.25, 1),
     box-shadow 0.32s ease,
-    border-color 0.32s ease,
-    background-color 0.32s ease;
+    background 0.32s ease;
+}
+
+/* Refracted edge: a gradient ring drawn in the 1px border box. Light catches
+   the top-left and bottom-right, the sides fall away — how a real bevel reads. */
+.pill::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  padding: 1.2px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.24) 26%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0.32) 74%,
+    rgba(255, 255, 255, 0.9) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Specular sheen: a bright bloom off the top-left shoulder and a softer bounce
+   off the bottom-right, which is what sells it as glass rather than frosting. */
+.pill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(
+      130% 105% at 20% -22%,
+      rgba(255, 255, 255, 0.72) 0%,
+      rgba(255, 255, 255, 0.16) 34%,
+      transparent 62%
+    ),
+    radial-gradient(
+      95% 78% at 88% 122%,
+      rgba(255, 255, 255, 0.34) 0%,
+      transparent 58%
+    );
+  opacity: 0.95;
+  pointer-events: none;
+  transition: opacity 0.32s ease, background-position 0.32s ease;
+}
+
+/* Content rides above both glass layers. */
+.locationSection,
+.divider,
+.links,
+.mobileMenu {
+  position: relative;
+  z-index: 1;
+}
+
+/* Safari/Firefox can't run SVG filters through backdrop-filter, so the module
+   applies a frosted blur instead and tags the element. Without refraction at the
+   rim the slab needs a touch more tint to still read as glass. */
+.pill:global(.lg-fallback) {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.62) 0%,
+    rgba(255, 255, 255, 0.4) 40%,
+    rgba(255, 255, 255, 0.32) 66%,
+    rgba(255, 255, 255, 0.54) 100%
+  );
 }
 
 /* Intro: narrow strip, pack row to the end so only the burger column shows. */
@@ -81,14 +166,26 @@
 }
 
 @media (hover: hover) {
+  /* On hover the slab thickens: richer tint, deeper shadow, brighter specular.
+     Blur/refraction stay put — they're owned by the module's inline filter. */
   .pill:hover {
     padding: 15px 19px;
-    background: rgba(255, 255, 255, 0.52);
-    border-color: rgba(255, 255, 255, 0.45);
+    background: linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.62) 0%,
+      rgba(255, 255, 255, 0.32) 40%,
+      rgba(255, 255, 255, 0.2) 66%,
+      rgba(255, 255, 255, 0.48) 100%
+    );
     box-shadow:
-      0 14px 44px rgba(0, 0, 0, 0.14),
-      inset 0 1px 0 rgba(255, 255, 255, 0.6),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.12);
+      0 18px 48px rgba(0, 0, 0, 0.16),
+      0 3px 10px rgba(0, 0, 0, 0.06),
+      inset 0 1px 1px rgba(255, 255, 255, 0.85),
+      inset 0 -12px 26px rgba(255, 255, 255, 0.18);
+  }
+
+  .pill:hover::after {
+    opacity: 1;
   }
 }
 
@@ -121,6 +218,26 @@
   line-height: 1;
   white-space: nowrap;
   transition: color 0.22s ease, text-shadow 0.22s ease;
+}
+
+/* Over dark sections a white slab reads as milk, not glass — drop the fill way
+   down and let the rim + specular do the work against the dark backdrop. */
+.pill[data-label-contrast="light"] {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.24) 0%,
+    rgba(255, 255, 255, 0.09) 42%,
+    rgba(255, 255, 255, 0.05) 68%,
+    rgba(255, 255, 255, 0.19) 100%
+  );
+  box-shadow:
+    0 14px 40px rgba(0, 0, 0, 0.36),
+    inset 0 1px 1px rgba(255, 255, 255, 0.5),
+    inset 0 -10px 22px rgba(255, 255, 255, 0.08);
+}
+
+.pill[data-label-contrast="light"]::after {
+  opacity: 0.75;
 }
 
 .pill[data-label-contrast="light"] .locationViewport {
@@ -309,6 +426,8 @@
 
 .mobileMenuPanel {
   position: absolute;
+  /* Above the pill's ::after sheen, which paints last in tree order. */
+  z-index: 2;
   right: 0;
   bottom: calc(100% + 10px);
   display: flex;
@@ -318,14 +437,21 @@
   padding: 10px;
   border-radius: 18px;
   /* Whiter / less see-through so page color doesn’t tint the menu */
-  background: rgba(255, 255, 255, 0.86);
-  border: 1px solid rgba(255, 255, 255, 0.65);
+  background: linear-gradient(
+    150deg,
+    rgba(255, 255, 255, 0.72) 0%,
+    rgba(255, 255, 255, 0.52) 44%,
+    rgba(255, 255, 255, 0.46) 70%,
+    rgba(255, 255, 255, 0.66) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.55);
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+    0 16px 44px rgba(0, 0, 0, 0.15),
+    0 2px 8px rgba(0, 0, 0, 0.05),
+    inset 0 1px 1px rgba(255, 255, 255, 0.85),
+    inset 0 -10px 24px rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(24px) saturate(190%) brightness(1.04);
+  -webkit-backdrop-filter: blur(24px) saturate(190%) brightness(1.04);
   opacity: 0;
   pointer-events: none;
   transform: translateY(10px) scale(0.96);
@@ -439,7 +565,13 @@
     max-width: 100%;
     gap: 10px;
     padding: 10px 12px;
-    background: rgba(255, 255, 255, 0.4);
+    background: linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.56) 0%,
+      rgba(255, 255, 255, 0.3) 40%,
+      rgba(255, 255, 255, 0.2) 66%,
+      rgba(255, 255, 255, 0.44) 100%
+    );
   }
 
   @media (hover: hover) {
@@ -528,14 +660,21 @@
     min-width: 0;
     padding: 16px 14px;
     border-radius: 24px;
-    background: rgba(255, 255, 255, 0.86);
-    border: 1px solid rgba(255, 255, 255, 0.65);
+    background: linear-gradient(
+      150deg,
+      rgba(255, 255, 255, 0.72) 0%,
+      rgba(255, 255, 255, 0.52) 44%,
+      rgba(255, 255, 255, 0.46) 70%,
+      rgba(255, 255, 255, 0.66) 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.55);
     box-shadow:
-      0 8px 32px rgba(0, 0, 0, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.5),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+      0 16px 44px rgba(0, 0, 0, 0.15),
+      0 2px 8px rgba(0, 0, 0, 0.05),
+      inset 0 1px 1px rgba(255, 255, 255, 0.85),
+      inset 0 -10px 24px rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(24px) saturate(190%) brightness(1.04);
+    -webkit-backdrop-filter: blur(24px) saturate(190%) brightness(1.04);
     opacity: 0;
     pointer-events: none;
     transform: translateY(12px);
@@ -658,14 +797,21 @@
     min-width: 0;
     padding: 16px 14px;
     border-radius: 24px;
-    background: rgba(255, 255, 255, 0.86);
-    border: 1px solid rgba(255, 255, 255, 0.65);
+    background: linear-gradient(
+      150deg,
+      rgba(255, 255, 255, 0.72) 0%,
+      rgba(255, 255, 255, 0.52) 44%,
+      rgba(255, 255, 255, 0.46) 70%,
+      rgba(255, 255, 255, 0.66) 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.55);
     box-shadow:
-      0 8px 32px rgba(0, 0, 0, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.5),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+      0 16px 44px rgba(0, 0, 0, 0.15),
+      0 2px 8px rgba(0, 0, 0, 0.05),
+      inset 0 1px 1px rgba(255, 255, 255, 0.85),
+      inset 0 -10px 24px rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(24px) saturate(190%) brightness(1.04);
+    -webkit-backdrop-filter: blur(24px) saturate(190%) brightness(1.04);
     opacity: 0;
     pointer-events: none;
     transform: translateY(12px);

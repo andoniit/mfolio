@@ -139,7 +139,10 @@ export default function RootLayout({
         lang="en"
         className={`${shadows.variable} ${satoshi.variable} ${sueEllenFrancisco.variable} ${coolvetica.variable} ${coolveticaItalic.variable}`}
       >
-      <body className="min-h-screen flex flex-col">
+      {/* Extensions (Grammarly et al.) stamp attributes onto <body> before React
+          hydrates, which trips the attribute-mismatch warning. Suppressing here
+          covers only this element's own attributes, not its children. */}
+      <body className="min-h-screen flex flex-col" suppressHydrationWarning>
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}
           strategy="afterInteractive"

@@ -12,6 +12,7 @@ import {
   useState,
   type CSSProperties,
 } from "react";
+import type { LiquidGlassHandle } from "@/lib/liquid-glass";
 import styles from "./FloatingBottomNav.module.scss";
 
 const SNAP_THRESHOLD_PX = 70;
@@ -462,6 +463,40 @@ export default function FloatingBottomNav() {
     if (!isDesktop) return;
     void requestAnimationFrame(() => draggableInstanceRef.current?.update());
   }, [isDesktop, snapBox.w, snapBox.h]);
+
+  // Liquid glass on the pill: a real refraction bulge at the rim plus a faint
+  // chromatic fringe. The module owns `backdrop-filter` and rebuilds its
+  // displacement map on resize (the intro width animation, hover padding); the
+  // tint, inner highlights and shadow stay in the stylesheet. Chromium only —
+  // Safari/Firefox get the frosted-blur fallback automatically, so nothing here
+  // is load-bearing for legibility.
+  useEffect(() => {
+    const pill = pillRef.current;
+    if (!pill) return;
+
+    let glass: LiquidGlassHandle | null = null;
+    let cancelled = false;
+
+    void import("@/lib/liquid-glass.js").then(() => {
+      if (cancelled || !window.liquidGlass) return;
+      glass = window.liquidGlass(pill, {
+        // The pill is small and carries text, so: gentle bulge, wide neutral
+        // interior, and enough interior blur to keep the label crisp.
+        scale: -70,
+        chroma: 4,
+        border: 0.16,
+        mapBlur: 8,
+        blur: 6,
+        saturate: 1.7,
+        fallbackBlur: 20,
+      });
+    });
+
+    return () => {
+      cancelled = true;
+      glass?.destroy();
+    };
+  }, []);
 
   useEffect(() => {
     const pill = pillRef.current;
