@@ -10,6 +10,7 @@ import VoluntaryRoles from "@/components/home/VoluntaryRoles";
 import Contact from "@/components/home/contact/Contact"
 import MyVision from "@/components/home/MyVision"
 import Preloader from "@/components/home/Preloader"
+import { PRELOADER_DURATION_MS } from "@/constants/preloader-logo"
 import { AnimatePresence } from 'framer-motion';
 import Projects from "@/components/home/Projects/Project"
 import EmojiKeypad from "@/components/home/Projects/EmojiKeypad"
@@ -39,7 +40,7 @@ function PreloaderGate() {
       setIntroDone(true);
       document.body.style.cursor = "default";
       window.scrollTo(0, 0);
-    }, 2000);
+    }, PRELOADER_DURATION_MS);
     return () => window.clearTimeout(t);
   }, [skipIntro]);
 

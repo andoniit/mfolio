@@ -25,33 +25,82 @@
         fill: #141516;
       }
     }
-    
-    p {
-      display: flex;
-      color: white;
-      font-size: 5em;
-      align-items: center;
-      justify-content: center;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 6;
-      font-family: 'Coolvetica', sans-serif;
-      font-weight: normal;
-      letter-spacing: 0.05em;
-      padding: 0;
-      margin: 0;
+}
 
-      span {
-        display: block;
-        width: 10px;
-        height: 10px;
-        background-color: white;
-        border-radius: 50%;
-        margin-right: 10px;
-      }
-    }
+/* The loader box IS the photo frame: it is pinned to the hero's own frame rect
+   (measured in Preloader.jsx) so the curtain lifts onto a photo that has not
+   moved. Falls back to the hero's geometry, centred, if the measure misses. */
+.loader {
+  /* Positioned by inline top/left/width/height, or centred by `.introduction`'s
+     flexbox — never by a CSS transform, since framer-motion writes its own
+     `transform` here for the fade-in scale. */
+  position: relative;
+  z-index: 6;
+  width: 25vw;
+  height: 25vh;
+  font-family: 'Coolvetica', sans-serif;
+  letter-spacing: 0.05em;
+}
+
+/* Counter + progress line, riding just above the frame. */
+.meter {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 7px;
+}
+
+.counter {
+  color: #ffffff;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.track {
+  width: 100%;
+  height: 1.5px;
+  border-radius: 2px;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.16);
+}
+
+.bar {
+  height: 100%;
+  background-color: #ffffff;
+  border-radius: inherit;
+  will-change: width;
+}
+
+.frame {
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+/* Height matches the frame, so a -100% translate advances exactly one photo. */
+.strip {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+
+.slide {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 100%;
+
+  img {
+    object-fit: cover;
+  }
 }
 
 @media screen and (max-width: 768px) {
@@ -60,22 +109,12 @@
     width: 100vw;
     padding: 1rem;
   }
-  
+
   .introduction svg {
     height: calc(100% + 100px);
   }
-  
-  .introduction p {
-    font-size: 3em;
-    top: 50%; 
-    left: 50%;
-    transform: translate(-50%, -50%);
-    padding: 0;
-  }
-  
-  .introduction p span {
-    width: 5px;
-    height: 5px;
-    margin-right: 5px;
+
+  .counter {
+    font-size: 0.95rem;
   }
 }

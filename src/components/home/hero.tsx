@@ -97,7 +97,10 @@ useEffect(() => {
       >
         {/* Section 1: Center Image */}
         <motion.div variants={itemVariants} style={{ scale: scaleSection1 }} className={`${styles.el} ${styles.section1}`}>
-          <div className={styles.imageContainer}>
+          {/* `data-hero-frame` is what the Preloader measures so its rolling photo
+              sits exactly here — the sticky box starts below the header, so this
+              is not the viewport centre. @see src/components/home/Preloader.jsx */}
+          <div data-hero-frame className={styles.imageContainer}>
             <Image
               src={Picture4}
               fill

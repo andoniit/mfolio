@@ -25,3 +25,12 @@ export function markLogoIntroPlayedSession(): void {
     /* ignore quota / private mode */
   }
 }
+
+/**
+ * How long the home Preloader holds before it peels away (ms).
+ * The `%` counter and its progress line are driven off this same window,
+ * so the number always lands on 100 right as the curtain lifts.
+ * @see src/components/home/Preloader.jsx
+ * @see src/app/page.tsx (PreloaderGate)
+ */
+export const PRELOADER_DURATION_MS = 2000;
