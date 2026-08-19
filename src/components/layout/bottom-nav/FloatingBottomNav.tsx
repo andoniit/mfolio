@@ -12,6 +12,7 @@ import {
   useState,
   type CSSProperties,
 } from "react";
+import { GlassPill } from "@/lib/glass-pill";
 import type { LiquidGlassHandle } from "@/lib/liquid-glass";
 import styles from "./FloatingBottomNav.module.scss";
 
@@ -73,14 +74,6 @@ function samplePageLuminanceBehindPill(pill: HTMLElement): number | null {
   }
   return null;
 }
-
-type DraggableInst = {
-  kill: () => void;
-  update: () => void;
-  x: number;
-  y: number;
-  applyBounds: (b: { minX: number; maxX: number; minY: number; maxY: number }) => void;
-};
 
 function useWindowSize() {
   const [size, setSize] = useState({ w: 0, h: 0 });
@@ -152,7 +145,7 @@ export default function FloatingBottomNav() {
   const pillRef = useRef<HTMLElement>(null);
   const dragHandleRef = useRef<HTMLDivElement>(null);
   const snapZoneRef = useRef<HTMLDivElement>(null);
-  const draggableInstanceRef = useRef<DraggableInst | null>(null);
+  const glassPillRef = useRef<GlassPill | null>(null);
   const { w: winW, h: winH } = useWindowSize();
   const [snapBox, setSnapBox] = useState({ w: 360, h: 52 });
   const [isDesktop, setIsDesktop] = useState(false);
@@ -222,7 +215,7 @@ export default function FloatingBottomNav() {
   useEffect(() => {
     if (!navIntroReady) return;
     const t = window.setTimeout(() => {
-      draggableInstanceRef.current?.update();
+      glassPillRef.current?.refresh();
     }, 800);
     return () => window.clearTimeout(t);
   }, [navIntroReady]);
@@ -308,16 +301,9 @@ export default function FloatingBottomNav() {
     if (!isNearFooter) return;
     const pill = pillRef.current;
     if (!pill || typeof window === "undefined") return;
-    gsap.to(pill, {
-      x: 0,
-      y: 0,
-      duration: 0.28,
-      ease: "power2.out",
-      overwrite: "auto",
-      onComplete: () => {
-        draggableInstanceRef.current?.update();
-      },
-    });
+    // Send it home on the spring rather than tweening transform directly, which
+    // would fight the controller's own loop for the same property.
+    glassPillRef.current?.home();
   }, [isNearFooter]);
 
   useEffect(() => {
@@ -461,7 +447,7 @@ export default function FloatingBottomNav() {
 
   useLayoutEffect(() => {
     if (!isDesktop) return;
-    void requestAnimationFrame(() => draggableInstanceRef.current?.update());
+    void requestAnimationFrame(() => glassPillRef.current?.refresh());
   }, [isDesktop, snapBox.w, snapBox.h]);
 
   // Liquid glass on the pill: a real refraction bulge at the rim plus a faint
@@ -498,122 +484,47 @@ export default function FloatingBottomNav() {
     };
   }, []);
 
+  // Drag physics: the pill chases the pointer on a spring, squashes along its
+  // direction of travel, and springs home when dropped near its resting spot.
+  // Pointer position is published as --gx/--gy so the glare tracks the cursor.
   useEffect(() => {
     const pill = pillRef.current;
     const handle = dragHandleRef.current;
     const snapZone = snapZoneRef.current;
-    if (
-      !isDesktop ||
-      !pill ||
-      !handle ||
-      !snapZone ||
-      typeof window === "undefined"
-    ) {
-      if (pill) gsap.set(pill, { clearProps: "x,y" });
-      if (draggableInstanceRef.current) {
-        draggableInstanceRef.current.kill();
-        draggableInstanceRef.current = null;
-      }
+
+    if (!isDesktop || !pill || !handle || typeof window === "undefined") {
+      glassPillRef.current?.destroy();
+      glassPillRef.current = null;
       return;
     }
 
-    gsap.set(pill, { x: 0, y: 0 });
-    gsap.set(snapZone, { opacity: 0, scale: 0.96 });
+    if (snapZone) gsap.set(snapZone, { opacity: 0, scale: 0.96 });
 
-    let dInst: DraggableInst | null = null;
-
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { Draggable } = require("gsap/Draggable") as {
-      Draggable: {
-        create: (
-          target: HTMLElement,
-          vars: Record<string, unknown>
-        ) => DraggableInst[];
-      };
-    };
-    gsap.registerPlugin(Draggable);
-
-    const applyBounds = () => {
-      if (!dInst) return;
-      const pad = 10;
-      const rect = pill.getBoundingClientRect();
-      const w = rect.width;
-      const h = rect.height;
-      const dx = dInst.x;
-      const dy = dInst.y;
-      const baseLeft = rect.left - dx;
-      const baseTop = rect.top - dy;
-      let minX = pad - baseLeft;
-      let maxX = window.innerWidth - pad - w - baseLeft;
-      let minY = pad - baseTop;
-      let maxY = window.innerHeight - pad - h - baseTop;
-      if (minX > maxX) [minX, maxX] = [maxX, minX];
-      if (minY > maxY) [minY, maxY] = [maxY, minY];
-      dInst.applyBounds({ minX, maxX, minY, maxY });
-    };
-
-    const draggable = Draggable.create(pill, {
-      type: "x,y",
-      trigger: handle,
-      cursor: "grab",
-      activeCursor: "grabbing",
-      dragClickables: false,
-      minimumMovement: 4,
-      zIndexBoost: false,
-      onPress() {
-        applyBounds();
-        gsap.set(handle, { cursor: "grabbing" });
-      },
-      onRelease() {
-        gsap.set(handle, { cursor: "grab" });
-      },
-      onDrag() {
-        const dx = Number((this as { x: number }).x);
-        const dy = Number((this as { y: number }).y);
-        const dist = Math.hypot(dx, dy);
-        const near = dist < SNAP_THRESHOLD_PX;
+    const controller = new GlassPill(pill, {
+      handle,
+      margin: 10,
+      snapThreshold: SNAP_THRESHOLD_PX,
+      reducedMotion: !!prefersReducedMotion,
+      onDragState({ dragging, nearHome }) {
+        gsap.set(handle, { cursor: dragging ? "grabbing" : "grab" });
+        if (!snapZone) return;
+        const show = dragging && nearHome;
         gsap.to(snapZone, {
-          opacity: near ? 1 : 0,
-          scale: near ? 1 : 0.96,
+          opacity: show ? 1 : 0,
+          scale: show ? 1 : 0.96,
           duration: 0.2,
           ease: "power2.out",
         });
       },
-      onDragEnd() {
-        gsap.to(snapZone, {
-          opacity: 0,
-          scale: 0.96,
-          duration: 0.25,
-          ease: "power2.out",
-        });
-        const dx = Number((this as { x: number }).x);
-        const dy = Number((this as { y: number }).y);
-        const dist = Math.hypot(dx, dy);
-        if (dist < SNAP_THRESHOLD_PX) {
-          gsap.to(pill, {
-            x: 0,
-            y: 0,
-            duration: 0.85,
-            ease: "elastic.out(1, 0.55)",
-            onUpdate: () => dInst?.update(),
-            onComplete: () => dInst?.update(),
-          });
-        }
-      },
-    })[0];
+    });
 
-    dInst = draggable;
-    draggableInstanceRef.current = draggable;
-    applyBounds();
-    window.addEventListener("resize", applyBounds, { passive: true });
+    glassPillRef.current = controller;
 
     return () => {
-      window.removeEventListener("resize", applyBounds);
-      draggable.kill();
-      draggableInstanceRef.current = null;
-      gsap.set(pill, { clearProps: "x,y" });
+      controller.destroy();
+      glassPillRef.current = null;
     };
-  }, [isDesktop, pathname, winW, winH]);
+  }, [isDesktop, pathname, winW, winH, prefersReducedMotion]);
 
   /** Portfolio preview iframe (`/?mfEmbed=1`) — hide floating nav so it is not duplicated. */
   if (searchParams.get("mfEmbed") === "1") {

@@ -58,6 +58,10 @@
   padding: 11px 15px;
   border-radius: 999px;
   pointer-events: auto;
+  /* Pointer position, published by the GlassPill controller on pointermove.
+     Defaults put the glare at the top-centre before the cursor arrives. */
+  --gx: 50%;
+  --gy: 0%;
   /* Liquid glass dressing. The refraction itself (backdrop-filter with an SVG
      displacement map) is applied inline by `liquid-glass.js`; everything here is
      the dressing that makes it read as a solid slab of glass:
@@ -121,6 +125,14 @@
   z-index: 0;
   border-radius: inherit;
   background:
+    /* Follows the cursor across the glass — the highlight you'd see sliding
+       over a real slab as it tilts under your finger. */
+    radial-gradient(
+      42% 130% at var(--gx) var(--gy),
+      rgba(255, 255, 255, 0.55) 0%,
+      rgba(255, 255, 255, 0.14) 45%,
+      transparent 72%
+    ),
     radial-gradient(
       130% 105% at 20% -22%,
       rgba(255, 255, 255, 0.72) 0%,
