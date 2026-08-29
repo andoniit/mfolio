@@ -10,73 +10,116 @@ import {
 
 const EMPTY: OutsideOfWorkPayload = { photos: [], gamePhotos: [], games: [] };
 
-/* ------------------------------- photo mosaic ------------------------------ */
+/* ------------------------------ carousel card ------------------------------ */
+
+function Chevron({ dir }: { dir: "left" | "right" }) {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true">
+      <path
+        d={dir === "left" ? "M14.5 5.5 8 12l6.5 6.5" : "M9.5 5.5 16 12l-6.5 6.5"}
+        stroke="#2b2b29"
+        strokeWidth="2.1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 /**
- * A deliberately uneven mosaic: the first photo takes a tall cell and the rest
- * fill around it, so a handful of pictures still reads as a composition rather
- * than a grid of thumbnails.
+ * One photo at a time in a card: a chip naming the set, the app mark it came
+ * from, and a pill of controls under it. All frames stay mounted and crossfade,
+ * so stepping through never flashes an empty stage.
  */
-function PhotoMosaic({
+function PhotoCarousel({
   photos,
-  onOpen,
   label,
   glyph,
+  onOpen,
 }: {
   photos: PublicOutsideItem[];
-  onOpen: (index: number) => void;
   label: string;
   glyph: React.ReactNode;
+  onOpen: (index: number) => void;
 }) {
+  const [index, setIndex] = useState(0);
+  const count = photos.length;
+
+  const go = useCallback(
+    (delta: number) => setIndex((prev) => (count === 0 ? 0 : (prev + delta + count) % count)),
+    [count]
+  );
+
+  // Slow auto-advance; the timer restarts on every change, so a manual step
+  // gives you the full dwell on the photo you just chose.
+  useEffect(() => {
+    if (count < 2) return;
+    const id = window.setInterval(() => go(1), 6500);
+    return () => window.clearInterval(id);
+  }, [count, index, go]);
+
+  const current = photos[index];
+
   return (
-    <div className="oow-block">
-      <div className="oow-block-head">
-        <span className="oow-app-badge" aria-hidden="true">{glyph}</span>
-        <h3>{label}</h3>
-        {photos.length > 0 && <span className="oow-count">{photos.length}</span>}
-      </div>
-      {photos.length === 0 ? (
-        <div className="oow-empty oow-empty--mosaic">
+    <motion.article
+      className="oow-card"
+      initial={{ opacity: 0, y: 26 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.15 }}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <span className="oow-chip">{label}</span>
+      <span className="oow-app-badge" aria-hidden="true">{glyph}</span>
+
+      {count === 0 ? (
+        <div className="oow-empty oow-empty--stage">
           <span>{label}</span>
           <em>Coming soon</em>
         </div>
       ) : (
-        <MosaicGrid photos={photos} onOpen={onOpen} />
-      )}
-    </div>
-  );
-}
+        <>
+          <button
+            type="button"
+            className="oow-stage"
+            onClick={() => onOpen(index)}
+            aria-label={`Open photo: ${current.title}`}
+          >
+            {photos.map((photo, i) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={photo.id}
+                className={`oow-frame${i === index ? " is-active" : ""}`}
+                src={photo.image_url ?? ""}
+                alt={photo.title}
+                loading={i === 0 ? "eager" : "lazy"}
+                draggable={false}
+              />
+            ))}
+          </button>
 
-function MosaicGrid({
-  photos,
-  onOpen,
-}: {
-  photos: PublicOutsideItem[];
-  onOpen: (index: number) => void;
-}) {
-  return (
-    <div className="oow-mosaic" data-count={Math.min(photos.length, 5)}>
-      {photos.slice(0, 5).map((photo, i) => (
-        <motion.button
-          key={photo.id}
-          type="button"
-          className="oow-tile"
-          onClick={() => onOpen(i)}
-          aria-label={`Open photo: ${photo.title}`}
-          initial={{ opacity: 0, scale: 0.96 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: i * 0.07 }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={photo.image_url ?? ""} alt={photo.title} loading="lazy" draggable={false} />
-          <span className="oow-tile-caption">
-            <strong>{photo.title}</strong>
-            {photo.subtitle && <em>{photo.subtitle}</em>}
-          </span>
-        </motion.button>
-      ))}
-    </div>
+          <div className="oow-bar">
+            <div className="oow-meta">
+              <strong>{current.title}</strong>
+              {current.subtitle && <span>{current.subtitle}</span>}
+            </div>
+
+            {count > 1 && (
+              <div className="oow-nav">
+                <button type="button" onClick={() => go(-1)} aria-label="Previous photo">
+                  <Chevron dir="left" />
+                </button>
+                <span className="oow-nav-count">
+                  {String(index + 1).padStart(2, "0")} / {String(count).padStart(2, "0")}
+                </span>
+                <button type="button" onClick={() => go(1)} aria-label="Next photo">
+                  <Chevron dir="right" />
+                </button>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+    </motion.article>
   );
 }
 
@@ -88,11 +131,13 @@ function GameList({ games }: { games: PublicOutsideItem[] }) {
       className="oow-games"
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.15 }}
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+      viewport={{ once: true, amount: 0.12 }}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.08 }}
     >
       <div className="oow-block-head">
-        <span className="oow-app-badge" aria-hidden="true"><ControllerGlyph /></span>
+        <span className="oow-app-badge oow-app-badge--inline" aria-hidden="true">
+          <ControllerGlyph />
+        </span>
         <h3>Games I&apos;ve played</h3>
         {games.length > 0 && <span className="oow-count">{games.length}</span>}
       </div>
@@ -131,12 +176,7 @@ function GameList({ games }: { games: PublicOutsideItem[] }) {
             return (
               <li key={game.id}>
                 {game.link_url ? (
-                  <a
-                    className="oow-game-row"
-                    href={game.link_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                  <a className="oow-game-row" href={game.link_url} target="_blank" rel="noopener noreferrer">
                     {row}
                   </a>
                 ) : (
@@ -176,12 +216,12 @@ export default function OutsideOfWork() {
     };
   }, []);
 
-  const shown = lightbox ? data[lightbox.set].slice(0, 5) : [];
+  const shown = lightbox ? data[lightbox.set] : [];
   const step = useCallback(
     (delta: number) =>
       setLightbox((prev) => {
         if (!prev) return prev;
-        const list = data[prev.set].slice(0, 5);
+        const list = data[prev.set];
         if (list.length === 0) return prev;
         return { ...prev, index: (prev.index + delta + list.length) % list.length };
       }),
@@ -189,7 +229,7 @@ export default function OutsideOfWork() {
   );
 
   useEffect(() => {
-    if (lightbox === null) return;
+    if (!lightbox) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setLightbox(null);
       if (e.key === "ArrowRight") step(1);
@@ -213,25 +253,24 @@ export default function OutsideOfWork() {
         /* Outside of work */
       </motion.h2>
 
-      {/* Photos stand on their own; the two gaming blocks pair up beside each
-          other, since captures and the played list belong together. */}
       <div className="oow-stack">
-        <PhotoMosaic
-          photos={data.photos}
-          onOpen={(index) => setLightbox({ set: "photos", index })}
-          label="Photos"
-          glyph={<PhotosGlyph />}
-        />
-
-        <div className="oow-split">
-          <PhotoMosaic
+        {/* The two card sets pair off; the list runs full width beneath them. */}
+        <div className="oow-cards">
+          <PhotoCarousel
+            photos={data.photos}
+            label="Photos I shot"
+            glyph={<PhotosGlyph />}
+            onOpen={(index) => setLightbox({ set: "photos", index })}
+          />
+          <PhotoCarousel
             photos={data.gamePhotos}
-            onOpen={(index) => setLightbox({ set: "gamePhotos", index })}
             label="From the PS5"
             glyph={<PlayStationGlyph />}
+            onOpen={(index) => setLightbox({ set: "gamePhotos", index })}
           />
-          <GameList games={data.games} />
         </div>
+
+        <GameList games={data.games} />
       </div>
 
       <AnimatePresence>
@@ -262,7 +301,9 @@ export default function OutsideOfWork() {
                 {shown.length > 1 && (
                   <span className="oow-lightbox-nav">
                     <button type="button" onClick={() => step(-1)} aria-label="Previous photo">‹</button>
-                    <span>{(lightbox?.index ?? 0) + 1}/{shown.length}</span>
+                    <span>
+                      {String((lightbox?.index ?? 0) + 1).padStart(2, "0")} / {String(shown.length).padStart(2, "0")}
+                    </span>
                     <button type="button" onClick={() => step(1)} aria-label="Next photo">›</button>
                   </span>
                 )}
@@ -284,7 +325,6 @@ export default function OutsideOfWork() {
     </section>
   );
 }
-
 
 /* --------------------------------- glyphs ---------------------------------- */
 
@@ -369,29 +409,160 @@ function OutsideOfWorkStyles() {
       .oow-stack {
         display: flex;
         flex-direction: column;
-        gap: 3.5rem;
+        gap: 2rem;
         max-width: 1320px;
         margin: 0 auto;
       }
-
-      /* Asymmetric on purpose: the captures carry the weight, the list sits
-         beside them as a quieter column. */
-      .oow-split {
+      .oow-cards {
         display: grid;
-        grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
-        gap: 2.5rem;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 2rem;
         align-items: start;
       }
 
-      .oow-block { min-width: 0; }
+      /* --- the card --- */
+      .oow-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        background: #ffffff;
+        border: 1px solid rgba(0,0,0,0.05);
+        border-radius: 26px;
+        box-shadow: 0 14px 38px rgba(0,0,0,0.07);
+        overflow: hidden;
+      }
 
-      /* Each block is announced by its app mark, so the three read as three
-         places rather than one long strip. */
+      .oow-chip {
+        position: absolute;
+        top: 1.1rem;
+        left: 1.1rem;
+        z-index: 2;
+        padding: 8px 15px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.94);
+        backdrop-filter: blur(8px);
+        font-size: 0.84rem;
+        font-weight: 500;
+        color: #2b2b29;
+        white-space: nowrap;
+      }
+
+      .oow-app-badge {
+        position: absolute;
+        top: 1.1rem;
+        right: 1.1rem;
+        z-index: 2;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 13px;
+        background: #ffffff;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+      }
+      /* The games header uses the same mark inline, in normal flow. */
+      .oow-app-badge--inline {
+        position: static;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        flex: 0 0 auto;
+      }
+
+      .oow-stage {
+        position: relative;
+        display: block;
+        width: 100%;
+        aspect-ratio: 3 / 2;
+        padding: 0;
+        border: 0;
+        background: #141414;
+        cursor: zoom-in;
+        overflow: hidden;
+      }
+      .oow-frame {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        transform: scale(1.03);
+        transition: opacity 0.85s ease, transform 0.85s ease;
+        user-select: none;
+      }
+      .oow-frame.is-active { opacity: 1; transform: scale(1); }
+
+      .oow-bar {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.25rem 1.15rem;
+        background: #ffffff;
+      }
+      .oow-meta { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+      .oow-meta strong {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #1d1d1b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .oow-meta span { font-size: 0.82rem; color: #9a9a92; }
+
+      /* --- the pill of controls --- */
+      .oow-nav {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-left: auto;
+        padding: 5px;
+        background: #efeeeb;
+        border-radius: 999px;
+        flex: 0 0 auto;
+      }
+      .oow-nav button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border: 0;
+        border-radius: 50%;
+        background: #ffffff;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.13);
+        cursor: pointer;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+      }
+      .oow-nav button:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0,0,0,0.16); }
+      .oow-nav button:active { transform: translateY(0); }
+      .oow-nav-count {
+        min-width: 58px;
+        text-align: center;
+        font-size: 0.92rem;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        color: #1d1d1b;
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* --- games --- */
+      .oow-games {
+        padding: 1.5rem;
+        background: #ffffff;
+        border: 1px solid rgba(0,0,0,0.05);
+        border-radius: 26px;
+        box-shadow: 0 14px 38px rgba(0,0,0,0.07);
+      }
       .oow-block-head {
         display: flex;
         align-items: center;
         gap: 0.7rem;
-        margin-bottom: 1.1rem;
+        margin-bottom: 1rem;
       }
       .oow-block-head h3 {
         margin: 0;
@@ -400,83 +571,6 @@ function OutsideOfWorkStyles() {
         font-weight: 400;
         letter-spacing: 0.01em;
         color: #1d1d1b;
-      }
-      .oow-app-badge {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
-        background: #ffffff;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-        flex: 0 0 auto;
-      }
-
-      /* --- mosaic --- */
-      .oow-mosaic {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        grid-auto-rows: 190px;
-        gap: 14px;
-      }
-      /* First photo anchors the composition. */
-      .oow-mosaic > :first-child { grid-column: span 2; grid-row: span 2; }
-      .oow-mosaic[data-count="1"] > :first-child { grid-column: span 3; }
-      .oow-mosaic[data-count="2"] > :first-child { grid-column: span 2; grid-row: span 2; }
-      .oow-mosaic[data-count="4"] > :nth-child(4) { grid-column: span 2; }
-
-      .oow-tile {
-        position: relative;
-        display: block;
-        padding: 0;
-        border: 0;
-        border-radius: 18px;
-        overflow: hidden;
-        background: #e9e8e3;
-        cursor: zoom-in;
-        transform: translateZ(0);
-      }
-      .oow-tile img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-        transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
-      }
-      .oow-tile:hover img { transform: scale(1.06); }
-
-      /* Caption rides in on hover; always visible on touch, where there is no
-         hover to reveal it. */
-      .oow-tile-caption {
-        position: absolute;
-        inset: auto 0 0 0;
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        padding: 2.5rem 0.9rem 0.85rem;
-        text-align: left;
-        background: linear-gradient(to top, rgba(0,0,0,0.72), rgba(0,0,0,0));
-        color: #fff;
-        opacity: 0;
-        transform: translateY(6px);
-        transition: opacity 0.35s ease, transform 0.35s ease;
-        pointer-events: none;
-      }
-      .oow-tile:hover .oow-tile-caption,
-      .oow-tile:focus-visible .oow-tile-caption { opacity: 1; transform: translateY(0); }
-      .oow-tile-caption strong { font-size: 0.92rem; font-weight: 600; }
-      .oow-tile-caption em { font-style: normal; font-size: 0.74rem; opacity: 0.8; }
-
-      /* --- games --- */
-      .oow-games {
-        position: sticky;
-        top: 2rem;
-        padding: 1.5rem;
-        background: #ffffff;
-        border: 1px solid rgba(0,0,0,0.06);
-        border-radius: 22px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
       }
       .oow-count {
         font-size: 0.78rem;
@@ -489,11 +583,10 @@ function OutsideOfWorkStyles() {
         list-style: none;
         margin: 0;
         padding: 0;
-        display: flex;
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 0 1.5rem;
       }
-      .oow-game-list > li + li { border-top: 1px solid rgba(0,0,0,0.05); }
-
       .oow-game-row {
         display: flex;
         align-items: center;
@@ -501,8 +594,9 @@ function OutsideOfWorkStyles() {
         padding: 0.7rem 0.2rem;
         text-decoration: none;
         color: inherit;
-        transition: background 0.2s ease;
         border-radius: 10px;
+        border-top: 1px solid rgba(0,0,0,0.05);
+        transition: background 0.2s ease;
       }
       a.oow-game-row:hover { background: #f6f6f3; }
 
@@ -571,11 +665,7 @@ function OutsideOfWorkStyles() {
         color: #c3c2bb;
         text-align: center;
       }
-      .oow-empty--mosaic {
-        min-height: 400px;
-        border: 1px dashed rgba(0,0,0,0.09);
-        border-radius: 18px;
-      }
+      .oow-empty--stage { aspect-ratio: 3 / 2; min-height: 0; background: #fbfbf9; }
       .oow-empty span { font-size: 0.85rem; font-weight: 600; }
       .oow-empty em {
         font-family: var(--font-coolvetica), sans-serif;
@@ -645,23 +735,20 @@ function OutsideOfWorkStyles() {
         cursor: pointer;
       }
 
-      /* Stack once the two columns stop having room to breathe. */
-      @media (max-width: 1000px) {
-        .oow-stack { gap: 2.5rem; }
-        .oow-split { grid-template-columns: 1fr; gap: 2.5rem; }
-        .oow-games { position: static; }
-        .oow-mosaic { grid-auto-rows: 165px; }
+      @media (max-width: 900px) {
+        .oow-cards { grid-template-columns: 1fr; gap: 1.5rem; }
+        .oow-stack { gap: 1.5rem; }
       }
 
       @media (max-width: 640px) {
         .oow-section { padding: 4rem 1.25rem 5rem; }
         .oow-heading { margin-bottom: 2.25rem; }
-        .oow-mosaic { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 140px; gap: 10px; }
-        .oow-mosaic > :first-child { grid-column: span 2; grid-row: span 1; }
-        .oow-mosaic[data-count="4"] > :nth-child(4) { grid-column: span 1; }
-        /* No hover on touch, so the caption has to stay put. */
-        .oow-tile-caption { opacity: 1; transform: none; }
+        .oow-card, .oow-games { border-radius: 20px; }
+        .oow-bar { flex-wrap: wrap; gap: 0.75rem; padding: 0.9rem 1rem 1rem; }
+        .oow-nav { margin-left: 0; }
+        .oow-meta strong { font-size: 0.98rem; }
         .oow-games { padding: 1.15rem; }
+        .oow-game-list { grid-template-columns: 1fr; }
       }
     `}</style>
   );
