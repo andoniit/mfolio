@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { isAdminRequest } from "@/lib/api-auth";
 import {
   parsePhotoWallInput,
   parsePhotoDataUrl,
@@ -19,11 +20,18 @@ function missingConfig() {
 }
 
 // Public: approved Polaroids for the home page wall.
-export async function GET() {
-  const { data, error } = await supabaseAdmin
-    .from("photo_wall_posts")
-    .select(PUBLIC_COLUMNS)
-    .eq("status", "approved")
+// `?status=all` with an admin token returns every submission so the owner can
+// review what is still pending.
+export async function GET(req: Request) {
+  const wantsAll = new URL(req.url).searchParams.get("status") === "all";
+  const asAdmin = wantsAll && (await isAdminRequest(req));
+
+  const columns: string = asAdmin ? "*" : PUBLIC_COLUMNS;
+  let query = supabaseAdmin.from("photo_wall_posts").select(columns);
+
+  if (!asAdmin) query = query.eq("status", "approved");
+
+  const { data, error } = await query
     .order("sort_order", { ascending: true })
     .order("created_at", { ascending: false });
 
@@ -31,7 +39,7 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 
-  return NextResponse.json((data ?? []) as PublicPhotoWallPost[]);
+  return NextResponse.json((data ?? []) as unknown as PublicPhotoWallPost[]);
 }
 
 // Public: submit a Polaroid + caption. Stored as 'pending' until approved.

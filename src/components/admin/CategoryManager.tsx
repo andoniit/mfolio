@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { adminFetch } from "@/lib/admin-fetch";
 
 export default function CategoryManager({ categories }: { categories: any[] }) {
   const [name, setName] = useState("");
@@ -12,7 +13,7 @@ export default function CategoryManager({ categories }: { categories: any[] }) {
     if (!name.trim()) return;
     
     setLoading(true);
-    const res = await fetch("/api/categories", {
+    const res = await adminFetch("/api/categories", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -96,7 +97,7 @@ export default function CategoryManager({ categories }: { categories: any[] }) {
 
                         setDeletingId(category.id);
                         try {
-                          const res = await fetch(`/api/categories/${category.id}`, {
+                          const res = await adminFetch(`/api/categories/${category.id}`, {
                             method: "DELETE",
                           });
 

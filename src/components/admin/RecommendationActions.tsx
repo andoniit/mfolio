@@ -9,6 +9,7 @@ import {
   normalizeColor,
   type RecommendationStatus,
 } from "@/lib/recommendations";
+import { adminFetch } from "@/lib/admin-fetch";
 
 type Props = {
   id: string;
@@ -48,7 +49,7 @@ export default function RecommendationActions({ id, status, color, avatarUrl }: 
   const patch = async (body: Record<string, unknown>) => {
     setBusy(true);
     try {
-      const res = await fetch(`/api/recommendations/${id}`, {
+      const res = await adminFetch(`/api/recommendations/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -68,7 +69,7 @@ export default function RecommendationActions({ id, status, color, avatarUrl }: 
     if (!confirm("Delete this recommendation permanently?")) return;
     setBusy(true);
     try {
-      const res = await fetch(`/api/recommendations/${id}`, { method: "DELETE" });
+      const res = await adminFetch(`/api/recommendations/${id}`, { method: "DELETE" });
       if (!res.ok) {
         const r = await res.json().catch(() => null);
         alert(r?.error || "Delete failed.");

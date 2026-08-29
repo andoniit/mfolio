@@ -6,6 +6,7 @@ import AdminDateField from "@/components/admin/AdminDateField";
 import BlogEditor from "@/components/blog/BlogEditor";
 import ImageUpload from "@/components/admin/ImageUpload";
 import { PROJECT_IMAGES_BUCKET } from "@/lib/project-storage";
+import { adminFetch } from "@/lib/admin-fetch";
 
 export type GalleryItem = {
   image_url: string;
@@ -190,7 +191,7 @@ export default function ProjectForm({ initialData, projectId }: ProjectFormProps
     };
 
     try {
-      const res = await fetch(
+      const res = await adminFetch(
         isEditing ? `/api/projects/${projectId}` : "/api/projects",
         {
           method: isEditing ? "PUT" : "POST",
@@ -222,7 +223,7 @@ export default function ProjectForm({ initialData, projectId }: ProjectFormProps
     if (!ok) return;
 
     try {
-      const res = await fetch(`/api/projects/${projectId}`, { method: "DELETE" });
+      const res = await adminFetch(`/api/projects/${projectId}`, { method: "DELETE" });
       const result = await res.json().catch(() => null);
 
       if (!res.ok) {

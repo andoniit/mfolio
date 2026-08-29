@@ -1,5 +1,7 @@
 "use client";
 
+import { adminFetch } from "@/lib/admin-fetch";
+
 type Props = {
   experienceId: string;
   title: string;
@@ -19,7 +21,7 @@ export default function ExperienceListTrashButton({
       return;
     }
 
-    const res = await fetch(`/api/experiences/${experienceId}`, { method: "DELETE" });
+    const res = await adminFetch(`/api/experiences/${experienceId}`, { method: "DELETE" });
     const result = await res.json().catch(() => null);
 
     if (!res.ok) {

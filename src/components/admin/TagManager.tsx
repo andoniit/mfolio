@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { adminFetch } from "@/lib/admin-fetch";
 
 export default function TagManager({ tags }: { tags: any[] }) {
   const [name, setName] = useState("");
@@ -11,7 +12,7 @@ export default function TagManager({ tags }: { tags: any[] }) {
     if (!name.trim()) return;
 
     setLoading(true);
-    const res = await fetch("/api/tags", {
+    const res = await adminFetch("/api/tags", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

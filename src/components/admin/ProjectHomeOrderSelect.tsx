@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { adminFetch } from "@/lib/admin-fetch";
 
 type Props = {
   projectId: string;
@@ -15,7 +16,7 @@ export default function ProjectHomeOrderSelect({ projectId, initialValue }: Prop
     setSaving(true);
     setValue(next);
 
-    const res = await fetch(`/api/projects/${projectId}/home-feature-order`, {
+    const res = await adminFetch(`/api/projects/${projectId}/home-feature-order`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ home_feature_order: next ? Number(next) : null }),

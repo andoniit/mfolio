@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { RESUME_BUCKET, RESUME_OBJECT_PATH } from "@/lib/resume-storage";
+import { adminFetch } from "@/lib/admin-fetch";
 
 // --- Icons ---
 const PdfIcon = () => (
@@ -113,7 +114,7 @@ export default function ResumeManager() {
 
     setRemoving(true);
     try {
-      const res = await fetch("/api/resume", { method: "DELETE" });
+      const res = await adminFetch("/api/resume", { method: "DELETE" });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         alert(data?.error || "Failed to remove resume");

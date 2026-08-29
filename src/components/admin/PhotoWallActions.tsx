@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { MESSAGE_MAX, type PhotoWallStatus } from "@/lib/photo-wall";
+import { adminFetch } from "@/lib/admin-fetch";
 
 type Props = {
   id: string;
@@ -19,7 +20,7 @@ export default function PhotoWallActions({ id, status, message }: Props) {
   const patch = async (body: Record<string, unknown>) => {
     setBusy(true);
     try {
-      const res = await fetch(`/api/photo-wall/${id}`, {
+      const res = await adminFetch(`/api/photo-wall/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -40,7 +41,7 @@ export default function PhotoWallActions({ id, status, message }: Props) {
     if (!confirm("Delete this photo permanently? The uploaded image is removed too.")) return;
     setBusy(true);
     try {
-      const res = await fetch(`/api/photo-wall/${id}`, { method: "DELETE" });
+      const res = await adminFetch(`/api/photo-wall/${id}`, { method: "DELETE" });
       if (!res.ok) {
         const r = await res.json().catch(() => null);
         alert(r?.error || "Delete failed.");

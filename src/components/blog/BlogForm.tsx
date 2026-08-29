@@ -5,6 +5,7 @@ import slugify from "slugify";
 import BlogEditor from "@/components/blog/BlogEditor";
 import AdminDateField from "@/components/admin/AdminDateField";
 import ImageUpload from "@/components/admin/ImageUpload";
+import { adminFetch } from "@/lib/admin-fetch";
 
 type Category = {
   id: string;
@@ -103,7 +104,7 @@ export default function BlogForm({
 
     setCreatingTag(true);
     try {
-      const res = await fetch("/api/tags", {
+      const res = await adminFetch("/api/tags", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -190,7 +191,7 @@ export default function BlogForm({
     };
 
     try {
-      const res = await fetch(
+      const res = await adminFetch(
         isEditing ? `/api/posts/${postId}` : "/api/posts",
         {
           method: isEditing ? "PUT" : "POST",
@@ -226,7 +227,7 @@ export default function BlogForm({
     if (!ok) return;
 
     try {
-      const res = await fetch(`/api/posts/${postId}`, {
+      const res = await adminFetch(`/api/posts/${postId}`, {
         method: "DELETE",
       });
 
