@@ -9,7 +9,15 @@ export async function GET(req: Request) {
   const wantsAll = new URL(req.url).searchParams.get("all") === "1";
   const isAdmin = wantsAll && (await isAdminRequest(req));
 
-  let query = supabaseAdmin.from("posts").select(`
+  // The admin list only needs enough to draw a row. Selecting `*` here meant
+  // shipping content_json and content_html — ~75KB of post bodies — to a screen
+  // that shows titles.
+  const ADMIN_LIST_COLUMNS =
+    "id, title, slug, excerpt, cover_image_url, published, published_at, trashed_at, category_id";
+
+  let query = isAdmin
+    ? supabaseAdmin.from("posts").select(ADMIN_LIST_COLUMNS)
+    : supabaseAdmin.from("posts").select(`
       *,
       categories ( id, name, slug ),
       post_tags (
