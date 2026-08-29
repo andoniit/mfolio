@@ -15,6 +15,20 @@ export default function AdminShell({
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
+
+  // On a phone the 320px sidebar leaves almost nothing for the content, so
+  // start collapsed to the icon rail below the breakpoint. This is also what
+  // the iOS app's embedded web screens get. Still togglable by hand — only the
+  // crossing of the breakpoint reasserts it, so a deliberate expand sticks.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const narrow = window.matchMedia("(max-width: 900px)");
+    const apply = (matches: boolean) => setCollapsed(matches);
+    apply(narrow.matches);
+    const onChange = (e: MediaQueryListEvent) => apply(e.matches);
+    narrow.addEventListener("change", onChange);
+    return () => narrow.removeEventListener("change", onChange);
+  }, []);
  
   const isLogin = useMemo(() => pathname === "/admin/login", [pathname]);
  

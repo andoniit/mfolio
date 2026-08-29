@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { isAdminRequest } from "@/lib/api-auth";
 import { revalidateExperienceCaches } from "@/lib/revalidate-experience";
 import { buildExperiencePayload, parsePositiveInt } from "@/lib/experience-payload";
 
@@ -8,11 +9,14 @@ export async function GET(req: Request) {
   const limit = parsePositiveInt(searchParams.get("limit"), 100);
   const category = searchParams.get("category");
 
-  let query = supabaseAdmin
-    .from("experiences")
-    .select("*")
-    .eq("published", true)
-    .is("trashed_at", null);
+  // `?all=1` adds unpublished and trashed rows, for the owner only.
+  const wantsAll = searchParams.get("all") === "1";
+  const isAdmin = wantsAll && (await isAdminRequest(req));
+
+  let query = supabaseAdmin.from("experiences").select("*");
+  if (!isAdmin) {
+    query = query.eq("published", true).is("trashed_at", null);
+  }
 
   if (category === "work" || category === "volunteer") {
     query = query.eq("category", category);

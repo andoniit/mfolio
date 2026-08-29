@@ -1,20 +1,30 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { isAdminRequest } from "@/lib/api-auth";
 import { revalidateBlogCaches } from "@/lib/revalidate-blog";
 
-export async function GET() {
-  const { data, error } = await supabaseAdmin
-    .from("posts")
-    .select(`
+export async function GET(req: Request) {
+  // `?all=1` returns drafts and trashed posts too, but only for the owner —
+  // the public blog keeps getting published, untrashed posts and nothing else.
+  const wantsAll = new URL(req.url).searchParams.get("all") === "1";
+  const isAdmin = wantsAll && (await isAdminRequest(req));
+
+  let query = supabaseAdmin.from("posts").select(`
       *,
       categories ( id, name, slug ),
       post_tags (
         tags ( id, name, slug )
       )
-    `)
-    .eq("published", true)
-    .is("trashed_at", null)
-    .order("published_at", { ascending: false });
+    `);
+
+  if (!isAdmin) {
+    query = query.eq("published", true).is("trashed_at", null);
+  }
+
+  const { data, error } = await query.order("published_at", {
+    ascending: false,
+    nullsFirst: false,
+  });
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });

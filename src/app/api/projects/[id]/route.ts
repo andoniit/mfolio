@@ -143,6 +143,57 @@ export async function PUT(
   return NextResponse.json(data);
 }
 
+/**
+ * Partial update — the publish flag only. Separate from PUT, which rewrites the
+ * gallery from the request body and would drop every image if used to flip one
+ * boolean.
+ */
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+
+  let body: { published?: unknown };
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+  }
+
+  if (typeof body.published !== "boolean") {
+    return NextResponse.json({ error: "Nothing to update." }, { status: 400 });
+  }
+
+  const update: Record<string, unknown> = { published: body.published };
+
+  // Stamp the publish date only the first time. Re-publishing something that
+  // already has a date must keep it, or the ordering silently changes.
+  if (body.published) {
+    const { data: current } = await supabaseAdmin
+      .from("projects")
+      .select("published_at")
+      .eq("id", id)
+      .maybeSingle();
+    if (!current?.published_at) update.published_at = new Date().toISOString();
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from("projects")
+    .update(update)
+    .eq("id", id)
+    .is("trashed_at", null)
+    .select()
+    .single();
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+
+  revalidateProjectCaches(data?.slug);
+  return NextResponse.json(data);
+}
+
 export async function DELETE(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
