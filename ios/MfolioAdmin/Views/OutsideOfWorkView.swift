@@ -4,7 +4,7 @@ struct OutsideOfWorkView: View {
     @EnvironmentObject private var auth: AuthStore
 
     @State private var kind: OutsideKind = .photo
-    @State private var payload = OutsideOfWorkPayload(photos: [], food: [], games: [])
+    @State private var payload = OutsideOfWorkPayload(photos: [], gamePhotos: [], games: [])
     @State private var loading = true
     @State private var error: String?
     @State private var editing: OutsideItem?
@@ -125,7 +125,6 @@ private struct ItemRow: View {
                     if let sub = item.subtitle, !sub.isEmpty {
                         Text(sub).lineLimit(1)
                     }
-                    if let r = item.rating { Text("★ \(r)") }
                     if let s = item.game_status { Text(s.label) }
                 }
                 .font(.caption)

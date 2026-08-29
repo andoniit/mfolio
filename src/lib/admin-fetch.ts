@@ -4,7 +4,7 @@ import { supabase } from "./supabase";
 
 /**
  * `fetch` for admin endpoints. Attaches the signed-in user's Supabase access
- * token, which `src/middleware.ts` requires for any write to `/api`.
+ * token, which `src/proxy.ts` requires for any write to `/api`.
  *
  * Public reads and visitor submissions should keep using plain `fetch` — they
  * are allowed through without a token.

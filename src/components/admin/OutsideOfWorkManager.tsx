@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import type { GameHit } from "@/app/api/games/search/route";
 import {
   DESCRIPTION_MAX,
   GAME_STATUSES,
@@ -19,16 +20,16 @@ import { adminFetch } from "@/lib/admin-fetch";
 
 type Props = { items: OutsideItem[] };
 
-const KIND_TABS: { kind: OutsideKind; label: string; blurb: string }[] = [
-  { kind: "photo", label: "Photos", blurb: "The big frame on the left of the bento." },
-  { kind: "food", label: "Food spots", blurb: "Top 5 by order show on the site." },
-  { kind: "game", label: "Games", blurb: "The one marked Playing gets the spotlight tile." },
+const KIND_TABS: { kind: OutsideKind; label: string; addLabel: string; blurb: string }[] = [
+  { kind: "photo", label: "Photos", addLabel: "photo", blurb: "The first one anchors the mosaic; five show on the site." },
+  { kind: "game_photo", label: "PS5 captures", addLabel: "capture", blurb: "Screenshots off the console; same mosaic treatment." },
+  { kind: "game", label: "Games", addLabel: "game", blurb: "Search a title to pull its cover art in automatically." },
 ];
 
 /** Per-kind copy so one form serves photos, food, and games. */
 const FIELD_COPY: Record<OutsideKind, { title: string; subtitle: string; link: string }> = {
   photo: { title: "Caption", subtitle: "Where / when", link: "Link (optional)" },
-  food: { title: "Place or dish", subtitle: "City or cuisine", link: "Maps or Yelp link" },
+  game_photo: { title: "Caption", subtitle: "Which game", link: "Link (optional)" },
   game: { title: "Game title", subtitle: "Platform (e.g. PS5)", link: "Store or trailer link" },
 };
 
@@ -81,7 +82,7 @@ function toPayload(kind: OutsideKind, draft: Draft) {
     image_url: draft.image_url.trim() || null,
     storage_path: draft.storage_path,
     link_url: draft.link_url.trim() || null,
-    rating: kind === "food" && draft.rating ? Number(draft.rating) : null,
+    rating: null,
     game_status: kind === "game" && draft.game_status ? draft.game_status : null,
     is_published: draft.is_published,
     sort_order: Number(draft.sort_order) || 0,
@@ -91,6 +92,109 @@ function toPayload(kind: OutsideKind, draft: Draft) {
 const inputClass =
   "w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 bg-white";
 const labelClass = "text-xs font-medium text-gray-500";
+
+/**
+ * Type a game, pick it, and the title, platform and cover fill themselves in.
+ * Search runs through our own API so the RAWG key stays server-side.
+ */
+function GameSearch({ onPick }: { onPick: (hit: GameHit) => void }) {
+  const [term, setTerm] = useState("");
+  const [hits, setHits] = useState<GameHit[]>([]);
+  const [note, setNote] = useState<string | null>(null);
+  const [searching, setSearching] = useState(false);
+  const [touched, setTouched] = useState(false);
+
+  // Debounced so a fast typist doesn't fire a request per keystroke.
+  useEffect(() => {
+    const q = term.trim();
+    if (q.length < 2) {
+      setHits([]);
+      setNote(null);
+      return;
+    }
+    let live = true;
+    const id = window.setTimeout(async () => {
+      setSearching(true);
+      setTouched(true);
+      try {
+        const res = await adminFetch(`/api/games/search?q=${encodeURIComponent(q)}`);
+        const body = await res.json();
+        if (!live) return;
+        if (!res.ok) {
+          setNote(body?.error ?? "Search failed.");
+          setHits([]);
+          return;
+        }
+        setHits(body.results ?? []);
+        setNote(body.note ?? null);
+      } catch {
+        if (live) setNote("Search failed.");
+      } finally {
+        if (live) setSearching(false);
+      }
+    }, 350);
+    return () => {
+      live = false;
+      window.clearTimeout(id);
+    };
+  }, [term]);
+
+  return (
+    <div className="flex flex-col gap-2 p-3 bg-gray-50 border border-gray-200 rounded-xl">
+      <span className={labelClass}>Find the game</span>
+      <div className="flex items-center gap-2">
+        <input
+          className={inputClass}
+          value={term}
+          onChange={(e) => setTerm(e.target.value)}
+          placeholder="Start typing a title…"
+        />
+        {searching && <span className="text-xs text-gray-400 shrink-0">Searching…</span>}
+      </div>
+
+      {note && <p className="text-xs text-amber-700 m-0">{note}</p>}
+
+      {hits.length > 0 && (
+        <ul className="flex flex-col gap-1 list-none p-0 m-0 max-h-64 overflow-y-auto">
+          {hits.map((hit) => (
+            <li key={hit.id}>
+              <button
+                type="button"
+                onClick={() => {
+                  onPick(hit);
+                  setTerm("");
+                  setHits([]);
+                }}
+                className="w-full flex items-center gap-3 p-2 text-left bg-white border border-gray-200 rounded-lg hover:border-gray-400"
+              >
+                <span className="shrink-0 w-10 h-13 rounded overflow-hidden bg-gray-100 flex items-center justify-center">
+                  {hit.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={hit.image} alt="" className="w-10 h-14 object-cover" />
+                  ) : (
+                    <span className="text-gray-300 text-xs">?</span>
+                  )}
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-medium text-gray-900 truncate">{hit.name}</span>
+                  <span className="block text-xs text-gray-500 truncate">
+                    {[hit.released?.slice(0, 4), hit.platforms.slice(0, 3).join(", ")]
+                      .filter(Boolean)
+                      .join(" · ") || hit.source}
+                  </span>
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {touched && !searching && hits.length === 0 && term.trim().length >= 2 && !note && (
+        <p className="text-xs text-gray-400 m-0">Nothing found — fill the fields in by hand.</p>
+      )}
+    </div>
+  );
+}
 
 function ItemForm({
   kind,
@@ -138,6 +242,24 @@ function ItemForm({
 
   return (
     <div className="flex flex-col gap-4">
+      {kind === "game" && (
+        <GameSearch
+          onPick={(hit) =>
+            setDraft({
+              ...draft,
+              title: hit.name,
+              // Prefer a console when the game lists one — this is a PS5 shelf.
+              subtitle:
+                hit.platforms.find((p) => /playstation|ps5|ps4/i.test(p)) ??
+                hit.platforms[0] ??
+                draft.subtitle,
+              image_url: hit.image ?? draft.image_url,
+              storage_path: null,
+            })
+          }
+        />
+      )}
+
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1.5">
           <span className={labelClass}>{copy.title}</span>
@@ -146,7 +268,7 @@ function ItemForm({
             value={draft.title}
             maxLength={TITLE_MAX}
             onChange={(e) => setDraft({ ...draft, title: e.target.value })}
-            placeholder={kind === "game" ? "Unravel Two" : kind === "food" ? "Ichiran Ramen" : "Ramen night"}
+            placeholder={kind === "game" ? "Unravel Two" : kind === "game_photo" ? "Photo mode shot" : "Evening run"}
           />
         </label>
 
@@ -157,7 +279,7 @@ function ItemForm({
             value={draft.subtitle}
             maxLength={SUBTITLE_MAX}
             onChange={(e) => setDraft({ ...draft, subtitle: e.target.value })}
-            placeholder={kind === "game" ? "PS5" : kind === "food" ? "New York, NY" : "Seattle, 2026"}
+            placeholder={kind === "game" ? "PS5" : kind === "game_photo" ? "Ghost of Tsushima" : "Chicago, 2026"}
           />
         </label>
 
@@ -170,24 +292,6 @@ function ItemForm({
             placeholder="https://…"
           />
         </label>
-
-        {kind === "food" && (
-          <label className="flex flex-col gap-1.5">
-            <span className={labelClass}>Rating (1–5)</span>
-            <select
-              className={inputClass}
-              value={draft.rating}
-              onChange={(e) => setDraft({ ...draft, rating: e.target.value })}
-            >
-              <option value="">No rating</option>
-              {[1, 2, 3, 4, 5].map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
 
         {kind === "game" && (
           <label className="flex flex-col gap-1.5">
@@ -233,7 +337,9 @@ function ItemForm({
       <div className="flex flex-col gap-2 border-t border-gray-100 pt-4">
         <span className={labelClass}>
           {kind === "game" ? "Cover art" : "Image"}
-          {kind === "photo" && <span className="text-gray-400"> — required</span>}
+          {(kind === "photo" || kind === "game_photo") && (
+            <span className="text-gray-400"> — required</span>
+          )}
         </span>
         <div className="flex flex-wrap items-center gap-3">
           {draft.image_url && (
@@ -312,7 +418,7 @@ export default function OutsideOfWorkManager({ items }: Props) {
   const counts = useMemo(
     () => ({
       photo: items.filter((i) => i.kind === "photo").length,
-      food: items.filter((i) => i.kind === "food").length,
+      game_photo: items.filter((i) => i.kind === "game_photo").length,
       game: items.filter((i) => i.kind === "game").length,
     }),
     [items]
@@ -414,7 +520,7 @@ export default function OutsideOfWorkManager({ items }: Props) {
           }}
           className="ml-auto px-4 py-2 text-sm font-semibold text-white bg-black rounded-lg hover:bg-gray-800"
         >
-          {adding ? "Close" : `Add ${activeTab.label.replace(/s$/, "").toLowerCase()}`}
+          {adding ? "Close" : `Add ${activeTab.addLabel}`}
         </button>
       </div>
 
@@ -476,7 +582,6 @@ export default function OutsideOfWorkManager({ items }: Props) {
                     <p className="text-xs text-gray-500 truncate m-0 mt-0.5">
                       {[
                         item.subtitle,
-                        item.rating ? `${item.rating}/5` : null,
                         item.game_status ? GAME_STATUS_LABEL[item.game_status] : null,
                         `order ${item.sort_order}`,
                       ]

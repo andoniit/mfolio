@@ -1,10 +1,13 @@
 // Shared types + validation for the home page "Outside of work" section
-// (photos I shoot, food spots I love, and the games on my PS5).
+// (the photos I shoot and the games I've played).
 
-export const OUTSIDE_KINDS = ["photo", "food", "game"] as const;
+// Three blocks: pictures I took, captures off the PS5, and the games list.
+// 'food' was dropped from the section; the database still permits it so an old
+// row would survive untouched, there just isn't a UI for it any more.
+export const OUTSIDE_KINDS = ["photo", "game_photo", "game"] as const;
 export type OutsideKind = (typeof OUTSIDE_KINDS)[number];
 
-export const GAME_STATUSES = ["playing", "completed", "backlog", "wishlist"] as const;
+export const GAME_STATUSES = ["playing", "half_done", "completed", "backlog", "wishlist"] as const;
 export type GameStatus = (typeof GAME_STATUSES)[number];
 
 export type OutsideItem = {
@@ -43,7 +46,7 @@ export type PublicOutsideItem = Pick<
 /** Grouped payload returned by `GET /api/outside-of-work`. */
 export type OutsideOfWorkPayload = {
   photos: PublicOutsideItem[];
-  food: PublicOutsideItem[];
+  gamePhotos: PublicOutsideItem[];
   games: PublicOutsideItem[];
 };
 
@@ -60,6 +63,7 @@ export const TAGS_MAX_COUNT = 6;
 
 export const GAME_STATUS_LABEL: Record<GameStatus, string> = {
   playing: "Playing",
+  half_done: "Half done",
   completed: "Completed",
   backlog: "Backlog",
   wishlist: "Wishlist",
@@ -132,7 +136,7 @@ export function parseOutsideItemInput(
 
   if (!partial || b.kind !== undefined) {
     if (!isOutsideKind(b.kind)) {
-      return { ok: false, error: "Pick a valid kind: photo, food, or game." };
+      return { ok: false, error: "Pick a valid kind: photo, game_photo, or game." };
     }
     out.kind = b.kind;
   }
@@ -186,19 +190,19 @@ export function parseOutsideItemInput(
     out.sort_order = Number.isFinite(sort) ? Math.trunc(sort) : 0;
   }
 
-  // A photo tile without an image is an empty frame; food/game can stand on text.
-  if (out.kind === "photo" && !partial && !out.image_url) {
+  // A picture with no image is an empty frame; a game can stand on its title.
+  if ((out.kind === "photo" || out.kind === "game_photo") && !partial && !out.image_url) {
     return { ok: false, error: "A photo needs an image." };
   }
 
   return { ok: true, value: out };
 }
 
-/** Splits a flat list into the three tiles the section renders. */
+/** Splits a flat list into the three blocks the section renders. */
 export function groupOutsideItems(items: PublicOutsideItem[]): OutsideOfWorkPayload {
   return {
     photos: items.filter((i) => i.kind === "photo"),
-    food: items.filter((i) => i.kind === "food"),
+    gamePhotos: items.filter((i) => i.kind === "game_photo"),
     games: items.filter((i) => i.kind === "game"),
   };
 }
