@@ -36,6 +36,17 @@ struct OutsideItemEditor: View {
     var body: some View {
         NavigationStack {
             Form {
+                if kind == .game {
+                    GameSearchSection { hit in
+                        title = hit.name
+                        // Prefer a console when one is listed — this is a PS5 shelf.
+                        subtitle = hit.platforms.first(where: {
+                            $0.range(of: "playstation|ps5|ps4", options: [.regularExpression, .caseInsensitive]) != nil
+                        }) ?? hit.platforms.first ?? subtitle
+                        if let image = hit.image { imageURL = image; storagePath = nil }
+                    }
+                }
+
                 Section {
                     TextField(kind.titleLabel, text: $title)
                     TextField(kind.subtitleLabel, text: $subtitle)
@@ -75,20 +86,10 @@ struct OutsideItemEditor: View {
                 }
 
                 Section("Link") {
-                    TextField(kind == .food ? "Maps or Yelp link" : "Store or trailer link", text: $link)
+                    TextField("Store or trailer link", text: $link)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .keyboardType(.URL)
-                }
-
-                if kind == .food {
-                    Section("Rating") {
-                        Picker("Rating", selection: $rating) {
-                            Text("None").tag(0)
-                            ForEach(1...5, id: \.self) { Text("\($0)").tag($0) }
-                        }
-                        .pickerStyle(.segmented)
-                    }
                 }
 
                 if kind == .game {
@@ -210,7 +211,7 @@ struct OutsideItemEditor: View {
             "is_published": isPublished,
             "sort_order": sortOrder,
         ]
-        body["rating"] = (kind == .food && rating > 0) ? rating : nil
+        body["rating"] = nil
         body["game_status"] = (kind == .game) ? gameStatus?.rawValue : nil
 
         do {
