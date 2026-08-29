@@ -1,8 +1,10 @@
 "use client";
 
+import { adminFetch } from "@/lib/admin-fetch";
+
 export default function TrashActions({ postId }: { postId: string }) {
   const handleRestore = async () => {
-    const res = await fetch(`/api/posts/${postId}/restore`, {
+    const res = await adminFetch(`/api/posts/${postId}/restore`, {
       method: "POST",
     });
 
@@ -21,7 +23,7 @@ export default function TrashActions({ postId }: { postId: string }) {
     );
     if (!ok) return;
 
-    const res = await fetch(`/api/posts/${postId}`, {
+    const res = await adminFetch(`/api/posts/${postId}`, {
       method: "DELETE",
     });
 

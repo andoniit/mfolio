@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { isAdminRequest } from "@/lib/api-auth";
 import {
   parseRecommendationInput,
   normalizeColor,
@@ -18,11 +19,17 @@ function missingConfig() {
 }
 
 // Public: approved recommendations for the home page wall.
-export async function GET() {
-  const { data, error } = await supabaseAdmin
-    .from("recommendations")
-    .select(PUBLIC_COLUMNS)
-    .eq("status", "approved")
+// `?status=all` with an admin token returns pending ones awaiting review.
+export async function GET(req: Request) {
+  const wantsAll = new URL(req.url).searchParams.get("status") === "all";
+  const asAdmin = wantsAll && (await isAdminRequest(req));
+
+  const columns: string = asAdmin ? "*" : PUBLIC_COLUMNS;
+  let query = supabaseAdmin.from("recommendations").select(columns);
+
+  if (!asAdmin) query = query.eq("status", "approved");
+
+  const { data, error } = await query
     .order("sort_order", { ascending: true })
     .order("created_at", { ascending: false });
 
@@ -30,7 +37,7 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 
-  return NextResponse.json((data ?? []) as PublicRecommendation[]);
+  return NextResponse.json((data ?? []) as unknown as PublicRecommendation[]);
 }
 
 // Public: submit a recommendation. Stored as 'pending' until approved.

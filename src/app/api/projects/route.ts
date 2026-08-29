@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { isAdminRequest } from "@/lib/api-auth";
 import { revalidateProjectCaches } from "@/lib/revalidate-project";
 
 type GalleryImageInput = {
@@ -72,14 +73,17 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const featured = searchParams.get("featured");
   const limit = parsePositiveInt(searchParams.get("limit"), 50);
+  // `?all=1` with an admin token also returns drafts, for the iOS app.
+  const asAdmin = searchParams.get("all") === "1" && (await isAdminRequest(req));
 
   let query = supabaseAdmin
     .from("projects")
     .select(
-      "id, title, slug, description, cover_image_url, project_date, workplace, client_name, home_feature_order, tech_stack"
+      "id, title, slug, description, cover_image_url, project_date, workplace, client_name, home_feature_order, tech_stack, published"
     )
-    .eq("published", true)
     .is("trashed_at", null);
+
+  if (!asAdmin) query = query.eq("published", true);
 
   if (featured === "home") {
     query = query

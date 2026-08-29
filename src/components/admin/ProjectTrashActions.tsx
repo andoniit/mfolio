@@ -1,8 +1,10 @@
 "use client";
 
+import { adminFetch } from "@/lib/admin-fetch";
+
 export default function ProjectTrashActions({ projectId }: { projectId: string }) {
   const handleRestore = async () => {
-    const res = await fetch(`/api/projects/${projectId}/restore`, {
+    const res = await adminFetch(`/api/projects/${projectId}/restore`, {
       method: "POST",
     });
 
@@ -21,7 +23,7 @@ export default function ProjectTrashActions({ projectId }: { projectId: string }
     );
     if (!ok) return;
 
-    const res = await fetch(`/api/projects/${projectId}`, {
+    const res = await adminFetch(`/api/projects/${projectId}`, {
       method: "DELETE",
     });
 

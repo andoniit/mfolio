@@ -1,5 +1,7 @@
 "use client";
 
+import { adminFetch } from "@/lib/admin-fetch";
+
 type Props = {
   projectId: string;
   title: string;
@@ -12,7 +14,7 @@ export default function ProjectListTrashButton({ projectId, title }: Props) {
       return;
     }
 
-    const res = await fetch(`/api/projects/${projectId}`, { method: "DELETE" });
+    const res = await adminFetch(`/api/projects/${projectId}`, { method: "DELETE" });
     const result = await res.json().catch(() => null);
 
     if (!res.ok) {

@@ -1,5 +1,7 @@
 "use client";
 
+import { adminFetch } from "@/lib/admin-fetch";
+
 type Props = {
   postId: string;
   title: string;
@@ -12,7 +14,7 @@ export default function BlogListTrashButton({ postId, title }: Props) {
       return;
     }
 
-    const res = await fetch(`/api/posts/${postId}`, { method: "DELETE" });
+    const res = await adminFetch(`/api/posts/${postId}`, { method: "DELETE" });
     const result = await res.json().catch(() => null);
 
     if (!res.ok) {

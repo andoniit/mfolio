@@ -1,8 +1,10 @@
 "use client";
 
+import { adminFetch } from "@/lib/admin-fetch";
+
 export default function ExperienceTrashActions({ experienceId }: { experienceId: string }) {
   const handleRestore = async () => {
-    const res = await fetch(`/api/experiences/${experienceId}/restore`, {
+    const res = await adminFetch(`/api/experiences/${experienceId}/restore`, {
       method: "POST",
     });
 
@@ -19,7 +21,7 @@ export default function ExperienceTrashActions({ experienceId }: { experienceId:
     const ok = confirm("This will permanently delete the experience. Continue?");
     if (!ok) return;
 
-    const res = await fetch(`/api/experiences/${experienceId}`, {
+    const res = await adminFetch(`/api/experiences/${experienceId}`, {
       method: "DELETE",
     });
 

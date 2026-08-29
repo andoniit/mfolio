@@ -3,6 +3,7 @@
 import { useState } from "react";
 import AdminDateField from "@/components/admin/AdminDateField";
 import { EMPLOYMENT_TYPES } from "@/lib/experience-payload";
+import { adminFetch } from "@/lib/admin-fetch";
 
 type ExperienceFormProps = {
   initialData?: any;
@@ -136,7 +137,7 @@ export default function ExperienceForm({
     };
 
     try {
-      const res = await fetch(
+      const res = await adminFetch(
         isEditing ? `/api/experiences/${experienceId}` : "/api/experiences",
         {
           method: isEditing ? "PUT" : "POST",
@@ -168,7 +169,7 @@ export default function ExperienceForm({
     if (!ok) return;
 
     try {
-      const res = await fetch(`/api/experiences/${experienceId}`, { method: "DELETE" });
+      const res = await adminFetch(`/api/experiences/${experienceId}`, { method: "DELETE" });
       const result = await res.json().catch(() => null);
 
       if (!res.ok) {
