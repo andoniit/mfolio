@@ -17,6 +17,7 @@ import EmojiKeypad from "@/components/home/Projects/EmojiKeypad"
 import PolaroidSection from "@/components/home/PolaroidSection"
 import PhotoWall from "@/components/home/PhotoWall"
 import MySetups from "@/components/home/MySetups"
+import OutsideOfWork from "@/components/home/OutsideOfWork"
 import Recommendations from "@/components/home/Recommendations"
 import Slideshow from "@/components/home/SliderSection"
 import Header from "@/components/layout/header/header"
@@ -98,6 +99,7 @@ export default function Home() {
       <MyVision/>
       <Projects/>
       <MySetups />
+      <OutsideOfWork />
       <Recommendations />
       <Slideshow/>
     </main>

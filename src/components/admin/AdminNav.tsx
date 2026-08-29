@@ -50,7 +50,8 @@ function NavIcon({
     | "briefcase"
     | "heart"
     | "quote"
-    | "camera";
+    | "camera"
+    | "gamepad";
 }) {
   const common = { width: 18, height: 18, viewBox: "0 0 24 24" };
   switch (kind) {
@@ -174,6 +175,18 @@ function NavIcon({
             strokeLinejoin="round"
           />
           <circle cx="12" cy="13" r="3.4" />
+        </svg>
+      );
+    case "gamepad":
+      return (
+        <svg {...common} fill="none" stroke="currentColor" strokeWidth="2">
+          <path
+            d="M7.5 8h9a4.5 4.5 0 0 1 4.4 3.6l.8 4A3 3 0 0 1 18.8 19c-.9 0-1.7-.4-2.3-1.1L15.2 16H8.8l-1.3 1.9C6.9 18.6 6.1 19 5.2 19a3 3 0 0 1-2.9-3.4l.8-4A4.5 4.5 0 0 1 7.5 8z"
+            strokeLinejoin="round"
+          />
+          <path d="M8 11v2.2M6.9 12.1h2.2" strokeLinecap="round" />
+          <circle cx="15.4" cy="11.6" r="0.9" fill="currentColor" stroke="none" />
+          <circle cx="17.4" cy="13.4" r="0.9" fill="currentColor" stroke="none" />
         </svg>
       );
   }
@@ -730,6 +743,35 @@ export default function AdminNav({ collapsed = false }: Props) {
                 }`}
               >
                 Photo Wall
+              </span>
+            )}
+          </Link>
+
+          <Link
+            href="/admin/outside-of-work"
+            className={`group flex items-center gap-3 py-2.5 px-3 transition-all duration-200 rounded-xl ${
+              pathname === "/admin/outside-of-work"
+                ? "bg-white/50 text-black shadow-sm border border-white/40"
+                : "text-gray-500 border border-transparent hover:bg-white/30 hover:text-gray-900"
+            } ${collapsed ? "justify-center px-0 w-11 h-11 mx-auto" : ""}`}
+            title="Outside of Work"
+          >
+            <span
+              className={`inline-flex items-center justify-center transition-transform duration-200 ${
+                pathname === "/admin/outside-of-work"
+                  ? "text-black scale-105"
+                  : "text-gray-400 group-hover:text-gray-700"
+              }`}
+            >
+              <NavIcon kind="gamepad" />
+            </span>
+            {!collapsed && (
+              <span
+                className={`text-[14px] tracking-wide ${
+                  pathname === "/admin/outside-of-work" ? "font-semibold" : "font-medium"
+                }`}
+              >
+                Outside of Work
               </span>
             )}
           </Link>

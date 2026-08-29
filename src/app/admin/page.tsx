@@ -18,6 +18,8 @@ export default async function AdminDashboardPage() {
     { count: recommendationsApprovedCount },
     { count: photoWallPendingCount },
     { count: photoWallApprovedCount },
+    { count: outsideLiveCount },
+    { count: outsideTotalCount },
   ] = await Promise.all([
     supabaseAdmin.from("posts").select("*", { count: "exact", head: true }).is("trashed_at", null),
     supabaseAdmin.from("posts").select("*", { count: "exact", head: true }).not("trashed_at", "is", null),
@@ -47,6 +49,11 @@ export default async function AdminDashboardPage() {
       .from("photo_wall_posts")
       .select("*", { count: "exact", head: true })
       .eq("status", "approved"),
+    supabaseAdmin
+      .from("outside_of_work_items")
+      .select("*", { count: "exact", head: true })
+      .eq("is_published", true),
+    supabaseAdmin.from("outside_of_work_items").select("*", { count: "exact", head: true }),
   ]);
 
   const cards = [
@@ -115,6 +122,19 @@ export default async function AdminDashboardPage() {
       publicLabel: "View on site",
       meta: `${photoWallApprovedCount ?? 0} published${
         photoWallPendingCount ? ` · ${photoWallPendingCount} pending review` : ""
+      }`,
+    },
+    {
+      title: "Outside of Work",
+      description: "Your photos, favourite food spots, and the games on your PS5.",
+      href: "/admin/outside-of-work",
+      cta: "Manage outside of work",
+      publicHref: "/#outside-of-work",
+      publicLabel: "View on site",
+      meta: `${outsideLiveCount ?? 0} live${
+        outsideTotalCount && outsideTotalCount > (outsideLiveCount ?? 0)
+          ? ` · ${outsideTotalCount - (outsideLiveCount ?? 0)} hidden`
+          : ""
       }`,
     },
     {

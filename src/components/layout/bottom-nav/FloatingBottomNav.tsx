@@ -97,6 +97,7 @@ const HOME_SECTIONS = [
   { id: "my-vision", label: "My Vision" },
   { id: "featured-projects", label: "Featured Projects" },
   { id: "my-desk-setup", label: "My Desk Setup" },
+  { id: "outside-of-work", label: "Outside of Work" },
   { id: "recommendations", label: "Recommendations" },
 ] as const;
 
