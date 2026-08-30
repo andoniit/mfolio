@@ -55,7 +55,31 @@ The server must have `ADMIN_EMAILS` set (see `.env.example`). Without it every
 write is refused, by design — Supabase signups are open, so a valid token alone
 doesn't prove it's you.
 
-## Build and install on your iPhone
+## Install it on your phone, privately
+
+TestFlight internal testing is the way to run this as a real app on your own
+device without publishing anything. Internal testers skip Beta App Review, so a
+build is installable minutes after it finishes processing. Up to 100 internal
+testers; each build stays valid for 90 days, after which you upload a new one.
+
+1. **App Store Connect → Apps → +** and create the app against the bundle id
+   `com.anirudha.mfolioadmin`. Nothing here is published or searchable.
+2. In Xcode: select the **MfolioAdmin** target → **Signing & Capabilities** →
+   tick *Automatically manage signing* and choose your team.
+3. **Product → Destination → Any iOS Device**, then **Product → Archive**.
+4. In the Organizer: **Distribute App → TestFlight (Internal Testing Only)**.
+5. Once processing finishes, **TestFlight → Internal Testing**, add yourself as
+   a tester, and install from the TestFlight app on your phone.
+
+Each upload needs a higher `CURRENT_PROJECT_VERSION` than the last — bump it in
+`project.yml` and re-run `xcodegen generate`.
+
+`ITSAppUsesNonExemptEncryption` is already declared `false` in `Info.plist`
+(the app uses only HTTPS and the system Keychain), so uploads skip the export
+compliance question. `PrivacyInfo.xcprivacy` declares the `UserDefaults`
+required-reason API and the sign-in email, so uploads come back clean.
+
+## Build and run from Xcode directly
 
 ```bash
 brew install xcodegen          # once
