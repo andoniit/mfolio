@@ -21,9 +21,13 @@
   <!-- Only so you can point the app at a dev server on your Mac. -->
   <key>NSAppTransportSecurity</key>
   <dict><key>NSAllowsLocalNetworking</key><true/></dict>
+  <!-- All four, because the target includes iPad and iPadOS requires an app to
+       support every orientation unless it declares UIRequiresFullScreen.
+       iPhones ignore upside-down on their own. -->
   <key>UISupportedInterfaceOrientations</key>
   <array>
     <string>UIInterfaceOrientationPortrait</string>
+    <string>UIInterfaceOrientationPortraitUpsideDown</string>
     <string>UIInterfaceOrientationLandscapeLeft</string>
     <string>UIInterfaceOrientationLandscapeRight</string>
   </array>

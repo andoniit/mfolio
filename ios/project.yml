@@ -35,4 +35,5 @@ targets:
         GENERATE_INFOPLIST_FILE: NO
         INFOPLIST_FILE: MfolioAdmin/Info.plist
         CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: VG2N3XUNXB
         ENABLE_USER_SCRIPT_SANDBOXING: NO
