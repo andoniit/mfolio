@@ -19,6 +19,7 @@ enum Theme {
         static let volunteer = Color.red
         static let categories = Color.purple
         static let tags = Color.mint
+        static let analytics = Color.green
         static let newsletter = Color.cyan
         static let resume = Color.gray
         static let web = Color.blue

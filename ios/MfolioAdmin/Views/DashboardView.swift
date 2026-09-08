@@ -53,6 +53,8 @@ struct DashboardView: View {
                 }
 
                 Section("Site") {
+                    link(AnalyticsView(), "chart.line.uptrend.xyaxis", Theme.Accent.analytics,
+                         "Analytics", "Views, places and pages")
                     link(NewsletterView(), "envelope.fill", Theme.Accent.newsletter, "Newsletter", "")
                     link(ResumeView(), "doc.fill", Theme.Accent.resume, "Resume", "")
                     link(WebEditorView(path: "/admin/seo", title: "SEO Tools"),

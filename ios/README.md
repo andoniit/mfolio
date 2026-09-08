@@ -16,6 +16,7 @@ the same endpoints the web dashboard uses.
 | Projects | Publish, unpublish, trash and restore |
 | Experience / Voluntary Roles | Publish, unpublish, trash and restore |
 | Categories / Tags | Add and delete |
+| Analytics | Google Analytics for the site: views per day, visitors, countries / regions / cities, top pages, referrers, devices, and who's on the site right now |
 | Newsletter | Read the subscriber list |
 | Resume | See what's live, preview it, remove it |
 | SEO Tools / Web dashboard | Opened on the web, already signed in |
@@ -36,6 +37,63 @@ from the recursive source glob. Left to recurse, XcodeGen would add `icon.json`
 and the SVG as separate files and the icon would never build.
 
 To change it, edit the `.icon` in Icon Composer and rebuild — no other step.
+
+## Analytics
+
+The Analytics screen reads the site's GA4 property through
+`/api/admin/analytics`. Everything the screen shows arrives in one request —
+which is three calls to Google behind it (two report batches plus realtime),
+because GA4 caps a batch at five reports.
+
+**No Google credential ever reaches the phone.** `src/lib/ga4.ts` signs a
+service-account assertion server-side, swaps it for a one-hour access token
+(cached in module memory) and returns plain numbers. The route is behind the
+same `verifyAdmin` check as the rest of `/api`.
+
+What it shows, for the last 7 / 28 / 90 / 365 days:
+
+- Views, visitors, new visitors and sessions, each against the previous window
+  of the same length, plus engagement rate and average visit length
+- Views (or visitors, or sessions) per day, as a chart you can scrub
+- Countries, regions and cities — regions and cities are qualified by their
+  country, since "Maharashtra" or "Springfield" alone is ambiguous
+- Top pages, acquisition channels, referrers, devices and browsers
+- A live count of who is on the site right now
+
+### Connecting it
+
+Until the server has credentials the screen shows these steps rather than an
+error — the route answers `{ configured: false, reason }` with a 200.
+
+1. **Google Cloud console** → pick (or make) a project → **APIs & Services →
+   Enable APIs** → enable **Google Analytics Data API**.
+2. **IAM & Admin → Service Accounts → Create**. No project roles are needed —
+   the access it uses is granted inside Analytics, in step 4.
+3. On that account: **Keys → Add key → Create new key → JSON**. Download it.
+4. **Google Analytics → Admin → Property access management → +** and add the
+   service account's email with the **Viewer** role.
+5. Set these on the server (`.env.local`, and the production env):
+
+   ```
+   GA4_PROPERTY_ID=123456789
+   GOOGLE_SERVICE_ACCOUNT_EMAIL=...@....iam.gserviceaccount.com
+   GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+   ```
+
+   `GA4_PROPERTY_ID` is the **numeric** id under Admin → Property details, not
+   the `G-XXXXXXXXXX` measurement id the site's tag uses. On Vercel, where
+   multi-line values get mangled, paste the whole downloaded JSON into
+   `GOOGLE_SERVICE_ACCOUNT_JSON` instead of the last two lines — raw or base64,
+   both are accepted.
+
+6. Redeploy, and pull to refresh in the app.
+
+If Google answers 403, step 4 is the one that was missed; the app says so with
+the service account's email in the message.
+
+GA4 finalises the current day over the following hours, so today's bar keeps
+moving. The realtime count is its own thing — active users in the last 30
+minutes — and if that call fails the rest of the screen still renders.
 
 ## Photo handling
 
@@ -117,4 +175,10 @@ ios/
     Core/                  Config, Keychain, auth, API client, image upload
     Models/                Codable mirrors of the API shapes
     Views/                 One file per screen
+```
+
+On the server side the analytics screen is `src/lib/ga4.ts` (the GA4 Data API
+client) and `src/app/api/admin/analytics/route.ts` (the one endpoint it calls).
+
+```
 ```
