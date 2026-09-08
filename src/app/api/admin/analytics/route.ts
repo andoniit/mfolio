@@ -89,8 +89,10 @@ export async function GET(req: Request) {
     { dateRanges: [current], dimensions: [{ name: "region" }, { name: "country" }], metrics: BREAKDOWN_METRICS, orderBys: byViews, limit: TOP_LIMIT },
     // 4 — cities, qualified by region and country
     { dateRanges: [current], dimensions: [{ name: "city" }, { name: "region" }, { name: "country" }], metrics: BREAKDOWN_METRICS, orderBys: byViews, limit: PAGE_LIMIT },
-    // 5 — pages
-    { dateRanges: [current], dimensions: [{ name: "pagePath" }, { name: "pageTitle" }], metrics: BREAKDOWN_METRICS, orderBys: byViews, limit: PAGE_LIMIT },
+    // 5 — pages. Path only, deliberately: the site rewrites document.title as
+    // you scroll (TabTitleWatcher), so adding pageTitle splits one page into
+    // several rows and divides its views between them.
+    { dateRanges: [current], dimensions: [{ name: "pagePath" }], metrics: BREAKDOWN_METRICS, orderBys: byViews, limit: PAGE_LIMIT },
     // 6 — phone vs laptop vs tablet
     { dateRanges: [current], dimensions: [{ name: "deviceCategory" }], metrics: BREAKDOWN_METRICS, orderBys: byViews, limit: 8 },
     // 7 — how they arrived (search, social, direct…)
@@ -223,16 +225,12 @@ function realtimeTotal(report: GA4Report | null): number {
   return (report.rows ?? []).reduce((sum: number, row: GA4Row) => sum + metric(row, 0), 0);
 }
 
-/** Pages keep the path as the identity and the title as the human hint. */
+/** The path is the page's identity, and reads fine on its own. */
 function pageRows(report: GA4Report | undefined): Breakdown[] {
-  return (report?.rows ?? []).map((row) => {
-    const title = label(dim(row, 1), "");
-    return {
-      label: label(dim(row, 0), "/"),
-      ...(title ? { sublabel: title } : {}),
-      views: metric(row, 0),
-      users: metric(row, 1),
-      sessions: metric(row, 2),
-    };
-  });
+  return (report?.rows ?? []).map((row) => ({
+    label: label(dim(row, 0), "/"),
+    views: metric(row, 0),
+    users: metric(row, 1),
+    sessions: metric(row, 2),
+  }));
 }
