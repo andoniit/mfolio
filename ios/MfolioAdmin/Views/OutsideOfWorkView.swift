@@ -9,6 +9,10 @@ struct OutsideOfWorkView: View {
     @State private var error: String?
     @State private var editing: OutsideItem?
     @State private var creating = false
+    /// Deleting is permanent — the row and its uploaded photo both go — so it
+    /// always asks first.
+    @State private var pendingDelete: OutsideItem?
+    @State private var reordering = false
 
     private var items: [OutsideItem] { payload.items(for: kind) }
 
@@ -24,7 +28,9 @@ struct OutsideOfWorkView: View {
                 .listRowInsets(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
             }
 
-            if loading {
+            // Spinner on first load only; a refresh after an edit or a drag keeps
+            // the list on screen instead of flashing it away.
+            if loading && payload.all.isEmpty {
                 Section { HStack { Spacer(); ProgressView(); Spacer() } }
             } else if items.isEmpty {
                 Section {
@@ -39,9 +45,11 @@ struct OutsideOfWorkView: View {
                     ForEach(items) { item in
                         Button { editing = item } label: { ItemRow(item: item) }
                             .buttonStyle(.plain)
-                            .swipeActions(edge: .trailing) {
+                            // No full swipe: it fires the first action, which
+                            // here is a permanent delete.
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                                 Button(role: .destructive) {
-                                    Task { await delete(item) }
+                                    pendingDelete = item
                                 } label: { Label("Delete", systemImage: "trash") }
 
                                 Button {
@@ -53,8 +61,13 @@ struct OutsideOfWorkView: View {
                                 .tint(item.published ? .gray : .green)
                             }
                     }
+                    .onMove(perform: move)
+                } header: {
+                    if reordering {
+                        HStack(spacing: 6) { ProgressView().controlSize(.mini); Text("Saving order") }
+                    }
                 } footer: {
-                    Text("Swipe a row to publish, hide, or delete. Tap to edit.")
+                    Text("Tap to edit. Swipe to publish, hide or delete. Tap Edit to drag into the order the site shows.")
                 }
             }
 
@@ -71,6 +84,24 @@ struct OutsideOfWorkView: View {
             ToolbarItem(placement: .primaryAction) {
                 Button { creating = true } label: { Image(systemName: "plus") }
             }
+            if items.count > 1 {
+                ToolbarItem(placement: .topBarTrailing) { EditButton() }
+            }
+        }
+        .confirmationDialog(
+            "Delete “\(pendingDelete?.title ?? "")”?",
+            isPresented: Binding(get: { pendingDelete != nil }, set: { if !$0 { pendingDelete = nil } }),
+            titleVisibility: .visible,
+            presenting: pendingDelete
+        ) { item in
+            Button("Delete permanently", role: .destructive) { Task { await delete(item) } }
+            if item.published {
+                Button("Hide it instead") { Task { await togglePublished(item) } }
+            }
+        } message: { item in
+            Text(item.storage_path != nil
+                 ? "This removes it from the site and deletes its uploaded photo. It can't be undone."
+                 : "This removes it from the site. It can't be undone.")
         }
         .refreshable { await load() }
         .task { await load() }
@@ -100,6 +131,43 @@ struct OutsideOfWorkView: View {
                 .patch("/api/outside-of-work/\(item.id)", body: ["is_published": !item.published])
             await load()
         } catch { self.error = error.localizedDescription }
+    }
+
+    /// Drag-to-reorder within the current tab. The new order becomes positions
+    /// 1, 2, 3… and only rows whose position changed are sent — partial
+    /// PATCHes of `sort_order`, which leave every other field alone.
+    private func move(from source: IndexSet, to destination: Int) {
+        var ordered = items
+        ordered.move(fromOffsets: source, toOffset: destination)
+
+        var changes: [(id: String, position: Int)] = []
+        for (index, item) in ordered.enumerated() where item.sort_order != index + 1 {
+            changes.append((item.id, index + 1))
+        }
+        guard !changes.isEmpty else { return }
+
+        // Show the new order straight away; the server catches up behind it.
+        for i in ordered.indices { ordered[i].sort_order = i + 1 }
+        switch kind {
+        case .photo: payload.photos = ordered
+        case .game_photo: payload.gamePhotos = ordered
+        case .game: payload.games = ordered
+        }
+
+        reordering = true
+        error = nil
+        Task {
+            do {
+                for change in changes {
+                    try await APIClient(auth: auth)
+                        .patch("/api/outside-of-work/\(change.id)", body: ["sort_order": change.position])
+                }
+            } catch {
+                self.error = "Couldn't save the new order: \(error.localizedDescription)"
+            }
+            reordering = false
+            await load()
+        }
     }
 
     private func delete(_ item: OutsideItem) async {
