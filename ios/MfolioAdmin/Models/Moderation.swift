@@ -12,8 +12,19 @@ struct PhotoWallPost: Codable, Identifiable, Hashable {
     var author_name: String?
     var status: ModerationStatus?
     var created_at: String?
+    /// Position on the wall; lower first, then newest first.
+    var sort_order: Int?
 
     var state: ModerationStatus { status ?? .approved }
+
+    /// "21 Sep 2026, 11:04" for the detail view.
+    var submittedLine: String? {
+        guard let created_at else { return nil }
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let date = f.date(from: created_at) ?? ISO8601DateFormatter().date(from: created_at)
+        return date?.formatted(date: .abbreviated, time: .shortened)
+    }
 }
 
 /// A visitor's sticky note from `recommendations`.
