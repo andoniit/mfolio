@@ -1,7 +1,8 @@
 import SwiftUI
 
-/// Blog posts: publish, unpublish, trash and restore from the phone. Writing
-/// the body stays in the web editor, which opens already signed in.
+/// Blog posts: write, edit, publish, unpublish, trash and restore — all
+/// natively. The web editor is still a long-press away for anything the
+/// phone isn't the right tool for.
 struct BlogView: View {
     @EnvironmentObject private var auth: AuthStore
     @State private var posts: [BlogPost] = []
@@ -20,7 +21,7 @@ struct BlogView: View {
 
             Section {
                 NavigationLink {
-                    WebEditorView(path: "/admin/blogs/new", title: "New Post")
+                    PostEditorView(postID: nil) { Task { await load() } }
                 } label: {
                     Label("New post", systemImage: "square.and.pencil")
                 }
@@ -49,7 +50,7 @@ struct BlogView: View {
 
     private func row(_ post: BlogPost) -> some View {
         NavigationLink {
-            WebEditorView(path: "/admin/blogs/\(post.id)", title: post.title)
+            PostEditorView(postID: post.id) { Task { await load() } }
         } label: {
             VStack(alignment: .leading, spacing: 4) {
                 Text(post.title).font(.body)
@@ -58,6 +59,16 @@ struct BlogView: View {
                                   tint: post.isPublished ? .green : .secondary)
                     if busyID == post.id { ProgressView().controlSize(.mini) }
                 }
+            }
+        }
+        .contextMenu {
+            if post.isPublished, let slug = post.slug, let url = URL(string: "\(AppConfig.siteURL)/blog/\(slug)") {
+                Link(destination: url) { Label("View on site", systemImage: "safari") }
+            }
+            NavigationLink {
+                WebEditorView(path: "/admin/blogs/\(post.id)", title: post.title)
+            } label: {
+                Label("Open in web editor", systemImage: "globe")
             }
         }
         .swipeActions(edge: .trailing) {

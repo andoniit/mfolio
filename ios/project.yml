@@ -24,8 +24,17 @@ targets:
         excludes:
           - "AppIcon.icon"
           - "AppIcon.icon/**"
+          - "Editor"
+          - "Editor/**"
       - path: MfolioAdmin/AppIcon.icon
         type: file
+        buildPhase: resources
+      # The post editor's web half (built from ios/editor by
+      # `npm run build:ios-editor`). A folder reference, so it lands in the
+      # bundle as `Editor/` with the page and its script side by side —
+      # recursed, XcodeGen would try to compile the .js.
+      - path: MfolioAdmin/Editor
+        type: folder
         buildPhase: resources
     settings:
       base:

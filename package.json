@@ -6,7 +6,8 @@
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "build:ios-editor": "node ios/editor/build.mjs"
   },
   "dependencies": {
     "@ag-ui/client": "^0.0.53",
@@ -63,6 +64,7 @@
     "@types/react-dom": "^19",
     "@types/three": "^0.184.1",
     "class-variance-authority": "^0.7.1",
+    "esbuild": "^0.25.12",
     "eslint": "^9",
     "eslint-config-next": "^16.1.1",
     "sass": "^1.98.0",

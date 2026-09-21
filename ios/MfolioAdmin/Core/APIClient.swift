@@ -30,6 +30,16 @@ final class APIClient {
         try await send(path, method: "POST", body: body)
     }
 
+    /// For creates that answer with the new row — the caller needs its id.
+    func post<T: Decodable>(_ path: String, body: [String: Any?], as type: T.Type) async throws -> T {
+        try decode(type, from: try await send(path, method: "POST", body: body))
+    }
+
+    @discardableResult
+    func put(_ path: String, body: [String: Any?]) async throws -> Data {
+        try await send(path, method: "PUT", body: body)
+    }
+
     @discardableResult
     func patch(_ path: String, body: [String: Any?]) async throws -> Data {
         try await send(path, method: "PATCH", body: body)

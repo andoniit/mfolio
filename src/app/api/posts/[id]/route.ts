@@ -1,6 +1,44 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { verifyAdmin } from "@/lib/api-auth";
 import { revalidateBlogCaches } from "@/lib/revalidate-blog";
+
+/**
+ * One post in full — body, tags and all — for the iOS post editor.
+ *
+ * The web edit page reads Supabase directly on the server, so until the app
+ * needed it there was no endpoint for this. Owner-only: it returns drafts,
+ * which the public must not see, and `tag_ids` in exactly the shape PUT takes
+ * back, so a load-then-save round trip can't drop tags.
+ */
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const auth = await verifyAdmin(req.headers.get("authorization"));
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
+  }
+
+  const { id } = await params;
+
+  const [{ data: post, error }, { data: postTags, error: tagsError }] = await Promise.all([
+    supabaseAdmin.from("posts").select("*").eq("id", id).maybeSingle(),
+    supabaseAdmin.from("post_tags").select("tag_id").eq("post_id", id),
+  ]);
+
+  if (error || tagsError) {
+    return NextResponse.json({ error: (error ?? tagsError)?.message }, { status: 400 });
+  }
+  if (!post) {
+    return NextResponse.json({ error: "Post not found" }, { status: 404 });
+  }
+
+  return NextResponse.json({
+    ...post,
+    tag_ids: (postTags ?? []).map((row) => row.tag_id),
+  });
+}
 
 export async function PUT(
   req: Request,

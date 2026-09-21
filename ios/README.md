@@ -12,7 +12,7 @@ the same endpoints the web dashboard uses.
 | Outside of Work | Add / edit / delete photos, food spots and games; publish or hide; upload from your camera roll (shrunk on-device before sending) |
 | Photo Wall | Approve, reject, unpublish or delete visitor Polaroids |
 | Recommendations | Same, for visitor sticky notes |
-| Blog | Publish, unpublish, trash and restore posts |
+| Blog | Write, edit and publish posts natively — rich text, images, links, cover, category, tags, publish date — plus unpublish, trash and restore |
 | Projects | Publish, unpublish, trash and restore |
 | Experience / Voluntary Roles | Publish, unpublish, trash and restore |
 | Categories / Tags | Add and delete |
@@ -21,9 +21,55 @@ the same endpoints the web dashboard uses.
 | Resume | See what's live, preview it, remove it |
 | SEO Tools / Web dashboard | Opened on the web, already signed in |
 
-Writing long posts and filling in detailed forms stays in the web editor —
-rebuilding TipTap natively isn't worth it — but the app seeds your session into
-the web view, so those screens open signed in rather than at a login page.
+The screens still on the web (SEO tools, the rest of the dashboard) open
+signed in: the app seeds your session into the web view rather than landing
+you on a login page. Long-pressing a post also offers the web editor, as a
+fallback.
+
+## Writing posts
+
+New Post and tapping any post open a native editor: title and body on the
+main screen, and everything else — URL, excerpt, cover image, category, tags,
+publish toggle and date, trash — under **Details** (the sliders button).
+
+**The body is the web's own TipTap engine, bundled into the app.** Posts are
+stored as TipTap documents (`content_json`) plus the HTML the site renders
+(`content_html`), and the web dashboard edits the same posts. A native text
+view would mean converting every save through a lossy translator; running the
+same engine with the same extensions means the app writes exactly what the web
+does. Checked against the live posts: loading and re-saving each one gives
+byte-identical HTML and structurally identical JSON.
+
+Everything around the text is native — the format bar, menus, photo picking
+and upload, link entry, metadata. The engine lives in `MfolioAdmin/Editor/` as
+a page and one script, loaded from the app bundle. It never touches the
+network: its CSP forbids it, navigation away is refused, and images are
+uploaded natively and handed in as finished URLs. It works offline; only Save
+needs a connection.
+
+**Crash insurance.** A couple of seconds after each change the editor writes
+the post to `Application Support/PostDrafts/`, and clears it on a successful
+save. If the app is killed mid-post, reopening it offers the draft back. Backing
+out with unsaved changes asks first.
+
+Saves go to the same `/api/posts` endpoints with the same payload as
+`BlogForm.tsx`. The one server addition is `GET /api/posts/:id` (owner-only),
+which returns the full post with its `tag_ids` — the web edit page reads the
+database directly, so nothing exposed that before.
+
+### Changing the editor
+
+The source is `ios/editor/editor.js`. After editing it:
+
+```bash
+npm run build:ios-editor
+```
+
+That bundles it into `MfolioAdmin/Editor/editor.bundle.js`, which is committed,
+so building the app never needs Node — only changing the editor does. Its
+extension list must stay in step with
+`src/components/tiptap/templates/simple/simple-editor.tsx`; a node the web
+knows and the app doesn't would be dropped when a post is opened here.
 
 ## App icon
 
@@ -175,6 +221,8 @@ ios/
     Core/                  Config, Keychain, auth, API client, image upload
     Models/                Codable mirrors of the API shapes
     Views/                 One file per screen
+    Editor/                The bundled post-body editor (built from ../editor)
+  editor/                  Source for Editor/ — `npm run build:ios-editor`
 ```
 
 On the server side the analytics screen is `src/lib/ga4.ts` (the GA4 Data API
