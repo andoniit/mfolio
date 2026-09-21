@@ -39,6 +39,7 @@ struct ProjectSummary: Codable, Identifiable, Hashable {
     var workplace: String?
     var published: Bool?
     var trashed_at: String?
+    var home_feature_order: Int?
 
     // Default to false: an unknown flag should read as "not live" rather than
     // claiming something is published when we can't tell.

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { verifyAdmin } from "@/lib/api-auth";
 import { revalidateProjectCaches } from "@/lib/revalidate-project";
 
 type GalleryImageInput = {
@@ -72,6 +73,49 @@ async function syncProjectImages(projectId: string, images: GalleryImageInput[])
   if (insError) throw new Error(insError.message);
 }
 
+/**
+ * One project in full — body, gallery and all — for the iOS project editor.
+ * The web edit page reads Supabase directly, so nothing exposed this before.
+ * Owner-only, since it returns drafts. `gallery_images` comes back in exactly
+ * the shape PUT takes, so a load-then-save round trip can't reorder or drop
+ * images.
+ */
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const auth = await verifyAdmin(req.headers.get("authorization"));
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
+  }
+
+  const { id } = await params;
+
+  const [{ data: project, error }, { data: images, error: imagesError }] = await Promise.all([
+    supabaseAdmin.from("projects").select("*").eq("id", id).maybeSingle(),
+    supabaseAdmin
+      .from("project_images")
+      .select("image_url, alt_text, sort_order")
+      .eq("project_id", id)
+      .order("sort_order", { ascending: true }),
+  ]);
+
+  if (error || imagesError) {
+    return NextResponse.json({ error: (error ?? imagesError)?.message }, { status: 400 });
+  }
+  if (!project) {
+    return NextResponse.json({ error: "Project not found" }, { status: 404 });
+  }
+
+  return NextResponse.json({
+    ...project,
+    gallery_images: (images ?? []).map((row) => ({
+      image_url: row.image_url,
+      alt_text: row.alt_text || "",
+    })),
+  });
+}
+
 export async function PUT(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -100,12 +144,26 @@ export async function PUT(
   const published = Boolean(rest.published);
   const projectDate = rest.project_date || null;
 
+  // These throw on bad input. Uncaught, that surfaced as a bare 500 instead of
+  // the sentence explaining what to fix.
+  let externalUrl: string | null;
+  let homeFeatureOrder: number | null;
+  try {
+    externalUrl = normalizeExternalUrl(rest.external_url);
+    homeFeatureOrder = normalizeHomeFeatureOrder(rest.home_feature_order);
+  } catch (e: unknown) {
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "Invalid project details" },
+      { status: 400 }
+    );
+  }
+
   const projectData = {
     title: rest.title,
     slug: rest.slug,
     description: rest.description ?? null,
-    external_url: normalizeExternalUrl(rest.external_url),
-    home_feature_order: normalizeHomeFeatureOrder(rest.home_feature_order),
+    external_url: externalUrl,
+    home_feature_order: homeFeatureOrder,
     content_json: rest.content_json ?? null,
     content_html: rest.content_html ?? null,
     tech_stack: normalizeStringList(rest.tech_stack),

@@ -1,17 +1,18 @@
 import PhotosUI
 import SwiftUI
 
-/// Write, edit and publish a blog post without leaving the app.
+/// Write, edit and publish a project without leaving the app.
 ///
-/// The screen is the writing surface — title and body — with everything else
-/// (URL, excerpt, cover, category, tags, publishing) one tap away in Details,
-/// the way the post settings sit beside the canvas in most writing apps.
-///
-/// Saves go to the same `/api/posts` endpoints with the same payload as
-/// `BlogForm.tsx`, so the web and the app are two editors of one post.
-struct PostEditorView: View {
-    /// nil for a new post. Becomes the created id after the first save.
-    let postID: String?
+/// Same shape as the post editor — title and body up front, everything else
+/// under Details — and the same TipTap engine for the body, so a project saved
+/// here opens on the web unchanged. Saves send exactly what `ProjectForm.tsx`
+/// sends, to the same endpoints.
+struct ProjectEditorView: View {
+    /// nil for a new project. Becomes the created id after the first save.
+    let projectID: String?
+    /// Which project holds each home-page slot now, so Details can say what
+    /// choosing one will displace.
+    var homeSlotOwners: [Int: String] = [:]
     var onChange: () -> Void = {}
 
     @EnvironmentObject private var auth: AuthStore
@@ -19,10 +20,8 @@ struct PostEditorView: View {
     @StateObject private var editor = PostBodyEditor()
 
     @State private var currentID: String?
-    @State private var meta = PostMeta()
-    @State private var savedMeta = PostMeta()
-    @State private var categories: [Taxonomy] = []
-    @State private var tags: [Taxonomy] = []
+    @State private var meta = ProjectMeta()
+    @State private var savedMeta = ProjectMeta()
 
     @State private var phase: Phase = .loading
     @State private var saving = false
@@ -31,36 +30,32 @@ struct PostEditorView: View {
 
     @State private var showDetails = false
     @State private var confirmLeave = false
-    @State private var recovered: LocalDraftStore.Draft<PostMeta>?
-    /// A restored draft differs from the server even when the editor has just
-    /// loaded it "cleanly", so it counts as unsaved until the next save.
+    @State private var recovered: LocalDraftStore.Draft<ProjectMeta>?
     @State private var restoredUnsaved = false
 
     @State private var pickingBodyImage = false
     @State private var bodyImageItem: PhotosPickerItem?
     @State private var uploadingImage = false
-
     @State private var linkPrompt: LinkPrompt?
     @FocusState private var titleFocused: Bool
 
     private enum Phase: Equatable { case loading, ready, failed(String) }
 
     private var isNew: Bool { currentID == nil }
-    private var draftKey: String { LocalDraftStore.key(for: currentID) }
+    private var draftKey: String { LocalDraftStore.projectKey(for: currentID) }
     private var hasChanges: Bool { meta != savedMeta || editor.isDirty || restoredUnsaved }
 
     var body: some View {
         content
-            .navigationTitle(isNew ? "New Post" : "Edit Post")
+            .navigationTitle(isNew ? "New Project" : "Edit Project")
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(hasChanges)
             .toolbar { toolbar }
             .sheet(isPresented: $showDetails) {
-                PostDetailsSheet(
+                ProjectDetailsSheet(
                     meta: $meta,
-                    categories: categories,
-                    tags: $tags,
-                    postID: currentID,
+                    projectID: currentID,
+                    homeSlotOwners: homeSlotOwners,
                     onTrashed: {
                         LocalDraftStore.clear(draftKey)
                         onChange()
@@ -86,7 +81,6 @@ struct PostEditorView: View {
                 Text("Your edits since the last save will be lost.")
             }
             .task { await load() }
-            // Debounced autosave to disk: every edit restarts the wait.
             .task(id: autosaveKey) { await autosave() }
     }
 
@@ -99,7 +93,7 @@ struct PostEditorView: View {
             ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
         case .failed(let message):
             ContentUnavailableView {
-                Label("Couldn't open the post", systemImage: "exclamationmark.triangle")
+                Label("Couldn't open the project", systemImage: "exclamationmark.triangle")
             } description: {
                 Text(message)
             } actions: {
@@ -133,7 +127,7 @@ struct PostEditorView: View {
                     .background(Color(.secondarySystemBackground))
             }
 
-            TextField("Title", text: $meta.title, axis: .vertical)
+            TextField("Project name", text: $meta.title, axis: .vertical)
                 .font(.title2.weight(.bold))
                 .lineLimit(1...4)
                 .focused($titleFocused)
@@ -162,17 +156,17 @@ struct PostEditorView: View {
         .background(Color(.systemBackground))
     }
 
-    /// Where the post stands, at a glance: status, length, save state. Tapping
-    /// it opens Details, since that's where each of those is changed.
+    /// Status, where it sits on the home page, and what's attached — the
+    /// things Details changes, so tapping here opens it.
     private var statusLine: some View {
         Button { showDetails = true } label: {
             HStack(spacing: 8) {
                 StatusPill(text: meta.published ? "Published" : "Draft",
                            tint: meta.published ? .green : .secondary)
-                Text("\(editor.state.words) word\(editor.state.words == 1 ? "" : "s")")
-                if !meta.resolvedSlug.isEmpty {
-                    Text("/blog/\(meta.resolvedSlug)").lineLimit(1).truncationMode(.middle)
+                if let slot = meta.homeSlot {
+                    StatusPill(text: "Home #\(slot)", tint: Theme.Accent.projects)
                 }
+                Text(summary).lineLimit(1)
                 Spacer(minLength: 0)
                 if uploadingImage {
                     ProgressView().controlSize(.mini)
@@ -187,6 +181,13 @@ struct PostEditorView: View {
         .buttonStyle(.plain)
     }
 
+    private var summary: String {
+        var parts = ["\(editor.state.words) word\(editor.state.words == 1 ? "" : "s")"]
+        if !meta.gallery.isEmpty { parts.append("\(meta.gallery.count) photo\(meta.gallery.count == 1 ? "" : "s")") }
+        if !meta.workplace.isEmpty { parts.append(meta.workplace) }
+        return parts.joined(separator: " · ")
+    }
+
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
         if hasChanges {
@@ -198,23 +199,19 @@ struct PostEditorView: View {
             Button { showDetails = true } label: {
                 Image(systemName: "slider.horizontal.3")
             }
-            .accessibilityLabel("Post details")
+            .accessibilityLabel("Project details")
             .disabled(phase != .ready)
 
             if saving {
                 ProgressView()
             } else {
-                Button(saveTitle) { Task { await save() } }
-                    .fontWeight(.semibold)
-                    .disabled(phase != .ready || !editor.isReady || uploadingImage)
+                Button(meta.published && !savedMeta.published ? "Publish" : "Save") {
+                    Task { await save() }
+                }
+                .fontWeight(.semibold)
+                .disabled(phase != .ready || !editor.isReady || uploadingImage)
             }
         }
-    }
-
-    /// "Publish" only for the save that actually takes a post live, so the
-    /// button says what it's about to do.
-    private var saveTitle: String {
-        meta.published && !savedMeta.published ? "Publish" : "Save"
     }
 
     // MARK: - Images
@@ -235,38 +232,29 @@ struct PostEditorView: View {
     private func load() async {
         phase = .loading
         error = nil
-        let client = APIClient(auth: auth)
         do {
-            // Taxonomy failing shouldn't stop you writing; the post failing should.
-            async let cats = try? client.get("/api/categories", as: [Taxonomy].self)
-            async let tagList = try? client.get("/api/tags", as: [Taxonomy].self)
-
-            if let postID {
-                let post = try await client.get("/api/posts/\(postID)", as: PostDetail.self)
-                if post.trashed_at != nil {
-                    phase = .failed("This post is in the trash. Restore it from the blog list to edit it.")
+            if let projectID {
+                let project = try await APIClient(auth: auth)
+                    .get("/api/projects/\(projectID)", as: ProjectDetail.self)
+                if project.trashed_at != nil {
+                    phase = .failed("This project is in the trash. Restore it from the projects list to edit it.")
                     return
                 }
-                currentID = post.id
-                meta = PostMeta(post)
+                currentID = project.id
+                meta = ProjectMeta(project)
                 savedMeta = meta
-                // Prefer TipTap JSON, as the web does; fall back to the HTML for
-                // any post that only has that. Both load losslessly.
-                if let json = post.content_json, json != .null {
+                if let json = project.content_json, json != .null {
                     editor.load(json.foundation)
                 } else {
-                    editor.load(post.content_html)
+                    editor.load(project.content_html)
                 }
             } else {
                 currentID = nil
-                meta = PostMeta()
+                meta = ProjectMeta()
                 savedMeta = meta
                 editor.load(nil)
             }
-
-            categories = await cats ?? []
-            tags = await tagList ?? []
-            recovered = LocalDraftStore.load(draftKey, as: PostMeta.self)
+            recovered = LocalDraftStore.load(draftKey, as: ProjectMeta.self)
             phase = .ready
             if isNew && recovered == nil { titleFocused = true }
         } catch {
@@ -274,7 +262,7 @@ struct PostEditorView: View {
         }
     }
 
-    private func restore(_ draft: LocalDraftStore.Draft<PostMeta>) {
+    private func restore(_ draft: LocalDraftStore.Draft<ProjectMeta>) {
         meta = draft.meta
         editor.load(draft.content?.foundation)
         recovered = nil
@@ -283,9 +271,7 @@ struct PostEditorView: View {
 
     // MARK: - Autosave
 
-    private var autosaveKey: String {
-        "\(editor.revision)|\(meta.hashValue)"
-    }
+    private var autosaveKey: String { "\(editor.revision)|\(meta.hashValue)" }
 
     private func autosave() async {
         guard phase == .ready, hasChanges, recovered == nil else { return }
@@ -300,12 +286,18 @@ struct PostEditorView: View {
         let title = meta.title.trimmingCharacters(in: .whitespacesAndNewlines)
         let slug = meta.resolvedSlug.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !title.isEmpty else {
-            error = "Add a title first."
+            error = "Add a project name first."
             titleFocused = true
             return
         }
         guard !slug.isEmpty else {
             error = "Add a URL slug in Details."
+            showDetails = true
+            return
+        }
+        let link: String?
+        do { link = try meta.normalizedLink() } catch {
+            self.error = error.localizedDescription
             showDetails = true
             return
         }
@@ -315,39 +307,63 @@ struct PostEditorView: View {
         do {
             let snap = try await editor.snapshot()
             guard !snap.isEmpty else {
-                error = "Write something before saving."
+                error = "Write something about the project before saving."
                 return
             }
 
-            // Field for field what BlogForm.tsx sends.
+            func trimmedOrNil(_ s: String) -> String? {
+                let t = s.trimmingCharacters(in: .whitespacesAndNewlines)
+                return t.isEmpty ? nil : t
+            }
+
+            // Field for field what ProjectForm.tsx sends.
             let payload: [String: Any?] = [
                 "title": title,
                 "slug": slug,
-                "excerpt": meta.excerpt.trimmingCharacters(in: .whitespacesAndNewlines),
+                "description": trimmedOrNil(meta.description),
+                "external_url": link,
+                "home_feature_order": meta.homeSlot,
                 "cover_image_url": meta.coverImageURL,
                 "content_json": snap.json.foundation,
                 "content_html": snap.html,
+                "tech_stack": meta.techStack,
+                "collaborators": meta.collaborators,
+                "workplace": trimmedOrNil(meta.workplace),
+                "client_name": trimmedOrNil(meta.clientName),
                 "published": meta.published,
-                "published_at": meta.publishedAtISO,
-                "category_id": meta.categoryID,
-                "tag_ids": Array(meta.tagIDs),
+                "project_date": meta.projectDay,
+                "gallery_images": meta.gallery.map { image -> [String: Any] in
+                    let alt = image.alt.trimmingCharacters(in: .whitespacesAndNewlines)
+                    return ["image_url": image.url, "alt_text": alt.isEmpty ? NSNull() : alt]
+                },
             ]
 
             let client = APIClient(auth: auth)
             let wasNew = isNew
             let wentLive = meta.published && !savedMeta.published
+            let slotChanged = meta.homeSlot != savedMeta.homeSlot || wasNew
+
+            let id: String
             if let currentID {
-                try await client.put("/api/posts/\(currentID)", body: payload)
+                try await client.put("/api/projects/\(currentID)", body: payload)
+                id = currentID
             } else {
-                let created = try await client.post("/api/posts", body: payload, as: CreatedPost.self)
+                let created = try await client.post("/api/projects", body: payload, as: CreatedPost.self)
+                id = created.id
                 currentID = created.id
-                // The "new" slot has served its purpose now the post has an id.
-                LocalDraftStore.clear(LocalDraftStore.key(for: nil))
+                LocalDraftStore.clear(LocalDraftStore.projectKey(for: nil))
+            }
+
+            // PUT stores the slot but leaves any other project holding it too.
+            // This endpoint moves it: whoever had the slot gives it up.
+            if slotChanged, let slot = meta.homeSlot {
+                try await client.patch("/api/projects/\(id)/home-feature-order", body: ["home_feature_order": slot])
             }
 
             meta.title = title
             meta.slug = slug
             meta.slugTouched = true
+            if let link { meta.externalURL = link }
             savedMeta = meta
             editor.markClean()
             restoredUnsaved = false

@@ -77,7 +77,7 @@ struct PostDetailsSheet: View {
     private var urlSection: some View {
         Section {
             TextField("post-url", text: Binding(
-                get: { meta.slug },
+                get: { meta.resolvedSlug },
                 set: {
                     meta.slug = $0
                     meta.slugTouched = true
@@ -88,7 +88,7 @@ struct PostDetailsSheet: View {
             .keyboardType(.asciiCapable)
             .font(.body.monospaced())
 
-            if meta.slug != PostMeta.slugify(meta.title), !meta.title.isEmpty {
+            if meta.resolvedSlug != PostMeta.slugify(meta.title), !meta.title.isEmpty {
                 Button("Use title: \(PostMeta.slugify(meta.title))") {
                     meta.slug = PostMeta.slugify(meta.title)
                     meta.slugTouched = true
@@ -100,7 +100,10 @@ struct PostDetailsSheet: View {
             Text("URL")
         } footer: {
             VStack(alignment: .leading, spacing: 4) {
-                Text(verbatim: "\(AppConfig.siteURL)/blog/\(meta.slug.isEmpty ? "…" : meta.slug)")
+                if meta.resolvedSlug.isEmpty {
+                    Text("A URL is needed to save.").foregroundStyle(.red)
+                }
+                Text(verbatim: "\(AppConfig.siteURL)/blog/\(meta.resolvedSlug.isEmpty ? "…" : meta.resolvedSlug)")
                 if postID != nil && meta.published {
                     Text("Changing this breaks links to the old address.")
                         .foregroundStyle(.orange)

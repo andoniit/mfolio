@@ -73,17 +73,17 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const featured = searchParams.get("featured");
   const limit = parsePositiveInt(searchParams.get("limit"), 50);
-  // `?all=1` with an admin token also returns drafts, for the iOS app.
+  // `?all=1` with an admin token also returns drafts and trashed projects, for
+  // the iOS app's list (which has a Trash section with Restore). Everyone else
+  // gets published, untrashed projects only.
   const asAdmin = searchParams.get("all") === "1" && (await isAdminRequest(req));
 
-  let query = supabaseAdmin
-    .from("projects")
-    .select(
-      "id, title, slug, description, cover_image_url, project_date, workplace, client_name, home_feature_order, tech_stack, published"
-    )
-    .is("trashed_at", null);
+  const columns =
+    "id, title, slug, description, cover_image_url, project_date, workplace, client_name, home_feature_order, tech_stack, published";
 
-  if (!asAdmin) query = query.eq("published", true);
+  let query = supabaseAdmin.from("projects").select(asAdmin ? `${columns}, trashed_at` : columns);
+
+  if (!asAdmin) query = query.is("trashed_at", null).eq("published", true);
 
   if (featured === "home") {
     query = query
@@ -110,12 +110,25 @@ export async function POST(req: Request) {
   const published = Boolean(projectFields.published);
   const projectDate = projectFields.project_date || null;
 
+  // These throw on bad input; answer with the reason rather than a bare 500.
+  let externalUrl: string | null;
+  let homeFeatureOrder: number | null;
+  try {
+    externalUrl = normalizeExternalUrl(projectFields.external_url);
+    homeFeatureOrder = normalizeHomeFeatureOrder(projectFields.home_feature_order);
+  } catch (e: unknown) {
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "Invalid project details" },
+      { status: 400 }
+    );
+  }
+
   const payload = {
     title: projectFields.title,
     slug: projectFields.slug,
     description: projectFields.description ?? null,
-    external_url: normalizeExternalUrl(projectFields.external_url),
-    home_feature_order: normalizeHomeFeatureOrder(projectFields.home_feature_order),
+    external_url: externalUrl,
+    home_feature_order: homeFeatureOrder,
     content_json: projectFields.content_json ?? null,
     content_html: projectFields.content_html ?? null,
     tech_stack: normalizeStringList(projectFields.tech_stack),

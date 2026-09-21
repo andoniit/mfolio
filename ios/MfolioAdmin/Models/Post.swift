@@ -55,6 +55,12 @@ struct PostMeta: Codable, Hashable {
         tagIDs = Set(post.tag_ids ?? [])
     }
 
+    /// The slug to show and save. Until it's typed by hand it *is* the title,
+    /// slugified — derived on read rather than copied on every keystroke, since
+    /// a copy can miss the last one (it did, when focus left the title field
+    /// straight after typing).
+    var resolvedSlug: String { slugTouched ? slug : PostMeta.slugify(title) }
+
     /// The same timestamp BlogForm.tsx writes, so the two editors agree.
     var publishedAtISO: String? { published ? "\(publishDay)T12:00:00.000Z" : nil }
 
@@ -164,14 +170,20 @@ enum JSONValue: Codable, Equatable {
 /// clears it on a successful save. If the app dies mid-post — or you back out
 /// and change your mind — the next open offers the draft back.
 enum LocalDraftStore {
-    struct Draft: Codable {
-        var meta: PostMeta
+    /// `Meta` is whatever the editor keeps beside the body — post settings,
+    /// project details.
+    struct Draft<Meta: Codable>: Codable {
+        var meta: Meta
         var content: JSONValue?
         var savedAt: Date
     }
 
     /// One slot per post, plus one shared slot for the post not created yet.
     static func key(for postID: String?) -> String { postID ?? "new" }
+
+    /// Projects get their own namespace, so a project and a post can never
+    /// land in the same slot.
+    static func projectKey(for projectID: String?) -> String { "project-\(projectID ?? "new")" }
 
     private static var folder: URL? {
         guard let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
@@ -184,20 +196,20 @@ enum LocalDraftStore {
 
     private static func url(_ key: String) -> URL? {
         // Post ids are UUIDs; anything else is refused rather than used as a path.
-        guard key == "new" || key.range(of: #"^[A-Za-z0-9-]{1,64}$"#, options: .regularExpression) != nil else {
+        guard key.range(of: #"^[A-Za-z0-9-]{1,80}$"#, options: .regularExpression) != nil else {
             return nil
         }
         return folder?.appendingPathComponent("\(key).json")
     }
 
-    static func load(_ key: String) -> Draft? {
+    static func load<Meta: Codable>(_ key: String, as _: Meta.Type) -> Draft<Meta>? {
         guard let url = url(key), let data = try? Data(contentsOf: url) else { return nil }
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        return try? decoder.decode(Draft.self, from: data)
+        return try? decoder.decode(Draft<Meta>.self, from: data)
     }
 
-    static func save(_ draft: Draft, _ key: String) {
+    static func save<Meta: Codable>(_ draft: Draft<Meta>, _ key: String) {
         guard let url = url(key) else { return }
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601

@@ -1,7 +1,8 @@
 import SwiftUI
 
-/// Projects: publish, unpublish, trash and restore. The full editor (gallery,
-/// tech stack, rich body) stays on the web, which each row links into.
+/// Projects: write, edit, publish, unpublish, trash and restore — all
+/// natively, gallery and tech stack included. The web editor is a long-press
+/// away as a fallback.
 struct ProjectsView: View {
     @EnvironmentObject private var auth: AuthStore
 
@@ -13,6 +14,16 @@ struct ProjectsView: View {
     private var live: [ProjectSummary] { projects.filter { !$0.isTrashed } }
     private var trashed: [ProjectSummary] { projects.filter(\.isTrashed) }
 
+    /// Who holds each home-page slot, leaving out the project being edited —
+    /// the editor uses it to say what picking a slot will displace.
+    private func slotOwners(excluding id: String?) -> [Int: String] {
+        var owners: [Int: String] = [:]
+        for project in live where project.id != id {
+            if let slot = project.home_feature_order { owners[slot] = project.title }
+        }
+        return owners
+    }
+
     var body: some View {
         List {
             if let error {
@@ -21,7 +32,9 @@ struct ProjectsView: View {
 
             Section {
                 NavigationLink {
-                    WebEditorView(path: "/admin/projects/new", title: "New project")
+                    ProjectEditorView(projectID: nil, homeSlotOwners: slotOwners(excluding: nil)) {
+                        Task { await load() }
+                    }
                 } label: {
                     Label("New project", systemImage: "plus")
                 }
@@ -35,7 +48,7 @@ struct ProjectsView: View {
                 } header: {
                     Text("Projects (\(live.count))")
                 } footer: {
-                    Text("Swipe to publish or trash. Tap to open the full editor.")
+                    Text("Tap to edit. Swipe to publish or trash. Long-press for the site or the web editor.")
                 }
             }
 
@@ -66,7 +79,9 @@ struct ProjectsView: View {
 
     private func row(_ project: ProjectSummary) -> some View {
         NavigationLink {
-            WebEditorView(path: "/admin/projects/\(project.id)", title: project.title)
+            ProjectEditorView(projectID: project.id, homeSlotOwners: slotOwners(excluding: project.id)) {
+                Task { await load() }
+            }
         } label: {
             HStack(spacing: 12) {
                 Thumbnail(url: project.cover_image_url, fallback: project.title)
@@ -80,11 +95,25 @@ struct ProjectsView: View {
                         }
                         StatusPill(text: project.isPublished ? "Published" : "Draft",
                                   tint: project.isPublished ? .green : .secondary)
+                        if let slot = project.home_feature_order {
+                            StatusPill(text: "Home #\(slot)", tint: Theme.Accent.projects)
+                        }
                         if busyID == project.id { ProgressView().controlSize(.mini) }
                     }
                 }
             }
             .padding(.vertical, 2)
+        }
+        .contextMenu {
+            if project.isPublished, let slug = project.slug,
+               let url = URL(string: "\(AppConfig.siteURL)/projects/\(slug)") {
+                Link(destination: url) { Label("View on site", systemImage: "safari") }
+            }
+            NavigationLink {
+                WebEditorView(path: "/admin/projects/\(project.id)", title: project.title)
+            } label: {
+                Label("Open in web editor", systemImage: "globe")
+            }
         }
         .swipeActions(edge: .trailing) {
             Button(role: .destructive) {
