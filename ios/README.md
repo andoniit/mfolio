@@ -13,8 +13,8 @@ the same endpoints the web dashboard uses.
 | Photo Wall | Approve, reject, unpublish or delete visitor Polaroids |
 | Recommendations | Same, for visitor sticky notes |
 | Blog | Write, edit and publish posts natively — rich text, images, links, cover, category, tags, publish date — plus unpublish, trash and restore |
-| Projects | Publish, unpublish, trash and restore |
-| Experience / Voluntary Roles | Publish, unpublish, trash and restore |
+| Projects | Write, edit and publish projects natively — rich body, gallery with alt text, tech stack, collaborators, workplace and client, project link, home-page slot — plus unpublish, trash and restore |
+| Experience / Voluntary Roles | Add and edit roles natively — dates, job type, highlights, skills, company link, logo upload — drag to reorder, publish, unpublish, trash and restore |
 | Categories / Tags | Add and delete |
 | Analytics | Google Analytics for the site: views per day, visitors, countries / regions / cities, top pages, referrers, devices, and who's on the site right now |
 | Newsletter | Read the subscriber list |
@@ -56,6 +56,30 @@ Saves go to the same `/api/posts` endpoints with the same payload as
 `BlogForm.tsx`. The one server addition is `GET /api/posts/:id` (owner-only),
 which returns the full post with its `tag_ids` — the web edit page reads the
 database directly, so nothing exposed that before.
+
+### Projects
+
+Projects use the same editor — same engine, format bar, autosave and
+recovery — with their own Details: project date, home-page slot, URL,
+description, workplace, client, link, tech stack, collaborators, cover and a
+reorderable gallery with alt text (tap Edit to drag). Saves send what
+`ProjectForm.tsx` sends. Picking a home slot another project holds says so,
+and saving moves that project off it via `/api/projects/:id/home-feature-order`
+— PUT alone would leave two projects in one slot.
+
+`GET /api/projects/:id` (owner-only) returns a project with its
+`gallery_images`, and the admin list (`?all=1`) now includes trashed projects,
+so Restore in the app has something to show.
+
+### Experience and voluntary roles
+
+A role is structured fields rather than prose, so it's a plain native form —
+no editor engine. It sends what `ExperienceForm.tsx` sends and checks the
+API's rules first (title and company required, a start date for work, end not
+before start, valid links), so problems show before the request. Logos can be
+uploaded from the phone (to `experience-logos/`) as well as typed as a URL or
+site path. In the list, Edit lets you drag roles into order; only the roles
+whose position changed are sent, via the existing `sort_order` PATCH.
 
 ### Changing the editor
 

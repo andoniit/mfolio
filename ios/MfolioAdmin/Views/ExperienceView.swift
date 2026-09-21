@@ -1,7 +1,8 @@
 import SwiftUI
 
 /// Work history and voluntary roles — the same `experiences` table split by
-/// `category`, so one screen serves both entries on the dashboard.
+/// `category`, so one screen serves both entries on the dashboard. Adding and
+/// editing are native; Edit lets you drag roles into the order the site shows.
 struct ExperienceView: View {
     let category: String       // "work" or "volunteer"
     let title: String
@@ -11,7 +12,9 @@ struct ExperienceView: View {
     @State private var loading = true
     @State private var busyID: String?
     @State private var error: String?
+    @State private var reordering = false
 
+    /// In the site's order: by position, then newest first — the API's order.
     private var live: [ExperienceItem] { items.filter { !$0.isTrashed } }
     private var trashed: [ExperienceItem] { items.filter(\.isTrashed) }
 
@@ -23,7 +26,7 @@ struct ExperienceView: View {
 
             Section {
                 NavigationLink {
-                    WebEditorView(path: "/admin/\(webSegment)/new", title: "New")
+                    ExperienceEditorView(item: nil, category: category) { Task { await load() } }
                 } label: {
                     Label("Add \(title.lowercased())", systemImage: "plus")
                 }
@@ -32,8 +35,16 @@ struct ExperienceView: View {
             if live.isEmpty && !loading {
                 Section { ContentUnavailableView("Nothing yet", systemImage: "briefcase") }
             } else {
-                Section("\(title) (\(live.count))") {
+                Section {
                     ForEach(live) { item in row(item) }
+                        .onMove(perform: move)
+                } header: {
+                    HStack {
+                        Text("\(title) (\(live.count))")
+                        if reordering { ProgressView().controlSize(.mini) }
+                    }
+                } footer: {
+                    Text("Tap to edit. Swipe to publish or trash. Tap Edit to drag into order.")
                 }
             }
 
@@ -60,6 +71,7 @@ struct ExperienceView: View {
         }
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar { if live.count > 1 { EditButton() } }
         .overlay { if loading && items.isEmpty { ProgressView() } }
         .refreshable { await load() }
         .task { await load() }
@@ -69,7 +81,7 @@ struct ExperienceView: View {
 
     private func row(_ item: ExperienceItem) -> some View {
         NavigationLink {
-            WebEditorView(path: "/admin/\(webSegment)/\(item.id)", title: item.title)
+            ExperienceEditorView(item: item, category: category) { Task { await load() } }
         } label: {
             VStack(alignment: .leading, spacing: 3) {
                 Text(item.title)
@@ -82,6 +94,13 @@ struct ExperienceView: View {
                                   tint: item.isPublished ? .green : .secondary)
                     if busyID == item.id { ProgressView().controlSize(.mini) }
                 }
+            }
+        }
+        .contextMenu {
+            NavigationLink {
+                WebEditorView(path: "/admin/\(webSegment)/\(item.id)", title: item.title)
+            } label: {
+                Label("Open in web editor", systemImage: "globe")
             }
         }
         .swipeActions(edge: .trailing) {
@@ -103,6 +122,44 @@ struct ExperienceView: View {
     }
 
     private func client() -> APIClient { APIClient(auth: auth) }
+
+    /// Drag-to-reorder. The new order becomes positions 1, 2, 3… and only the
+    /// roles whose position actually changed are sent, one small PATCH each —
+    /// the endpoint the web's quick edits use, which leaves everything else
+    /// about the role alone.
+    private func move(from source: IndexSet, to destination: Int) {
+        var ordered = live
+        ordered.move(fromOffsets: source, toOffset: destination)
+
+        var changes: [(id: String, position: Int)] = []
+        for (index, item) in ordered.enumerated() where item.sort_order != index + 1 {
+            changes.append((item.id, index + 1))
+        }
+        guard !changes.isEmpty else { return }
+
+        // Show the new order straight away; the server catches up behind it.
+        let positions = Dictionary(uniqueKeysWithValues: changes.map { ($0.id, $0.position) })
+        items = items.map { item in
+            var copy = item
+            if let position = positions[item.id] { copy.sort_order = position }
+            return copy
+        }
+        items.sort { ($0.sort_order ?? 0) < ($1.sort_order ?? 0) }
+
+        reordering = true
+        error = nil
+        Task {
+            do {
+                for change in changes {
+                    try await client().patch("/api/experiences/\(change.id)", body: ["sort_order": change.position])
+                }
+            } catch {
+                self.error = "Couldn't save the new order: \(error.localizedDescription)"
+            }
+            reordering = false
+            await load()
+        }
+    }
 
     private func act(_ id: String, _ work: @escaping () async throws -> Void) {
         busyID = id; error = nil

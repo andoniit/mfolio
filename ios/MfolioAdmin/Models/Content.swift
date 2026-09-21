@@ -23,6 +23,7 @@ struct ExperienceItem: Codable, Identifiable, Hashable {
     var title: String
     var company: String
     var company_url: String?
+    var logo_url: String?
     var location: String?
     var employment_type: String?
     var start_date: String?
