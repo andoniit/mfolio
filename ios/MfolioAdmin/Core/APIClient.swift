@@ -100,6 +100,10 @@ final class APIClient {
             return "Your session expired. Sign out and back in."
         case 403:
             return "This account isn't on the admin allowlist."
+        case 504:
+            // The host cut the request off for running too long — nothing in
+            // the logs beyond that, so don't send anyone looking.
+            return "The server took too long to answer. Pull to refresh to try again."
         case 500...599:
             return "The server errored (\(status)). Check its logs."
         default:

@@ -89,9 +89,41 @@ export function ga4Config(): GA4Config {
   return { ok: true, creds: { propertyId, clientEmail, privateKey } };
 }
 
+/* -------------------------------------------------------------------- timeouts */
+
+/**
+ * Every call to Google carries a deadline. Without one, a slow answer holds the
+ * function open until Vercel kills it, and the app gets a bare 504 with nothing
+ * in it. With one, it gets a sentence saying what was slow, in seconds.
+ */
+export const GA4_TIMEOUTS = {
+  token: 8_000,
+  reports: 20_000,
+  realtime: 4_000,
+};
+
+async function fetchWithin(url: string, init: RequestInit, ms: number, what: string): Promise<Response> {
+  try {
+    return await fetch(url, { ...init, signal: AbortSignal.timeout(ms) });
+  } catch (error) {
+    const name = (error as { name?: string })?.name;
+    if (name === "TimeoutError" || name === "AbortError") {
+      throw new GA4Error(`${what} took longer than ${ms / 1000}s to answer. Try again in a moment.`, 504);
+    }
+    throw new GA4Error(`Could not reach ${what}.`, 502);
+  }
+}
+
 /* ---------------------------------------------------------------- access token */
 
 let cachedToken: { key: string; token: string; expiresAt: number } | null = null;
+
+/**
+ * The reports and the realtime call all start at once, before any token is
+ * cached. Without this, each of them mints its own — three trips to Google's
+ * token endpoint where one will do.
+ */
+let tokenInFlight: { key: string; promise: Promise<string> } | null = null;
 
 function base64url(input: Buffer | string): string {
   const bytes = typeof input === "string" ? Buffer.from(input, "utf8") : input;
@@ -112,6 +144,16 @@ async function accessToken(creds: GA4Credentials): Promise<string> {
   if (cachedToken && cachedToken.key === creds.clientEmail && cachedToken.expiresAt > now + 60) {
     return cachedToken.token;
   }
+  if (tokenInFlight?.key === creds.clientEmail) return tokenInFlight.promise;
+
+  const promise = mintToken(creds, now).finally(() => {
+    tokenInFlight = null;
+  });
+  tokenInFlight = { key: creds.clientEmail, promise };
+  return promise;
+}
+
+async function mintToken(creds: GA4Credentials, now: number): Promise<string> {
 
   const header = base64url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
   const claims = base64url(
@@ -136,15 +178,20 @@ async function accessToken(creds: GA4Credentials): Promise<string> {
     );
   }
 
-  const res = await fetch(TOKEN_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
-      assertion: `${header}.${claims}.${signature}`,
-    }),
-    cache: "no-store",
-  });
+  const res = await fetchWithin(
+    TOKEN_URL,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+        assertion: `${header}.${claims}.${signature}`,
+      }),
+      cache: "no-store",
+    },
+    GA4_TIMEOUTS.token,
+    "Google's sign-in service"
+  );
 
   const payload = (await res.json().catch(() => null)) as
     | { access_token?: string; expires_in?: number; error_description?: string; error?: string }
@@ -185,14 +232,19 @@ export type GA4Report = {
   rowCount?: number;
 };
 
-async function call<T>(creds: GA4Credentials, method: string, body: unknown): Promise<T> {
+async function call<T>(creds: GA4Credentials, method: string, body: unknown, timeoutMs: number): Promise<T> {
   const token = await accessToken(creds);
-  const res = await fetch(`${DATA_API}/properties/${creds.propertyId}:${method}`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-    cache: "no-store",
-  });
+  const res = await fetchWithin(
+    `${DATA_API}/properties/${creds.propertyId}:${method}`,
+    {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      cache: "no-store",
+    },
+    timeoutMs,
+    "Google Analytics"
+  );
 
   const payload = (await res.json().catch(() => null)) as { error?: { message?: string; status?: string } } | null;
 
@@ -227,7 +279,7 @@ export async function ga4BatchRunReports(
 
   const results = await Promise.all(
     batches.map((requests) =>
-      call<{ reports?: GA4Report[] }>(creds, "batchRunReports", { requests })
+      call<{ reports?: GA4Report[] }>(creds, "batchRunReports", { requests }, GA4_TIMEOUTS.reports)
     )
   );
 
@@ -238,7 +290,7 @@ export async function ga4RunRealtimeReport(
   creds: GA4Credentials,
   request: Omit<GA4ReportRequest, "dateRanges">
 ): Promise<GA4Report> {
-  return call<GA4Report>(creds, "runRealtimeReport", request);
+  return call<GA4Report>(creds, "runRealtimeReport", request, GA4_TIMEOUTS.realtime);
 }
 
 /* ----------------------------------------------------------------- row helpers */

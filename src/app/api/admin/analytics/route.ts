@@ -9,6 +9,7 @@ import {
   isoDate,
   label,
   metric,
+  type GA4Credentials,
   type GA4Report,
   type GA4ReportRequest,
   type GA4Row,
@@ -17,6 +18,25 @@ import {
 /** `node:crypto` signs the service-account assertion, so this cannot run on the edge. */
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+/**
+ * Without this Vercel applies its default limit — 10 seconds on the Hobby plan —
+ * and a cold start plus the login check, a Google token and ten reports can
+ * run past it; Vercel then kills the function and the app gets a bare 504.
+ * 60 is the Hobby ceiling. The per-call timeouts in ga4.ts keep a real answer
+ * well inside it, so this is headroom, not the expected running time.
+ */
+export const maxDuration = 60;
+
+/**
+ * GA4 data is hours behind anyway, so re-running ten reports on every
+ * pull-to-refresh buys nothing and spends the property's hourly quota. One
+ * snapshot per range is kept for two minutes; concurrent requests for the same
+ * range share one trip to Google. Per server instance, which is all it needs.
+ */
+const CACHE_MS = 2 * 60 * 1000;
+const cache = new Map<number, { at: number; body: unknown }>();
+const inFlight = new Map<number, Promise<unknown>>();
 
 /** What the range picker in the app offers. */
 const ALLOWED_DAYS = [7, 28, 90, 365];
@@ -54,6 +74,32 @@ export async function GET(req: Request) {
 
   const requested = Number(new URL(req.url).searchParams.get("days"));
   const days = ALLOWED_DAYS.includes(requested) ? requested : DEFAULT_DAYS;
+
+  const hit = cache.get(days);
+  if (hit && Date.now() - hit.at < CACHE_MS) {
+    return NextResponse.json(hit.body);
+  }
+
+  try {
+    let pending = inFlight.get(days);
+    if (!pending) {
+      pending = buildSnapshot(creds, days).finally(() => inFlight.delete(days));
+      inFlight.set(days, pending);
+    }
+    const body = await pending;
+    cache.set(days, { at: Date.now(), body });
+    return NextResponse.json(body);
+  } catch (error) {
+    const status = error instanceof GA4Error ? error.status : 502;
+    const message =
+      error instanceof GA4Error ? error.message : "Could not reach Google Analytics. Try again in a moment.";
+    console.error("[analytics]", message);
+    return NextResponse.json({ error: message }, { status });
+  }
+}
+
+async function buildSnapshot(creds: GA4Credentials, days: number) {
+  const started = Date.now();
 
   const current = { startDate: `${days - 1}daysAgo`, endDate: "today" };
   const previous = { startDate: `${days * 2 - 1}daysAgo`, endDate: `${days}daysAgo` };
@@ -103,46 +149,48 @@ export async function GET(req: Request) {
     { dateRanges: [current], dimensions: [{ name: "browser" }], metrics: BREAKDOWN_METRICS, orderBys: byViews, limit: 8 },
   ];
 
-  try {
-    const [reports, realtime] = await Promise.all([
-      ga4BatchRunReports(creds, requests),
-      // Realtime is a separate endpoint and a nice-to-have: if it fails (it has
-      // its own quota) the rest of the screen should still render.
-      ga4RunRealtimeReport(creds, {
-        dimensions: [{ name: "country" }],
-        metrics: [{ name: "activeUsers" }],
-        limit: 10,
-      }).catch(() => null),
-    ]);
+  let reportsMs = 0;
+  let realtimeMs = 0;
+  const [reports, realtime] = await Promise.all([
+    ga4BatchRunReports(creds, requests).finally(() => (reportsMs = Date.now() - started)),
+    // Realtime is a separate endpoint and a nice-to-have: if it fails or is slow
+    // (its own quota, its own 4s timeout) the rest of the screen still renders.
+    ga4RunRealtimeReport(creds, {
+      dimensions: [{ name: "country" }],
+      metrics: [{ name: "activeUsers" }],
+      limit: 10,
+    })
+      .catch(() => null)
+      .finally(() => (realtimeMs = Date.now() - started)),
+  ]);
 
-    const [summary, daily, countries, regions, cities, pages, devices, channels, sources, browsers] = reports;
+  // One line per snapshot actually fetched (cache hits skip it), so the Vercel
+  // logs say which part is slow if it ever is again.
+  console.log(
+    `[analytics] days=${days} reports=${reportsMs}ms realtime=${realtimeMs}ms${realtime ? "" : " (skipped)"} total=${Date.now() - started}ms`
+  );
 
-    return NextResponse.json({
-      configured: true,
-      propertyId: creds.propertyId,
-      days,
-      generatedAt: new Date().toISOString(),
-      totals: totalsFor(summary, 0),
-      previousTotals: totalsFor(summary, 1),
-      daily: dailyRows(daily),
-      realtimeUsers: realtimeTotal(realtime),
-      realtimeCountries: realtime ? simpleBreakdown(realtime) : [],
-      countries: breakdown(countries),
-      regions: breakdown(regions, 1),
-      cities: breakdown(cities, 1, 2),
-      pages: pageRows(pages),
-      devices: breakdown(devices),
-      channels: breakdown(channels),
-      sources: breakdown(sources),
-      browsers: breakdown(browsers),
-    });
-  } catch (error) {
-    const status = error instanceof GA4Error ? error.status : 502;
-    const message =
-      error instanceof GA4Error ? error.message : "Could not reach Google Analytics. Try again in a moment.";
-    console.error("[analytics]", message);
-    return NextResponse.json({ error: message }, { status });
-  }
+  const [summary, daily, countries, regions, cities, pages, devices, channels, sources, browsers] = reports;
+
+  return {
+    configured: true,
+    propertyId: creds.propertyId,
+    days,
+    generatedAt: new Date().toISOString(),
+    totals: totalsFor(summary, 0),
+    previousTotals: totalsFor(summary, 1),
+    daily: dailyRows(daily),
+    realtimeUsers: realtimeTotal(realtime),
+    realtimeCountries: realtime ? simpleBreakdown(realtime) : [],
+    countries: breakdown(countries),
+    regions: breakdown(regions, 1),
+    cities: breakdown(cities, 1, 2),
+    pages: pageRows(pages),
+    devices: breakdown(devices),
+    channels: breakdown(channels),
+    sources: breakdown(sources),
+    browsers: breakdown(browsers),
+  };
 }
 
 /* ------------------------------------------------------------------- shaping */
